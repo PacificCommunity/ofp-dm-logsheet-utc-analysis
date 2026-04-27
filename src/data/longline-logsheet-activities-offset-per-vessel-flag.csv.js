@@ -18,7 +18,7 @@ const { find } = geoTzDefault;
 
 const CONN_STR =
   "Driver={ODBC Driver 17 for SQL Server};" +
-  "Server=localhost;" +
+  "Server=nouesql6;" +
   "Database=tufman2;" +
   "Trusted_Connection=yes;" +
   "TrustServerCertificate=yes;" +
