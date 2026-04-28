@@ -12,14 +12,7 @@
 
 import odbc from "odbc";
 import { csvFormat } from "d3-dsv";
-
-const CONN_STR =
-  "Driver={ODBC Driver 17 for SQL Server};" +
-  "Server=nouesql6;" +
-  "Database=tufman2;" +
-  "Trusted_Connection=yes;" +
-  "TrustServerCertificate=yes;" +
-  "ApplicationIntent=ReadOnly;";
+import { CONNECTION_STRING } from "./db.js";
 
 const SQL = `
 WITH vessel_flag AS (
@@ -115,7 +108,7 @@ GROUP BY vf.flag_id, po.offset_bucket
 ORDER BY type, vessel_flag, offset_bucket
 `;
 
-const conn = await odbc.connect(CONN_STR);
+const conn = await odbc.connect(CONNECTION_STRING);
 const rows = await conn.query(SQL);
 await conn.close();
 

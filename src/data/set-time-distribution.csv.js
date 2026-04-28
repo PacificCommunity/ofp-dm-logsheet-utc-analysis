@@ -11,14 +11,7 @@
 
 import odbc from "odbc";
 import { csvFormat } from "d3-dsv";
-
-const CONN_STR =
-  "Driver={ODBC Driver 17 for SQL Server};" +
-  "Server=nouesql6;" +
-  "Database=tufman2;" +
-  "Trusted_Connection=yes;" +
-  "TrustServerCertificate=yes;" +
-  "ApplicationIntent=ReadOnly;";
+import { CONNECTION_STRING } from "./db.js";
 
 const SQL = `
 WITH all_sets AS (
@@ -54,7 +47,7 @@ GROUP BY type, hour
 ORDER BY type, hour
 `;
 
-const conn = await odbc.connect(CONN_STR);
+const conn = await odbc.connect(CONNECTION_STRING);
 const rows = await conn.query(SQL);
 await conn.close();
 

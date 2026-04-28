@@ -15,14 +15,7 @@ import { csvFormat } from "d3-dsv";
 // geo-tz v8 is CJS; use default import and destructure
 import geoTzDefault from "geo-tz";
 const { find } = geoTzDefault;
-
-const CONN_STR =
-  "Driver={ODBC Driver 17 for SQL Server};" +
-  "Server=nouesql6;" +
-  "Database=tufman2;" +
-  "Trusted_Connection=yes;" +
-  "TrustServerCertificate=yes;" +
-  "ApplicationIntent=ReadOnly;";
+import { CONNECTION_STRING } from "./db.js";
 
 // Aggregate by (type, vessel_flag, 1° grid cell) to minimise geo-tz lookups.
 // latd / lond are stored as decimal(13,8).
@@ -124,7 +117,7 @@ function coordToOffset(lat, lon) {
 }
 
 // ── Query ────────────────────────────────────────────────────────────────────
-const conn = await odbc.connect(CONN_STR);
+const conn = await odbc.connect(CONNECTION_STRING);
 const rows = await conn.query(SQL);
 await conn.close();
 
