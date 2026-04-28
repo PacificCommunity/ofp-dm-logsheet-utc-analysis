@@ -1,11 +1,7 @@
-﻿name: Deploy
+name: Deploy
 
 on:
-  # Run this workflow whenever a new commit is pushed to master.
   push: {branches: [master]}
-  # Run this workflow once per day, at 00:00 UTC
-  schedule: [{cron: "00 00 * * *"}]
-  # Run this workflow when triggered manually in GitHub’s UI.
   workflow_dispatch: {}
 
 jobs:
@@ -20,19 +16,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      # Install Microsoft ODBC Driver 17 for SQL Server on the Ubuntu runner
-      - name: Install ODBC Driver 17 for SQL Server
-        run: |
-          curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-          curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
-          sudo apt-get update
-          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql17
-      - run: npm run build
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:
