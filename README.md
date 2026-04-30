@@ -49,11 +49,21 @@ A typical Framework project looks like this:
 
 ## Command reference
 
-| Command           | Description                                              |
-| ----------------- | -------------------------------------------------------- |
-| `npm install`            | Install or reinstall dependencies                        |
-| `npm run dev`        | Start local preview server                               |
-| `npm run build`      | Build your static site, generating `./dist`              |
-| `npm run deploy`     | Deploy your app to Observable                            |
-| `npm run clean`      | Clear the local data loader cache                        |
-| `npm run observable` | Run commands like `observable help`                      |
+| Command           | Description                                 |
+| ----------------- |---------------------------------------------|
+| `npm install`            | Install or reinstall dependencies           |
+| `npm run dev`        | Start local preview server                  |
+| `npm run build`      | Build your static site, generating `./dist` |
+| `npm run clean`      | Clear the local data loader cache           |
+| `npm run http` | serve the application built in `./dist`     |
+
+## Deployment
+
+This project is deployed as a [github page](https://docs.github.com/en/pages).  
+Since the data builders are using ODBC connection to SPC network, we can't run the static site generation on github.  
+So we need to version the `./dist` folder
+
+### How to deploy
+
+Build the static site with `npm run build`, and push all changes in `./dist` on the master branch.  
+The github action `deploy.yml` will then deploy the github page from the dist folder.
