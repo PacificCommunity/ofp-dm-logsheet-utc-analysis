@@ -21,7 +21,9 @@ const totalPS = d3.sum(ps, d => d.count);
 
 ## Longline logsheet
 
-Fishing set start times across **${d3.format(",")(totalLL)} sets** (`log.sets_ll`).
+Fishing set start times across **${d3.format(",")(totalLL)} sets** (`log.sets_ll` where `log.l_activity_id = 1`).
+
+This time distribution is consistent with the [Horizontal Longline Fishing Manual for Fishermen](https://www.pirfo.org/index.php/resources/downloads/category/33-manuals?download=115:horizontal-longline-fishing-manual-for-fishermen).
 
 ```js
 Plot.plot({
@@ -64,7 +66,10 @@ Plot.plot({
 
 ## Purseseine logsheet
 
-Fishing set start times across **${d3.format(",")(totalPS)} sets** (`log.sets_ps`).
+Fishing set start times across **${d3.format(",")(totalPS)} sets** (`log.sets_ps` where `s_activity_id = 1`).
+
+This time distribution shows no trends, and is consistent with [Purse-seine Observer Guide](https://www.pirfo.org/index.php/resources/downloads/category/33-manuals?download=229:spc-purse-seine-observer-guide-english-vs-2021).
+
 
 ```js
 Plot.plot({

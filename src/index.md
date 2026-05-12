@@ -16,11 +16,20 @@ const logVsObsOffsets = await FileAttachment("data/logsheet-vs-observer-offset-p
 // ── Table 1 helpers ────────────────────────────────────────────────────────
 // Normalise column names — observer CSV uses "offset_bucket", logsheet CSV uses "offset"
 // Compare only LonglineLogsheet for an apples-to-apples view (both datasets cover LL well)
+
+// Normalise offsets > 12 (e.g. UTC+13, UTC+14) to their [-12,+12] equivalent
+// by subtracting 24. UTC+13 → UTC-11, UTC+14 → UTC-10.
+// These are the same clock time but on opposite sides of the International Date Line.
+function normaliseOffset(o) {
+  return o > 12 ? o - 24 : o;
+}
+
 const obsNorm = obsOffsets
   .filter(d => d.type === "LonglineLogsheet")
-  .map(d => ({vessel_flag: d.vessel_flag, offset: d.offset_bucket, count: d.count}));
+  .map(d => ({vessel_flag: d.vessel_flag, offset: normaliseOffset(d.offset_bucket), count: d.count}));
 const llNorm = llOffsets
-  .filter(d => d.type === "LonglineLogsheet");
+  .filter(d => d.type === "LonglineLogsheet")
+  .map(d => ({...d, offset: normaliseOffset(d.offset)}));
 
 // Group each dataset by vessel_flag
 const obsByFlag = d3.group(obsNorm, d => d.vessel_flag);
@@ -36,21 +45,38 @@ function distributionOverlap(rowsA, rowsB, keyA = "offset", keyB = "offset") {
   const totalB = d3.sum(rowsB, d => d.count);
   if (totalA === 0 || totalB === 0) return null;
 
-  const mapA = new Map(rowsA.map(d => [d[keyA], d.count / totalA]));
-  const mapB = new Map(rowsB.map(d => [d[keyB], d.count / totalB]));
-
-  const allOffsets = new Set([...mapA.keys(), ...mapB.keys()]);
-  let overlap = 0;
-  for (const o of allOffsets) {
-    overlap += Math.min(mapA.get(o) ?? 0, mapB.get(o) ?? 0);
+  // Aggregate after normalisation (multiple source buckets may map to the same key)
+  const mapA = new Map();
+  for (const d of rowsA) {
+    const k = normaliseOffset(d[keyA]);
+    mapA.set(k, (mapA.get(k) ?? 0) + d.count / totalA);
   }
-  return overlap;
+  const mapB = new Map();
+  for (const d of rowsB) {
+    const k = normaliseOffset(d[keyB]);
+    mapB.set(k, (mapB.get(k) ?? 0) + d.count / totalB);
+  }
+
+  // Try shifts of -1, 0, +1 on B and return the best overlap.
+  // This absorbs ±1h timezone boundary ambiguity (e.g. Marshall Islands at
+  // 171°E sitting 1.5° west of the +11/+12 nautical boundary).
+  let best = 0;
+  for (let shift = -1; shift <= 1; shift++) {
+    const allOffsets = new Set([...mapA.keys(), ...[...mapB.keys()].map(k => k + shift)]);
+    let overlap = 0;
+    for (const o of allOffsets) {
+      overlap += Math.min(mapA.get(o) ?? 0, mapB.get(o - shift) ?? 0);
+    }
+    best = Math.max(best, overlap);
+  }
+  return best;
 }
 
 function dominantOffset(rows, key = "offset") {
   if (!rows || rows.length === 0) return "—";
   const top = rows.reduce((a, b) => b.count > a.count ? b : a);
-  return `${top[key] >= 0 ? "+" : ""}${top[key]}h`;
+  const v = normaliseOffset(top[key]);
+  return `${v >= 0 ? "+" : ""}${v}h`;
 }
 
 const comparison = commonFlags
@@ -114,8 +140,15 @@ Distribution overlap between the UTC offset measured from **observer trip data**
 and the UTC offset estimated from **fishing set coordinates** (geo-tz lookup),
 per vessel flag.
 
-Overlap is computed as the histogram intersection of the two normalised distributions:
-`overlap = Σ min(p_observer[h], p_coordinate[h])` — 100 % = identical distributions, 0 % = no shared offset buckets.
+Overlap is computed as the best histogram intersection across shifts of −1 h, 0, +1 h:
+`overlap = max over δ∈{-1,0,+1} of Σ min(p_observer[h], p_coordinate[h+δ])` — 100 % = identical distributions, 0 % = no shared offset buckets within ±1 h.
+
+This ±1 h tolerance absorbs boundary ambiguity for vessels fishing near a nautical timezone line
+(e.g. Marshall Islands at 171°E, 1.5° west of the UTC+11/+12 boundary).
+
+Offsets greater than UTC+12 (e.g. UTC+13 for Kiribati, Samoa; UTC+14 for Kiribati Line Islands) are folded
+back into the [−12, +12] range before comparison (UTC+13 → UTC−11, UTC+14 → UTC−10).
+These represent the same clock time on opposite sides of the International Date Line.
 
 ```js
 const fmt = d3.format(",.0f");
