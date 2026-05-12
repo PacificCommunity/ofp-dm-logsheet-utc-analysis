@@ -9,14 +9,13 @@ toc: false
 ```js
 import * as d3 from "npm:d3";
 
-const obsOffsets = await FileAttachment("data/observer-fishing-activities-offset-per-vessel-flag.csv").csv({typed: true});
-const llOffsets  = await FileAttachment("data/longline-logsheet-activities-offset-per-vessel-flag.csv").csv({typed: true});
+// pairedOffsets: each row has observer_offset AND coordinate_offset for the SAME set.
+// This ensures Table 1 only reflects sets where both observer and coordinate data exist.
+const pairedOffsets   = await FileAttachment("data/observer-matched-coordinate-offset-per-vessel-flag.csv").csv({typed: true});
+const obsOffsets      = await FileAttachment("data/observer-fishing-activities-offset-per-vessel-flag.csv").csv({typed: true});
 const logVsObsOffsets = await FileAttachment("data/logsheet-vs-observer-offset-per-vessel-flag.csv").csv({typed: true});
 
 // ── Table 1 helpers ────────────────────────────────────────────────────────
-// Normalise column names — observer CSV uses "offset_bucket", logsheet CSV uses "offset"
-// Compare only LonglineLogsheet for an apples-to-apples view (both datasets cover LL well)
-
 // Normalise offsets > 12 (e.g. UTC+13, UTC+14) to their [-12,+12] equivalent
 // by subtracting 24. UTC+13 → UTC-11, UTC+14 → UTC-10.
 // These are the same clock time but on opposite sides of the International Date Line.
@@ -24,19 +23,9 @@ function normaliseOffset(o) {
   return o > 12 ? o - 24 : o;
 }
 
-const obsNorm = obsOffsets
-  .filter(d => d.type === "LonglineLogsheet")
-  .map(d => ({vessel_flag: d.vessel_flag, offset: normaliseOffset(d.offset_bucket), count: d.count}));
-const llNorm = llOffsets
-  .filter(d => d.type === "LonglineLogsheet")
-  .map(d => ({...d, offset: normaliseOffset(d.offset)}));
-
-// Group each dataset by vessel_flag
-const obsByFlag = d3.group(obsNorm, d => d.vessel_flag);
-const llByFlag  = d3.group(llNorm,  d => d.vessel_flag);
-
-// Only compare flags present in both datasets
-const commonFlags = [...llByFlag.keys()].filter(f => obsByFlag.has(f));
+// Filter to LonglineLogsheet only; group by vessel_flag
+const pairedLL     = pairedOffsets.filter(d => d.type === "LonglineLogsheet");
+const pairedByFlag = d3.group(pairedLL, d => d.vessel_flag);
 
 // For each flag compute the distribution overlap (histogram intersection):
 //   overlap = sum_offset( min(p_obs[o], p_ll[o]) )  in [0, 1]
@@ -79,17 +68,17 @@ function dominantOffset(rows, key = "offset") {
   return `${v >= 0 ? "+" : ""}${v}h`;
 }
 
-const comparison = commonFlags
+const comparison = [...pairedByFlag.keys()]
   .map(flag => {
-    const obs = obsByFlag.get(flag);
-    const ll  = llByFlag.get(flag);
+    const rows = pairedByFlag.get(flag);
+    // Both distributions come from the same rows — observer_offset vs coordinate_offset
+    // for the exact same sets. distributionOverlap handles normalisation internally.
     return {
       flag,
-      overlap: distributionOverlap(obs, ll),
-      obsTotal: d3.sum(obs, d => d.count),
-      llTotal:  d3.sum(ll,  d => d.count),
-      dominantObs: dominantOffset(obs),
-      dominantLL:  dominantOffset(ll),
+      overlap:     distributionOverlap(rows, rows, "observer_offset", "coordinate_offset"),
+      pairedTotal: d3.sum(rows, d => d.count),
+      dominantObs: dominantOffset(rows, "observer_offset"),
+      dominantLL:  dominantOffset(rows, "coordinate_offset"),
     };
   })
   .sort((a, b) => b.overlap - a.overlap);
@@ -137,8 +126,8 @@ const qualityRows = allLogVsObsFlags.flatMap(flag =>
 ## Observer offset vs logsheet coordinate offset — Longline by vessel flag
 
 Distribution overlap between the UTC offset measured from **observer trip data** (longline sets)
-and the UTC offset estimated from **fishing set coordinates** (geo-tz lookup),
-per vessel flag.
+and the UTC offset estimated from **the same set's GPS coordinates** (nautical formula: `ROUND(lond / 15°, 0)`),
+per vessel flag — **only for sets where both an observer record and valid coordinates exist**.
 
 Overlap is computed as the best histogram intersection across shifts of −1 h, 0, +1 h:
 `overlap = max over δ∈{-1,0,+1} of Σ min(p_observer[h], p_coordinate[h+δ])` — 100 % = identical distributions, 0 % = no shared offset buckets within ±1 h.
@@ -159,8 +148,7 @@ display(html`<table style="width:100%;border-collapse:collapse;font-size:0.9rem"
     <tr style="border-bottom:2px solid #e5e7eb;text-align:left">
       <th style="padding:6px 12px">Flag</th>
       <th style="padding:6px 12px;text-align:right">Overlap</th>
-      <th style="padding:6px 12px;text-align:right">Observer sets</th>
-      <th style="padding:6px 12px;text-align:right">Coordinate sets</th>
+      <th style="padding:6px 12px;text-align:right">Paired sets</th>
       <th style="padding:6px 12px;text-align:center">Dominant observer offset</th>
       <th style="padding:6px 12px;text-align:center">Dominant coordinate offset</th>
     </tr>
@@ -172,8 +160,7 @@ display(html`<table style="width:100%;border-collapse:collapse;font-size:0.9rem"
       return html`<tr style="background:${bg}">
         <td style="padding:5px 12px;font-weight:600">${row.flag}</td>
         <td style="padding:5px 12px;text-align:right;background:${bar};font-variant-numeric:tabular-nums">${pct(row.overlap)}</td>
-        <td style="padding:5px 12px;text-align:right;font-variant-numeric:tabular-nums">${fmt(row.obsTotal)}</td>
-        <td style="padding:5px 12px;text-align:right;font-variant-numeric:tabular-nums">${fmt(row.llTotal)}</td>
+        <td style="padding:5px 12px;text-align:right;font-variant-numeric:tabular-nums">${fmt(row.pairedTotal)}</td>
         <td style="padding:5px 12px;text-align:center">${row.dominantObs}</td>
         <td style="padding:5px 12px;text-align:center">${row.dominantLL}</td>
       </tr>`;
