@@ -21,31 +21,49 @@
 import {define} from "./_observablehq/client.d8a38aae.js";
 import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
 
+registerFile("./data/ll-logsheet-time-quality.csv", {"name":"./data/ll-logsheet-time-quality.csv","mimeType":"text/csv","path":"./_file/data/ll-logsheet-time-quality.5ca01128.csv","lastModified":1778563348743,"size":303});
 registerFile("./data/ll-observer-coordinate-match.csv", {"name":"./data/ll-observer-coordinate-match.csv","mimeType":"text/csv","path":"./_file/data/ll-observer-coordinate-match.16c16d30.csv","lastModified":1778560884255,"size":323});
+registerFile("./data/ps-logsheet-time-quality.csv", {"name":"./data/ps-logsheet-time-quality.csv","mimeType":"text/csv","path":"./_file/data/ps-logsheet-time-quality.13be081f.csv","lastModified":1778563369582,"size":369});
 registerFile("./data/ps-observer-coordinate-match.csv", {"name":"./data/ps-observer-coordinate-match.csv","mimeType":"text/csv","path":"./_file/data/ps-observer-coordinate-match.b3a7310f.csv","lastModified":1778560920604,"size":401});
 
-define({id: "6c0df926", inputs: ["FileAttachment"], outputs: ["llMatch","psMatch","psMap","allFlags","rows"], body: async (FileAttachment) => {
+define({id: "fa0e8d6e", inputs: ["FileAttachment"], outputs: ["llMatch","psMatch","psMap1","allFlags1","coordRows","llTimeMatch","psTimeMatch","psMap2","allFlags2","timeRows"], body: async (FileAttachment) => {
+// ── Table 1: GPS coordinate offset vs observer offset ─────────────────────
 const llMatch = await FileAttachment("./data/ll-observer-coordinate-match.csv").csv({typed: true});
 const psMatch = await FileAttachment("./data/ps-observer-coordinate-match.csv").csv({typed: true});
 
-// Join LL and PS by vessel_flag
-const psMap = new Map(psMatch.map(d => [d.vessel_flag, d]));
-const allFlags = [...new Set([...llMatch.map(d => d.vessel_flag), ...psMatch.map(d => d.vessel_flag)])].sort();
+const psMap1 = new Map(psMatch.map(d => [d.vessel_flag, d]));
+const allFlags1 = [...new Set([...llMatch.map(d => d.vessel_flag), ...psMatch.map(d => d.vessel_flag)])].sort();
 
-const rows = allFlags.map(flag => {
-  const ll = llMatch.find(d => d.vessel_flag === flag) ?? null;
-  const ps = psMap.get(flag) ?? null;
-  return { flag, ll, ps };
-}).sort((a, b) => {
-  // Sort by LL match_pct ascending (worst first); fall back to PS if no LL
+const coordRows = allFlags1.map(flag => ({
+  flag,
+  ll: llMatch.find(d => d.vessel_flag === flag) ?? null,
+  ps: psMap1.get(flag) ?? null,
+})).sort((a, b) => {
   const pctA = a.ll?.match_pct ?? a.ps?.match_pct ?? 100;
   const pctB = b.ll?.match_pct ?? b.ps?.match_pct ?? 100;
   return pctA - pctB;
 });
-return {llMatch,psMatch,psMap,allFlags,rows};
+
+// ── Table 2: Logsheet set_time offset vs observer offset ──────────────────
+const llTimeMatch = await FileAttachment("./data/ll-logsheet-time-quality.csv").csv({typed: true});
+const psTimeMatch = await FileAttachment("./data/ps-logsheet-time-quality.csv").csv({typed: true});
+
+const psMap2 = new Map(psTimeMatch.map(d => [d.vessel_flag, d]));
+const allFlags2 = [...new Set([...llTimeMatch.map(d => d.vessel_flag), ...psTimeMatch.map(d => d.vessel_flag)])].sort();
+
+const timeRows = allFlags2.map(flag => ({
+  flag,
+  ll: llTimeMatch.find(d => d.vessel_flag === flag) ?? null,
+  ps: psMap2.get(flag) ?? null,
+})).sort((a, b) => {
+  const pctA = a.ll?.match_pct ?? a.ps?.match_pct ?? 100;
+  const pctB = b.ll?.match_pct ?? b.ps?.match_pct ?? 100;
+  return pctA - pctB;
+});
+return {llMatch,psMatch,psMap1,allFlags1,coordRows,llTimeMatch,psTimeMatch,psMap2,allFlags2,timeRows};
 }});
 
-define({id: "763302b3", inputs: ["html","display","rows"], outputs: ["fmt","pct","bar","color"], body: (html,display,rows) => {
+define({id: "b7a11147", inputs: ["html","display","coordRows"], outputs: ["fmt","pct","bar","color"], body: (html,display,coordRows) => {
 const fmt = n => n == null ? "—" : n.toLocaleString();
 const pct = (v, n) => v == null ? "—" : html`<span style="font-variant-numeric:tabular-nums">${v.toFixed(1)} %</span><span style="color:#9ca3af;font-size:0.8em"> (${fmt(n)})</span>`;
 
@@ -63,7 +81,7 @@ display(html`<table style="width:100%;border-collapse:collapse;font-size:0.9rem"
     </tr>
   </thead>
   <tbody>
-    ${rows.map((row, i) => html`<tr style="background:${i % 2 === 0 ? "transparent" : "#f9fafb"}">
+    ${coordRows.map((row, i) => html`<tr style="background:${i % 2 === 0 ? "transparent" : "#f9fafb"}">
       <td style="padding:5px 12px;font-weight:600">${row.flag}</td>
       <td style="padding:5px 12px;text-align:right;${bar(row.ll?.match_pct, color(row.ll?.match_pct))}">${pct(row.ll?.match_pct, row.ll?.total_sets)}</td>
       <td style="padding:5px 12px;text-align:right;${bar(row.ps?.match_pct, color(row.ps?.match_pct))}">${pct(row.ps?.match_pct, row.ps?.total_sets)}</td>
@@ -71,6 +89,25 @@ display(html`<table style="width:100%;border-collapse:collapse;font-size:0.9rem"
   </tbody>
 </table>`);
 return {fmt,pct,bar,color};
+}});
+
+define({id: "ddc76d1c", inputs: ["display","html","timeRows","bar","color","pct"], body: (display,html,timeRows,bar,color,pct) => {
+display(html`<table style="width:100%;border-collapse:collapse;font-size:0.9rem">
+  <thead>
+    <tr style="border-bottom:2px solid #e5e7eb;text-align:left">
+      <th style="padding:6px 12px">Flag</th>
+      <th style="padding:6px 12px;text-align:right">Longline match (paired sets)</th>
+      <th style="padding:6px 12px;text-align:right">Purseseine match (paired sets)</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${timeRows.map((row, i) => html`<tr style="background:${i % 2 === 0 ? "transparent" : "#f9fafb"}">
+      <td style="padding:5px 12px;font-weight:600">${row.flag}</td>
+      <td style="padding:5px 12px;text-align:right;${bar(row.ll?.match_pct, color(row.ll?.match_pct))}">${pct(row.ll?.match_pct, row.ll?.total_sets)}</td>
+      <td style="padding:5px 12px;text-align:right;${bar(row.ps?.match_pct, color(row.ps?.match_pct))}">${pct(row.ps?.match_pct, row.ps?.total_sets)}</td>
+    </tr>`)}
+  </tbody>
+</table>`);
 }});
 
 </script>
@@ -95,12 +132,12 @@ return {fmt,pct,bar,color};
 <div id="observablehq-center">
 <main id="observablehq-main" class="observablehq">
 <h1 id="logsheet-utc-analysis" tabindex="-1"><a class="observablehq-header-anchor" href="#logsheet-utc-analysis">Logsheet UTC analysis</a></h1>
-<div class="observablehq observablehq--block"><!--:6c0df926:--></div>
+<div class="observablehq observablehq--block"><!--:fa0e8d6e:--></div>
 <h2 id="observer-offset-vs-logsheet-coordinate-offset-by-vessel-flag" tabindex="-1"><a class="observablehq-header-anchor" href="#observer-offset-vs-logsheet-coordinate-offset-by-vessel-flag">Observer offset vs logsheet coordinate offset — by vessel flag</a></h2>
 <p>For each <strong>fishing set</strong> that has both an <strong>observer trip record</strong> and a valid <strong>GPS longitude</strong>,
 the table below shows what percentage of sets have a GPS-derived UTC offset that agrees
 within ±1 h with the observer-recorded UTC offset.</p>
-<p><strong>Method (computed entirely in SQL):</strong></p>
+<p><strong>Method :</strong></p>
 <ul>
 <li>Coordinate offset: <code>ROUND(lond / 15.0, 0)</code> — nautical timezone formula</li>
 <li>Observer offset: <code>ROUND(DATEDIFF(MINUTE, utc_dtime, local_dtime) / 60.0 × 2, 0) / 2</code></li>
@@ -109,11 +146,27 @@ within ±1 h with the observer-recorded UTC offset.</p>
 <li>Longline: one set per day, matched to observer <code>l_set</code> on the same date</li>
 <li>Purseseine: multiple sets per day, each matched to the observer daily record (<code>s_day</code>) on the same date</li>
 </ul>
-<div class="observablehq observablehq--block"><!--:763302b3:--></div>
+<div class="observablehq observablehq--block"><!--:b7a11147:--></div>
+<h2 id="logsheet-set-time-quality-by-vessel-flag" tabindex="-1"><a class="observablehq-header-anchor" href="#logsheet-set-time-quality-by-vessel-flag">Logsheet set time quality — by vessel flag</a></h2>
+<p>For each <strong>fishing set</strong> that has both an <strong>observer trip record</strong> and a valid <strong><code>set_time</code></strong> entry (HHMM),
+the table below shows what percentage of sets have a logsheet timestamp that agrees within ±1 h
+with the observer-recorded UTC offset.</p>
+<p><strong>Method (computed entirely in SQL):</strong></p>
+<ul>
+<li>Logsheet datetime: <code>logdate + set_time</code> (combining date and HHMM time columns)</li>
+<li>Logsheet offset: <code>DATEDIFF(MINUTE, utc_set_dtime, logsheet_dt) / 60</code> — how far is the captain's timestamp from observer UTC?</li>
+<li>Observer offset: <code>DATEDIFF(MINUTE, utc_set_dtime, set_dtime) / 60</code></li>
+<li>Match if <code>ABS(logsheet_offset − observer_offset_normalised) ≤ 1</code></li>
+<li>Offsets &gt; UTC+12 are folded back across the dateline (+13 → −11, +14 → −10)</li>
+</ul>
+<p><strong>Interpretation:</strong><br>
+High match% → <code>set_time</code> was entered in local time ✓<br>
+Low match% → <code>set_time</code> was likely entered in UTC — a common data quality issue</p>
+<div class="observablehq observablehq--block"><!--:ddc76d1c:--></div>
 </main>
 <footer id="observablehq-footer">
 <nav><a rel="next" href="./set-time-distribution"><span>Set time distribution</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-12T15:41:21">May 12, 2026</a>.</div>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-12T16:22:53">May 12, 2026</a>.</div>
 </footer>
 </div>
 </body>
