@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="generator" content="Observable Framework v1.13.4">
-<title>Logsheet activity IANA timezone offset by vessel flag | Logsheet UTC Analysis</title>
+<title>Logsheet activity Nautical timezone offset by vessel flag | Logsheet UTC Analysis</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
 <link rel="preload" as="style" href="./_observablehq/theme-air.d5b7fcbe.css">
@@ -58,12 +58,12 @@
 import {define} from "./_observablehq/client.d8a38aae.js";
 import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
 
-registerFile("./data/longline-logsheet-activities-offset-per-vessel-flag.csv", {"name":"./data/longline-logsheet-activities-offset-per-vessel-flag.csv","mimeType":"text/csv","path":"./_file/data/longline-logsheet-activities-offset-per-vessel-flag.276c5914.csv","lastModified":1778546982903,"size":9397});
+registerFile("./data/longline-logsheet-activities-nautical-offset-per-vessel-flag.csv", {"name":"./data/longline-logsheet-activities-nautical-offset-per-vessel-flag.csv","mimeType":"text/csv","path":"./_file/data/longline-logsheet-activities-nautical-offset-per-vessel-flag.bd59ef67.csv","lastModified":1778547589980,"size":8710});
 
-define({id: "f3a95dcd", inputs: ["FileAttachment","width"], outputs: ["Plot","d3","raw","TYPES","TYPE_LABEL","byFlagType","allFlags","offsetColor","allOffsets","plotW","plotH"], body: async (FileAttachment,width) => {
+define({id: "1f4eb627", inputs: ["FileAttachment","width"], outputs: ["Plot","d3","raw","TYPES","TYPE_LABEL","byFlagType","allFlags","offsetColor","allOffsets","plotW","plotH"], body: async (FileAttachment,width) => {
 const [Plot, d3] = await Promise.all([import("./_npm/@observablehq/plot@0.6.17/a96a6bbb.js"), import("./_npm/d3@7.9.0/66d82917.js")]);
 
-const raw = await FileAttachment("./data/longline-logsheet-activities-offset-per-vessel-flag.csv").csv({typed: true});
+const raw = await FileAttachment("./data/longline-logsheet-activities-nautical-offset-per-vessel-flag.csv").csv({typed: true});
 
 const TYPES = ["LonglineLogsheet", "PurseseineLogsheet"];
 const TYPE_LABEL = {LonglineLogsheet: "Longline", PurseseineLogsheet: "Purseseine"};
@@ -171,30 +171,32 @@ display(html`<div style="display:flex;gap:1.5rem;align-items:center;font-size:0.
     <li class="observablehq-link"><a href="./">Summary</a></li>
     <li class="observablehq-link"><a href="./set-time-distribution">Set time distribution</a></li>
     <li class="observablehq-link"><a href="./observer-offsets">Observer offsets by vessel flag</a></li>
-    <li class="observablehq-link observablehq-link-active"><a href="./logsheet-offsets">Logsheet activity IANA timezone offset by vessel flag</a></li>
-    <li class="observablehq-link"><a href="./logsheet-nautical-offsets">Logsheet activity Nautical timezone offset by vessel flag</a></li>
+    <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity IANA timezone offset by vessel flag</a></li>
+    <li class="observablehq-link observablehq-link-active"><a href="./logsheet-nautical-offsets">Logsheet activity Nautical timezone offset by vessel flag</a></li>
   </ol>
 </nav>
 <script>{const e=document.querySelector("#observablehq-sidebar"),o=document.querySelector("#observablehq-sidebar-toggle"),r=sessionStorage.getItem("observablehq-sidebar");r?o.checked=r==="true":o.indeterminate=!0;for(const t of document.querySelectorAll("#observablehq-sidebar summary")){const s=t.parentElement;switch(sessionStorage.getItem(`observablehq-sidebar:${t.textContent}`)){case"true":s.open=!0;break;case"false":s.classList.contains("observablehq-section-active")||(s.open=!1);break}}addEventListener("beforeunload",()=>sessionStorage.setItem("observablehq-sidebar-scrolly",`${e.scrollTop}`));const a=sessionStorage.getItem("observablehq-sidebar-scrolly");a!=null&&(e.style.cssText="overflow: hidden;",e.scrollTop=+a,e.style.cssText="");}</script>
 <div id="observablehq-center">
 <main id="observablehq-main" class="observablehq">
-<h1 id="logsheet-activity-iana-timezone-offset-by-vessel-flag" tabindex="-1"><a class="observablehq-header-anchor" href="#logsheet-activity-iana-timezone-offset-by-vessel-flag">Logsheet activity IANA timezone offset by vessel flag</a></h1>
-<p>UTC offset estimated from the <strong>geographic coordinates</strong> of each fishing set,
-resolved via <a href="https://github.com/evansiroky/timezone-boundary-builder" target="_blank" rel="noopener noreferrer">geo-tz</a>
-(IANA political timezone boundaries), then converted to a UTC offset (½ h resolution).</p>
+<h1 id="logsheet-activity-nautical-timezone-offset-by-vessel-flag" tabindex="-1"><a class="observablehq-header-anchor" href="#logsheet-activity-nautical-timezone-offset-by-vessel-flag">Logsheet activity Nautical timezone offset by vessel flag</a></h1>
+<p>UTC offset estimated from the <strong>geographic coordinates</strong> of each fishing set
+using the <strong>nautical timezone convention</strong> :</p>
+<blockquote>
+<p>offset = round(longitude / 15)</p>
+</blockquote>
+<p>Each 15° longitude band = 1 hour. This reflects how a GPS device at sea would
+determine local time, absent any cellular network or land-based timezone lookup.</p>
 <ul>
 <li><strong>Longline</strong> — <code>log.sets_ll</code> (<code>l_activity_id = 1</code>)</li>
 <li><strong>Purseseine</strong> — <code>log.sets_ps</code> (<code>s_activity_id = 1</code>)</li>
 </ul>
-<p>Please note that in open ocean, geo-tz willl return Etc/GMT+-N zones, which will be the same
-result as the nautical timezone.</p>
-<div class="observablehq observablehq--block"><!--:f3a95dcd:--></div>
+<div class="observablehq observablehq--block"><!--:1f4eb627:--></div>
 <div class="observablehq observablehq--block"><!--:ecb712fe:--></div>
 <h3 id="colour-key" tabindex="-1"><a class="observablehq-header-anchor" href="#colour-key">Colour key</a></h3>
 <div class="observablehq observablehq--block"><!--:2be23ac2:--></div>
 </main>
 <footer id="observablehq-footer">
-<nav><a rel="prev" href="./observer-offsets"><span>Observer offsets by vessel flag</span></a><a rel="next" href="./logsheet-nautical-offsets"><span>Logsheet activity Nautical timezone offset by vessel flag</span></a></nav>
+<nav><a rel="prev" href="./logsheet-offsets"><span>Logsheet activity IANA timezone offset by vessel flag</span></a></nav>
 <div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-12T15:41:21">May 12, 2026</a>.</div>
 </footer>
 </div>

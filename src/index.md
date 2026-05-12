@@ -7,206 +7,62 @@ toc: false
 # Logsheet UTC analysis
 
 ```js
-import * as d3 from "npm:d3";
+const llMatch = await FileAttachment("data/ll-observer-coordinate-match.csv").csv({typed: true});
+const psMatch = await FileAttachment("data/ps-observer-coordinate-match.csv").csv({typed: true});
 
-// pairedOffsets: each row has observer_offset AND coordinate_offset for the SAME set.
-// This ensures Table 1 only reflects sets where both observer and coordinate data exist.
-const pairedOffsets   = await FileAttachment("data/observer-matched-coordinate-offset-per-vessel-flag.csv").csv({typed: true});
-const obsOffsets      = await FileAttachment("data/observer-fishing-activities-offset-per-vessel-flag.csv").csv({typed: true});
-const logVsObsOffsets = await FileAttachment("data/logsheet-vs-observer-offset-per-vessel-flag.csv").csv({typed: true});
+// Join LL and PS by vessel_flag
+const psMap = new Map(psMatch.map(d => [d.vessel_flag, d]));
+const allFlags = [...new Set([...llMatch.map(d => d.vessel_flag), ...psMatch.map(d => d.vessel_flag)])].sort();
 
-// ── Table 1 helpers ────────────────────────────────────────────────────────
-// Normalise offsets > 12 (e.g. UTC+13, UTC+14) to their [-12,+12] equivalent
-// by subtracting 24. UTC+13 → UTC-11, UTC+14 → UTC-10.
-// These are the same clock time but on opposite sides of the International Date Line.
-function normaliseOffset(o) {
-  return o > 12 ? o - 24 : o;
-}
-
-// Filter to LonglineLogsheet only; group by vessel_flag
-const pairedLL     = pairedOffsets.filter(d => d.type === "LonglineLogsheet");
-const pairedByFlag = d3.group(pairedLL, d => d.vessel_flag);
-
-// For each flag compute the distribution overlap (histogram intersection):
-//   overlap = sum_offset( min(p_obs[o], p_ll[o]) )  in [0, 1]
-function distributionOverlap(rowsA, rowsB, keyA = "offset", keyB = "offset") {
-  const totalA = d3.sum(rowsA, d => d.count);
-  const totalB = d3.sum(rowsB, d => d.count);
-  if (totalA === 0 || totalB === 0) return null;
-
-  // Aggregate after normalisation (multiple source buckets may map to the same key)
-  const mapA = new Map();
-  for (const d of rowsA) {
-    const k = normaliseOffset(d[keyA]);
-    mapA.set(k, (mapA.get(k) ?? 0) + d.count / totalA);
-  }
-  const mapB = new Map();
-  for (const d of rowsB) {
-    const k = normaliseOffset(d[keyB]);
-    mapB.set(k, (mapB.get(k) ?? 0) + d.count / totalB);
-  }
-
-  // Try shifts of -1, 0, +1 on B and return the best overlap.
-  // This absorbs ±1h timezone boundary ambiguity (e.g. Marshall Islands at
-  // 171°E sitting 1.5° west of the +11/+12 nautical boundary).
-  let best = 0;
-  for (let shift = -1; shift <= 1; shift++) {
-    const allOffsets = new Set([...mapA.keys(), ...[...mapB.keys()].map(k => k + shift)]);
-    let overlap = 0;
-    for (const o of allOffsets) {
-      overlap += Math.min(mapA.get(o) ?? 0, mapB.get(o - shift) ?? 0);
-    }
-    best = Math.max(best, overlap);
-  }
-  return best;
-}
-
-function dominantOffset(rows, key = "offset") {
-  if (!rows || rows.length === 0) return "—";
-  const top = rows.reduce((a, b) => b.count > a.count ? b : a);
-  const v = normaliseOffset(top[key]);
-  return `${v >= 0 ? "+" : ""}${v}h`;
-}
-
-const comparison = [...pairedByFlag.keys()]
-  .map(flag => {
-    const rows = pairedByFlag.get(flag);
-    // Both distributions come from the same rows — observer_offset vs coordinate_offset
-    // for the exact same sets. distributionOverlap handles normalisation internally.
-    return {
-      flag,
-      overlap:     distributionOverlap(rows, rows, "observer_offset", "coordinate_offset"),
-      pairedTotal: d3.sum(rows, d => d.count),
-      dominantObs: dominantOffset(rows, "observer_offset"),
-      dominantLL:  dominantOffset(rows, "coordinate_offset"),
-    };
-  })
-  .sort((a, b) => b.overlap - a.overlap);
-
-// ── Table 2 helpers ────────────────────────────────────────────────────────
-// logVsObsOffsets: (type, vessel_flag, offset_bucket, count)
-//   = logsheet local time − observer UTC time
-// obsOffsets:      (type, vessel_flag, offset_bucket, count)
-//   = observer local time − observer UTC time
-// High overlap → logsheet times are consistent with observer UTC → reliable
-// Low overlap  → logsheet times likely entered incorrectly (e.g. in UTC)
-
-const logVsObsByTypeFlag = d3.rollup(logVsObsOffsets, rows => rows, d => d.type, d => d.vessel_flag);
-const obsByTypeFlag      = d3.rollup(obsOffsets,      rows => rows, d => d.type, d => d.vessel_flag);
-
-const TYPES = ["LonglineLogsheet", "PurseseineLogsheet"];
-const TYPE_LABEL = { LonglineLogsheet: "Longline", PurseseineLogsheet: "Purseseine" };
-
-// Collect all flags present in logVsObs for any type, sort by total count desc
-const allLogVsObsFlags = [...new Set(logVsObsOffsets.map(d => d.vessel_flag))]
-  .sort((a, b) => {
-    const tot = flag => d3.sum(TYPES.flatMap(t => logVsObsByTypeFlag.get(t)?.get(flag) ?? []), d => d.count);
-    return tot(b) - tot(a);
-  });
-
-const qualityRows = allLogVsObsFlags.flatMap(flag =>
-  TYPES.flatMap(type => {
-    const logRows = logVsObsByTypeFlag.get(type)?.get(flag) ?? [];
-    const obsRows = obsByTypeFlag.get(type)?.get(flag) ?? [];
-    if (logRows.length === 0 && obsRows.length === 0) return [];
-    const overlap = distributionOverlap(logRows, obsRows, "offset_bucket", "offset_bucket");
-    return [{
-      flag,
-      type: TYPE_LABEL[type],
-      overlap,
-      logTotal: d3.sum(logRows, d => d.count),
-      obsTotal: d3.sum(obsRows, d => d.count),
-      dominantLog: dominantOffset(logRows, "offset_bucket"),
-      dominantObs: dominantOffset(obsRows, "offset_bucket"),
-    }];
-  })
-);
+const rows = allFlags.map(flag => {
+  const ll = llMatch.find(d => d.vessel_flag === flag) ?? null;
+  const ps = psMap.get(flag) ?? null;
+  return { flag, ll, ps };
+}).sort((a, b) => {
+  // Sort by LL match_pct ascending (worst first); fall back to PS if no LL
+  const pctA = a.ll?.match_pct ?? a.ps?.match_pct ?? 100;
+  const pctB = b.ll?.match_pct ?? b.ps?.match_pct ?? 100;
+  return pctA - pctB;
+});
 ```
 
-## Observer offset vs logsheet coordinate offset — Longline by vessel flag
+## Observer offset vs logsheet coordinate offset — by vessel flag
 
-Distribution overlap between the UTC offset measured from **observer trip data** (longline sets)
-and the UTC offset estimated from **the same set's GPS coordinates** (nautical formula: `ROUND(lond / 15°, 0)`),
-per vessel flag — **only for sets where both an observer record and valid coordinates exist**.
+For each **fishing set** that has both an **observer trip record** and a valid **GPS longitude**,
+the table below shows what percentage of sets have a GPS-derived UTC offset that agrees
+within ±1 h with the observer-recorded UTC offset.
 
-Overlap is computed as the best histogram intersection across shifts of −1 h, 0, +1 h:
-`overlap = max over δ∈{-1,0,+1} of Σ min(p_observer[h], p_coordinate[h+δ])` — 100 % = identical distributions, 0 % = no shared offset buckets within ±1 h.
-
-This ±1 h tolerance absorbs boundary ambiguity for vessels fishing near a nautical timezone line
-(e.g. Marshall Islands at 171°E, 1.5° west of the UTC+11/+12 boundary).
-
-Offsets greater than UTC+12 (e.g. UTC+13 for Kiribati, Samoa; UTC+14 for Kiribati Line Islands) are folded
-back into the [−12, +12] range before comparison (UTC+13 → UTC−11, UTC+14 → UTC−10).
-These represent the same clock time on opposite sides of the International Date Line.
+**Method (computed entirely in SQL):**
+- Coordinate offset: `ROUND(lond / 15.0, 0)` — nautical timezone formula
+- Observer offset: `ROUND(DATEDIFF(MINUTE, utc_dtime, local_dtime) / 60.0 × 2, 0) / 2`
+- Offsets > UTC+12 (e.g. Kiribati UTC+13/+14) are folded back: +13 → −11, +14 → −10
+- Sets are **paired**: only sets where both an observer record and valid coordinates exist are included
+- Longline: one set per day, matched to observer `l_set` on the same date
+- Purseseine: multiple sets per day, each matched to the observer daily record (`s_day`) on the same date
 
 ```js
-const fmt = d3.format(",.0f");
-const pct = v => v == null ? "—" : `${(v * 100).toFixed(1)} %`;
+const fmt = n => n == null ? "—" : n.toLocaleString();
+const pct = (v, n) => v == null ? "—" : html`<span style="font-variant-numeric:tabular-nums">${v.toFixed(1)} %</span><span style="color:#9ca3af;font-size:0.8em"> (${fmt(n)})</span>`;
+
+const bar = (v, color) =>
+  v == null ? "" : `background:linear-gradient(90deg,${color} ${v.toFixed(1)}%,transparent 0)`;
+
+const color = v => v == null ? "" : v >= 80 ? "#86efac" : v >= 60 ? "#fde68a" : "#fca5a5";
 
 display(html`<table style="width:100%;border-collapse:collapse;font-size:0.9rem">
   <thead>
     <tr style="border-bottom:2px solid #e5e7eb;text-align:left">
       <th style="padding:6px 12px">Flag</th>
-      <th style="padding:6px 12px;text-align:right">Overlap</th>
-      <th style="padding:6px 12px;text-align:right">Paired sets</th>
-      <th style="padding:6px 12px;text-align:center">Dominant observer offset</th>
-      <th style="padding:6px 12px;text-align:center">Dominant coordinate offset</th>
+      <th style="padding:6px 12px;text-align:right">Longline match (paired sets)</th>
+      <th style="padding:6px 12px;text-align:right">Purseseine match (paired sets)</th>
     </tr>
   </thead>
   <tbody>
-    ${comparison.map((row, i) => {
-      const bg = i % 2 === 0 ? "transparent" : "#f9fafb";
-      const bar = `linear-gradient(90deg,${row.overlap > 0.66 ? "#86efac" : row.overlap > 0.33 ? "#fde68a" : "#fca5a5"} ${(row.overlap*100).toFixed(1)}%,transparent 0)`;
-      return html`<tr style="background:${bg}">
-        <td style="padding:5px 12px;font-weight:600">${row.flag}</td>
-        <td style="padding:5px 12px;text-align:right;background:${bar};font-variant-numeric:tabular-nums">${pct(row.overlap)}</td>
-        <td style="padding:5px 12px;text-align:right;font-variant-numeric:tabular-nums">${fmt(row.pairedTotal)}</td>
-        <td style="padding:5px 12px;text-align:center">${row.dominantObs}</td>
-        <td style="padding:5px 12px;text-align:center">${row.dominantLL}</td>
-      </tr>`;
-    })}
-  </tbody>
-</table>`);
-```
-
-## Logsheet local time quality — by vessel flag and logsheet type
-
-Distribution overlap between the **observer's own UTC offset** (`obsv_set_dtime − obsv_utc_set_dtime`)
-and the **offset implied by the logsheet's local time** (`log_set_dtime − obsv_utc_set_dtime`),
-per vessel flag and logsheet type (sets from 2017 onwards).
-
-High overlap → logsheet times are consistent with the observer UTC → times are likely **correct**.  
-Low overlap → logsheet times diverge from observer UTC → times were likely **entered incorrectly** (e.g. in UTC rather than local time).
-
-```js
-display(html`<table style="width:100%;border-collapse:collapse;font-size:0.9rem">
-  <thead>
-    <tr style="border-bottom:2px solid #e5e7eb;text-align:left">
-      <th style="padding:6px 12px">Flag</th>
-      <th style="padding:6px 12px">Type</th>
-      <th style="padding:6px 12px;text-align:right">Overlap</th>
-      <th style="padding:6px 12px;text-align:right">Observer sets</th>
-      <th style="padding:6px 12px;text-align:right">Logsheet sets</th>
-      <th style="padding:6px 12px;text-align:center">Dominant observer offset</th>
-      <th style="padding:6px 12px;text-align:center">Dominant logsheet offset</th>
-    </tr>
-  </thead>
-  <tbody>
-    ${qualityRows.map((row, i) => {
-      const bg = i % 2 === 0 ? "transparent" : "#f9fafb";
-      const bar = row.overlap == null
-        ? "transparent"
-        : `linear-gradient(90deg,${row.overlap > 0.66 ? "#86efac" : row.overlap > 0.33 ? "#fde68a" : "#fca5a5"} ${(row.overlap*100).toFixed(1)}%,transparent 0)`;
-      return html`<tr style="background:${bg}">
-        <td style="padding:5px 12px;font-weight:600">${row.flag}</td>
-        <td style="padding:5px 12px;color:#6b7280">${row.type}</td>
-        <td style="padding:5px 12px;text-align:right;background:${bar};font-variant-numeric:tabular-nums">${pct(row.overlap)}</td>
-        <td style="padding:5px 12px;text-align:right;font-variant-numeric:tabular-nums">${fmt(row.obsTotal)}</td>
-        <td style="padding:5px 12px;text-align:right;font-variant-numeric:tabular-nums">${fmt(row.logTotal)}</td>
-        <td style="padding:5px 12px;text-align:center">${row.dominantObs}</td>
-        <td style="padding:5px 12px;text-align:center">${row.dominantLog}</td>
-      </tr>`;
-    })}
+    ${rows.map((row, i) => html`<tr style="background:${i % 2 === 0 ? "transparent" : "#f9fafb"}">
+      <td style="padding:5px 12px;font-weight:600">${row.flag}</td>
+      <td style="padding:5px 12px;text-align:right;${bar(row.ll?.match_pct, color(row.ll?.match_pct))}">${pct(row.ll?.match_pct, row.ll?.total_sets)}</td>
+      <td style="padding:5px 12px;text-align:right;${bar(row.ps?.match_pct, color(row.ps?.match_pct))}">${pct(row.ps?.match_pct, row.ps?.total_sets)}</td>
+    </tr>`)}
   </tbody>
 </table>`);
 ```

@@ -13,218 +13,64 @@
 <link rel="modulepreload" href="./_observablehq/client.d8a38aae.js">
 <link rel="modulepreload" href="./_observablehq/runtime.607a8173.js">
 <link rel="modulepreload" href="./_observablehq/stdlib.277aeab8.js">
-<link rel="modulepreload" href="./_npm/d3@7.9.0/66d82917.js">
 <link rel="modulepreload" href="./_npm/htl@0.3.1/72f4716c.js">
 <link rel="modulepreload" href="./_npm/d3-dsv@3.0.1/9cffc2bd.js">
-<link rel="modulepreload" href="./_npm/d3-array@3.2.4/e93ca09f.js">
-<link rel="modulepreload" href="./_npm/d3-axis@3.0.0/0f2de24d.js">
-<link rel="modulepreload" href="./_npm/d3-brush@3.0.0/65eb105b.js">
-<link rel="modulepreload" href="./_npm/d3-chord@3.0.1/7ef8fb2e.js">
-<link rel="modulepreload" href="./_npm/d3-color@3.1.0/aeb57b94.js">
-<link rel="modulepreload" href="./_npm/d3-contour@4.0.2/1d2aed74.js">
-<link rel="modulepreload" href="./_npm/d3-delaunay@6.0.4/87adea64.js">
-<link rel="modulepreload" href="./_npm/d3-dispatch@3.0.1/9ba9c7f3.js">
-<link rel="modulepreload" href="./_npm/d3-drag@3.0.0/4202580c.js">
-<link rel="modulepreload" href="./_npm/d3-ease@3.0.1/cdd7e898.js">
-<link rel="modulepreload" href="./_npm/d3-fetch@3.0.1/b4e2ad9a.js">
-<link rel="modulepreload" href="./_npm/d3-force@3.0.0/5e804d15.js">
-<link rel="modulepreload" href="./_npm/d3-format@3.1.2/3785bf2d.js">
-<link rel="modulepreload" href="./_npm/d3-geo@3.1.1/40599fb3.js">
-<link rel="modulepreload" href="./_npm/d3-hierarchy@3.1.2/e49e792c.js">
-<link rel="modulepreload" href="./_npm/d3-interpolate@3.0.1/8d1e5425.js">
-<link rel="modulepreload" href="./_npm/d3-path@3.1.0/20d3f133.js">
-<link rel="modulepreload" href="./_npm/d3-polygon@3.0.1/7553081f.js">
-<link rel="modulepreload" href="./_npm/d3-quadtree@3.0.1/0dfd751c.js">
-<link rel="modulepreload" href="./_npm/d3-random@3.0.1/3c90ee06.js">
-<link rel="modulepreload" href="./_npm/d3-scale@4.0.2/720b7f0a.js">
-<link rel="modulepreload" href="./_npm/d3-scale-chromatic@3.1.0/ba24c2e7.js">
-<link rel="modulepreload" href="./_npm/d3-selection@3.0.0/4d94e5b7.js">
-<link rel="modulepreload" href="./_npm/d3-shape@3.2.0/6d3a6726.js">
-<link rel="modulepreload" href="./_npm/d3-time@3.1.0/9f03c579.js">
-<link rel="modulepreload" href="./_npm/d3-time-format@4.1.0/07c9626f.js">
-<link rel="modulepreload" href="./_npm/d3-timer@3.0.1/b58a267d.js">
-<link rel="modulepreload" href="./_npm/d3-transition@3.0.1/004da2ac.js">
-<link rel="modulepreload" href="./_npm/d3-zoom@3.0.0/b5786b3f.js">
-<link rel="modulepreload" href="./_npm/internmap@2.0.3/e08981d9.js">
-<link rel="modulepreload" href="./_npm/delaunator@5.1.0/d4ec0aa1.js">
-<link rel="modulepreload" href="./_npm/robust-predicates@3.0.3/42820bfa.js">
 <link rel="icon" href="./_file/observable.1af93621.png" type="image/png" sizes="32x32">
 <script type="module">
 
 import {define} from "./_observablehq/client.d8a38aae.js";
 import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
 
-registerFile("./data/logsheet-vs-observer-offset-per-vessel-flag.csv", {"name":"./data/logsheet-vs-observer-offset-per-vessel-flag.csv","mimeType":"text/csv","path":"./_file/data/logsheet-vs-observer-offset-per-vessel-flag.d109c172.csv","lastModified":1777343731844,"size":31802});
-registerFile("./data/longline-logsheet-activities-offset-per-vessel-flag.csv", {"name":"./data/longline-logsheet-activities-offset-per-vessel-flag.csv","mimeType":"text/csv","path":"./_file/data/longline-logsheet-activities-offset-per-vessel-flag.fa322004.csv","lastModified":1777343568194,"size":11828});
-registerFile("./data/observer-fishing-activities-offset-per-vessel-flag.csv", {"name":"./data/observer-fishing-activities-offset-per-vessel-flag.csv","mimeType":"text/csv","path":"./_file/data/observer-fishing-activities-offset-per-vessel-flag.a6d0d29a.csv","lastModified":1777343563560,"size":12807});
+registerFile("./data/ll-observer-coordinate-match.csv", {"name":"./data/ll-observer-coordinate-match.csv","mimeType":"text/csv","path":"./_file/data/ll-observer-coordinate-match.16c16d30.csv","lastModified":1778560884255,"size":323});
+registerFile("./data/ps-observer-coordinate-match.csv", {"name":"./data/ps-observer-coordinate-match.csv","mimeType":"text/csv","path":"./_file/data/ps-observer-coordinate-match.b3a7310f.csv","lastModified":1778560920604,"size":401});
 
-define({id: "eb708bad", inputs: ["FileAttachment"], outputs: ["d3","obsOffsets","llOffsets","logVsObsOffsets","obsNorm","llNorm","obsByFlag","llByFlag","commonFlags","distributionOverlap","dominantOffset","comparison","logVsObsByTypeFlag","obsByTypeFlag","TYPES","TYPE_LABEL","allLogVsObsFlags","qualityRows"], body: async (FileAttachment) => {
-const d3 = await import("./_npm/d3@7.9.0/66d82917.js");
+define({id: "6c0df926", inputs: ["FileAttachment"], outputs: ["llMatch","psMatch","psMap","allFlags","rows"], body: async (FileAttachment) => {
+const llMatch = await FileAttachment("./data/ll-observer-coordinate-match.csv").csv({typed: true});
+const psMatch = await FileAttachment("./data/ps-observer-coordinate-match.csv").csv({typed: true});
 
-const obsOffsets = await FileAttachment("./data/observer-fishing-activities-offset-per-vessel-flag.csv").csv({typed: true});
-const llOffsets  = await FileAttachment("./data/longline-logsheet-activities-offset-per-vessel-flag.csv").csv({typed: true});
-const logVsObsOffsets = await FileAttachment("./data/logsheet-vs-observer-offset-per-vessel-flag.csv").csv({typed: true});
+// Join LL and PS by vessel_flag
+const psMap = new Map(psMatch.map(d => [d.vessel_flag, d]));
+const allFlags = [...new Set([...llMatch.map(d => d.vessel_flag), ...psMatch.map(d => d.vessel_flag)])].sort();
 
-// ── Table 1 helpers ────────────────────────────────────────────────────────
-// Normalise column names — observer CSV uses "offset_bucket", logsheet CSV uses "offset"
-// Compare only LonglineLogsheet for an apples-to-apples view (both datasets cover LL well)
-const obsNorm = obsOffsets
-  .filter(d => d.type === "LonglineLogsheet")
-  .map(d => ({vessel_flag: d.vessel_flag, offset: d.offset_bucket, count: d.count}));
-const llNorm = llOffsets
-  .filter(d => d.type === "LonglineLogsheet");
-
-// Group each dataset by vessel_flag
-const obsByFlag = d3.group(obsNorm, d => d.vessel_flag);
-const llByFlag  = d3.group(llNorm,  d => d.vessel_flag);
-
-// Only compare flags present in both datasets
-const commonFlags = [...llByFlag.keys()].filter(f => obsByFlag.has(f));
-
-// For each flag compute the distribution overlap (histogram intersection):
-//   overlap = sum_offset( min(p_obs[o], p_ll[o]) )  in [0, 1]
-function distributionOverlap(rowsA, rowsB, keyA = "offset", keyB = "offset") {
-  const totalA = d3.sum(rowsA, d => d.count);
-  const totalB = d3.sum(rowsB, d => d.count);
-  if (totalA === 0 || totalB === 0) return null;
-
-  const mapA = new Map(rowsA.map(d => [d[keyA], d.count / totalA]));
-  const mapB = new Map(rowsB.map(d => [d[keyB], d.count / totalB]));
-
-  const allOffsets = new Set([...mapA.keys(), ...mapB.keys()]);
-  let overlap = 0;
-  for (const o of allOffsets) {
-    overlap += Math.min(mapA.get(o) ?? 0, mapB.get(o) ?? 0);
-  }
-  return overlap;
-}
-
-function dominantOffset(rows, key = "offset") {
-  if (!rows || rows.length === 0) return "—";
-  const top = rows.reduce((a, b) => b.count > a.count ? b : a);
-  return `${top[key] >= 0 ? "+" : ""}${top[key]}h`;
-}
-
-const comparison = commonFlags
-  .map(flag => {
-    const obs = obsByFlag.get(flag);
-    const ll  = llByFlag.get(flag);
-    return {
-      flag,
-      overlap: distributionOverlap(obs, ll),
-      obsTotal: d3.sum(obs, d => d.count),
-      llTotal:  d3.sum(ll,  d => d.count),
-      dominantObs: dominantOffset(obs),
-      dominantLL:  dominantOffset(ll),
-    };
-  })
-  .sort((a, b) => b.overlap - a.overlap);
-
-// ── Table 2 helpers ────────────────────────────────────────────────────────
-// logVsObsOffsets: (type, vessel_flag, offset_bucket, count)
-//   = logsheet local time − observer UTC time
-// obsOffsets:      (type, vessel_flag, offset_bucket, count)
-//   = observer local time − observer UTC time
-// High overlap → logsheet times are consistent with observer UTC → reliable
-// Low overlap  → logsheet times likely entered incorrectly (e.g. in UTC)
-
-const logVsObsByTypeFlag = d3.rollup(logVsObsOffsets, rows => rows, d => d.type, d => d.vessel_flag);
-const obsByTypeFlag      = d3.rollup(obsOffsets,      rows => rows, d => d.type, d => d.vessel_flag);
-
-const TYPES = ["LonglineLogsheet", "PurseseineLogsheet"];
-const TYPE_LABEL = { LonglineLogsheet: "Longline", PurseseineLogsheet: "Purseseine" };
-
-// Collect all flags present in logVsObs for any type, sort by total count desc
-const allLogVsObsFlags = [...new Set(logVsObsOffsets.map(d => d.vessel_flag))]
-  .sort((a, b) => {
-    const tot = flag => d3.sum(TYPES.flatMap(t => logVsObsByTypeFlag.get(t)?.get(flag) ?? []), d => d.count);
-    return tot(b) - tot(a);
-  });
-
-const qualityRows = allLogVsObsFlags.flatMap(flag =>
-  TYPES.flatMap(type => {
-    const logRows = logVsObsByTypeFlag.get(type)?.get(flag) ?? [];
-    const obsRows = obsByTypeFlag.get(type)?.get(flag) ?? [];
-    if (logRows.length === 0 && obsRows.length === 0) return [];
-    const overlap = distributionOverlap(logRows, obsRows, "offset_bucket", "offset_bucket");
-    return [{
-      flag,
-      type: TYPE_LABEL[type],
-      overlap,
-      logTotal: d3.sum(logRows, d => d.count),
-      obsTotal: d3.sum(obsRows, d => d.count),
-      dominantLog: dominantOffset(logRows, "offset_bucket"),
-      dominantObs: dominantOffset(obsRows, "offset_bucket"),
-    }];
-  })
-);
-return {d3,obsOffsets,llOffsets,logVsObsOffsets,obsNorm,llNorm,obsByFlag,llByFlag,commonFlags,distributionOverlap,dominantOffset,comparison,logVsObsByTypeFlag,obsByTypeFlag,TYPES,TYPE_LABEL,allLogVsObsFlags,qualityRows};
+const rows = allFlags.map(flag => {
+  const ll = llMatch.find(d => d.vessel_flag === flag) ?? null;
+  const ps = psMap.get(flag) ?? null;
+  return { flag, ll, ps };
+}).sort((a, b) => {
+  // Sort by LL match_pct ascending (worst first); fall back to PS if no LL
+  const pctA = a.ll?.match_pct ?? a.ps?.match_pct ?? 100;
+  const pctB = b.ll?.match_pct ?? b.ps?.match_pct ?? 100;
+  return pctA - pctB;
+});
+return {llMatch,psMatch,psMap,allFlags,rows};
 }});
 
-define({id: "c7280fce", inputs: ["d3","display","html","comparison"], outputs: ["fmt","pct"], body: (d3,display,html,comparison) => {
-const fmt = d3.format(",.0f");
-const pct = v => v == null ? "—" : `${(v * 100).toFixed(1)} %`;
+define({id: "763302b3", inputs: ["html","display","rows"], outputs: ["fmt","pct","bar","color"], body: (html,display,rows) => {
+const fmt = n => n == null ? "—" : n.toLocaleString();
+const pct = (v, n) => v == null ? "—" : html`<span style="font-variant-numeric:tabular-nums">${v.toFixed(1)} %</span><span style="color:#9ca3af;font-size:0.8em"> (${fmt(n)})</span>`;
+
+const bar = (v, color) =>
+  v == null ? "" : `background:linear-gradient(90deg,${color} ${v.toFixed(1)}%,transparent 0)`;
+
+const color = v => v == null ? "" : v >= 80 ? "#86efac" : v >= 60 ? "#fde68a" : "#fca5a5";
 
 display(html`<table style="width:100%;border-collapse:collapse;font-size:0.9rem">
   <thead>
     <tr style="border-bottom:2px solid #e5e7eb;text-align:left">
       <th style="padding:6px 12px">Flag</th>
-      <th style="padding:6px 12px;text-align:right">Overlap</th>
-      <th style="padding:6px 12px;text-align:right">Observer sets</th>
-      <th style="padding:6px 12px;text-align:right">Coordinate sets</th>
-      <th style="padding:6px 12px;text-align:center">Dominant observer offset</th>
-      <th style="padding:6px 12px;text-align:center">Dominant coordinate offset</th>
+      <th style="padding:6px 12px;text-align:right">Longline match (paired sets)</th>
+      <th style="padding:6px 12px;text-align:right">Purseseine match (paired sets)</th>
     </tr>
   </thead>
   <tbody>
-    ${comparison.map((row, i) => {
-      const bg = i % 2 === 0 ? "transparent" : "#f9fafb";
-      const bar = `linear-gradient(90deg,${row.overlap > 0.66 ? "#86efac" : row.overlap > 0.33 ? "#fde68a" : "#fca5a5"} ${(row.overlap*100).toFixed(1)}%,transparent 0)`;
-      return html`<tr style="background:${bg}">
-        <td style="padding:5px 12px;font-weight:600">${row.flag}</td>
-        <td style="padding:5px 12px;text-align:right;background:${bar};font-variant-numeric:tabular-nums">${pct(row.overlap)}</td>
-        <td style="padding:5px 12px;text-align:right;font-variant-numeric:tabular-nums">${fmt(row.obsTotal)}</td>
-        <td style="padding:5px 12px;text-align:right;font-variant-numeric:tabular-nums">${fmt(row.llTotal)}</td>
-        <td style="padding:5px 12px;text-align:center">${row.dominantObs}</td>
-        <td style="padding:5px 12px;text-align:center">${row.dominantLL}</td>
-      </tr>`;
-    })}
+    ${rows.map((row, i) => html`<tr style="background:${i % 2 === 0 ? "transparent" : "#f9fafb"}">
+      <td style="padding:5px 12px;font-weight:600">${row.flag}</td>
+      <td style="padding:5px 12px;text-align:right;${bar(row.ll?.match_pct, color(row.ll?.match_pct))}">${pct(row.ll?.match_pct, row.ll?.total_sets)}</td>
+      <td style="padding:5px 12px;text-align:right;${bar(row.ps?.match_pct, color(row.ps?.match_pct))}">${pct(row.ps?.match_pct, row.ps?.total_sets)}</td>
+    </tr>`)}
   </tbody>
 </table>`);
-return {fmt,pct};
-}});
-
-define({id: "da9da2d3", inputs: ["display","html","qualityRows","pct","fmt"], body: (display,html,qualityRows,pct,fmt) => {
-display(html`<table style="width:100%;border-collapse:collapse;font-size:0.9rem">
-  <thead>
-    <tr style="border-bottom:2px solid #e5e7eb;text-align:left">
-      <th style="padding:6px 12px">Flag</th>
-      <th style="padding:6px 12px">Type</th>
-      <th style="padding:6px 12px;text-align:right">Overlap</th>
-      <th style="padding:6px 12px;text-align:right">Observer sets</th>
-      <th style="padding:6px 12px;text-align:right">Logsheet sets</th>
-      <th style="padding:6px 12px;text-align:center">Dominant observer offset</th>
-      <th style="padding:6px 12px;text-align:center">Dominant logsheet offset</th>
-    </tr>
-  </thead>
-  <tbody>
-    ${qualityRows.map((row, i) => {
-      const bg = i % 2 === 0 ? "transparent" : "#f9fafb";
-      const bar = row.overlap == null
-        ? "transparent"
-        : `linear-gradient(90deg,${row.overlap > 0.66 ? "#86efac" : row.overlap > 0.33 ? "#fde68a" : "#fca5a5"} ${(row.overlap*100).toFixed(1)}%,transparent 0)`;
-      return html`<tr style="background:${bg}">
-        <td style="padding:5px 12px;font-weight:600">${row.flag}</td>
-        <td style="padding:5px 12px;color:#6b7280">${row.type}</td>
-        <td style="padding:5px 12px;text-align:right;background:${bar};font-variant-numeric:tabular-nums">${pct(row.overlap)}</td>
-        <td style="padding:5px 12px;text-align:right;font-variant-numeric:tabular-nums">${fmt(row.obsTotal)}</td>
-        <td style="padding:5px 12px;text-align:right;font-variant-numeric:tabular-nums">${fmt(row.logTotal)}</td>
-        <td style="padding:5px 12px;text-align:center">${row.dominantObs}</td>
-        <td style="padding:5px 12px;text-align:center">${row.dominantLog}</td>
-      </tr>`;
-    })}
-  </tbody>
-</table>`);
+return {fmt,pct,bar,color};
 }});
 
 </script>
@@ -241,32 +87,33 @@ display(html`<table style="width:100%;border-collapse:collapse;font-size:0.9rem"
     <li class="observablehq-link observablehq-link-active"><a href="./">Summary</a></li>
     <li class="observablehq-link"><a href="./set-time-distribution">Set time distribution</a></li>
     <li class="observablehq-link"><a href="./observer-offsets">Observer offsets by vessel flag</a></li>
-    <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity offset by vessel flag</a></li>
+    <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity IANA timezone offset by vessel flag</a></li>
+    <li class="observablehq-link"><a href="./logsheet-nautical-offsets">Logsheet activity Nautical timezone offset by vessel flag</a></li>
   </ol>
 </nav>
 <script>{const e=document.querySelector("#observablehq-sidebar"),o=document.querySelector("#observablehq-sidebar-toggle"),r=sessionStorage.getItem("observablehq-sidebar");r?o.checked=r==="true":o.indeterminate=!0;for(const t of document.querySelectorAll("#observablehq-sidebar summary")){const s=t.parentElement;switch(sessionStorage.getItem(`observablehq-sidebar:${t.textContent}`)){case"true":s.open=!0;break;case"false":s.classList.contains("observablehq-section-active")||(s.open=!1);break}}addEventListener("beforeunload",()=>sessionStorage.setItem("observablehq-sidebar-scrolly",`${e.scrollTop}`));const a=sessionStorage.getItem("observablehq-sidebar-scrolly");a!=null&&(e.style.cssText="overflow: hidden;",e.scrollTop=+a,e.style.cssText="");}</script>
 <div id="observablehq-center">
 <main id="observablehq-main" class="observablehq">
 <h1 id="logsheet-utc-analysis" tabindex="-1"><a class="observablehq-header-anchor" href="#logsheet-utc-analysis">Logsheet UTC analysis</a></h1>
-<div class="observablehq observablehq--block"><!--:eb708bad:--></div>
-<h2 id="observer-offset-vs-logsheet-coordinate-offset-longline-by-vessel-flag" tabindex="-1"><a class="observablehq-header-anchor" href="#observer-offset-vs-logsheet-coordinate-offset-longline-by-vessel-flag">Observer offset vs logsheet coordinate offset — Longline by vessel flag</a></h2>
-<p>Distribution overlap between the UTC offset measured from <strong>observer trip data</strong> (longline sets)
-and the UTC offset estimated from <strong>fishing set coordinates</strong> (geo-tz lookup),
-per vessel flag.</p>
-<p>Overlap is computed as the histogram intersection of the two normalised distributions:
-<code>overlap = Σ min(p_observer[h], p_coordinate[h])</code> — 100 % = identical distributions, 0 % = no shared offset buckets.</p>
-<div class="observablehq observablehq--block"><!--:c7280fce:--></div>
-<h2 id="logsheet-local-time-quality-by-vessel-flag-and-logsheet-type" tabindex="-1"><a class="observablehq-header-anchor" href="#logsheet-local-time-quality-by-vessel-flag-and-logsheet-type">Logsheet local time quality — by vessel flag and logsheet type</a></h2>
-<p>Distribution overlap between the <strong>observer's own UTC offset</strong> (<code>obsv_set_dtime − obsv_utc_set_dtime</code>)
-and the <strong>offset implied by the logsheet's local time</strong> (<code>log_set_dtime − obsv_utc_set_dtime</code>),
-per vessel flag and logsheet type (sets from 2017 onwards).</p>
-<p>High overlap → logsheet times are consistent with the observer UTC → times are likely <strong>correct</strong>.<br>
-Low overlap → logsheet times diverge from observer UTC → times were likely <strong>entered incorrectly</strong> (e.g. in UTC rather than local time).</p>
-<div class="observablehq observablehq--block"><!--:da9da2d3:--></div>
+<div class="observablehq observablehq--block"><!--:6c0df926:--></div>
+<h2 id="observer-offset-vs-logsheet-coordinate-offset-by-vessel-flag" tabindex="-1"><a class="observablehq-header-anchor" href="#observer-offset-vs-logsheet-coordinate-offset-by-vessel-flag">Observer offset vs logsheet coordinate offset — by vessel flag</a></h2>
+<p>For each <strong>fishing set</strong> that has both an <strong>observer trip record</strong> and a valid <strong>GPS longitude</strong>,
+the table below shows what percentage of sets have a GPS-derived UTC offset that agrees
+within ±1 h with the observer-recorded UTC offset.</p>
+<p><strong>Method (computed entirely in SQL):</strong></p>
+<ul>
+<li>Coordinate offset: <code>ROUND(lond / 15.0, 0)</code> — nautical timezone formula</li>
+<li>Observer offset: <code>ROUND(DATEDIFF(MINUTE, utc_dtime, local_dtime) / 60.0 × 2, 0) / 2</code></li>
+<li>Offsets &gt; UTC+12 (e.g. Kiribati UTC+13/+14) are folded back: +13 → −11, +14 → −10</li>
+<li>Sets are <strong>paired</strong>: only sets where both an observer record and valid coordinates exist are included</li>
+<li>Longline: one set per day, matched to observer <code>l_set</code> on the same date</li>
+<li>Purseseine: multiple sets per day, each matched to the observer daily record (<code>s_day</code>) on the same date</li>
+</ul>
+<div class="observablehq observablehq--block"><!--:763302b3:--></div>
 </main>
 <footer id="observablehq-footer">
 <nav><a rel="next" href="./set-time-distribution"><span>Set time distribution</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-12T08:54:49">May 12, 2026</a>.</div>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-12T15:41:21">May 12, 2026</a>.</div>
 </footer>
 </div>
 </body>

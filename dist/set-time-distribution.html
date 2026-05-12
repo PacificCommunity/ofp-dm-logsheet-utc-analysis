@@ -180,7 +180,8 @@ Plot.plot({
     <li class="observablehq-link"><a href="./">Summary</a></li>
     <li class="observablehq-link observablehq-link-active"><a href="./set-time-distribution">Set time distribution</a></li>
     <li class="observablehq-link"><a href="./observer-offsets">Observer offsets by vessel flag</a></li>
-    <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity offset by vessel flag</a></li>
+    <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity IANA timezone offset by vessel flag</a></li>
+    <li class="observablehq-link"><a href="./logsheet-nautical-offsets">Logsheet activity Nautical timezone offset by vessel flag</a></li>
   </ol>
 </nav>
 <script>{const e=document.querySelector("#observablehq-sidebar"),o=document.querySelector("#observablehq-sidebar-toggle"),r=sessionStorage.getItem("observablehq-sidebar");r?o.checked=r==="true":o.indeterminate=!0;for(const t of document.querySelectorAll("#observablehq-sidebar summary")){const s=t.parentElement;switch(sessionStorage.getItem(`observablehq-sidebar:${t.textContent}`)){case"true":s.open=!0;break;case"false":s.classList.contains("observablehq-section-active")||(s.open=!1);break}}addEventListener("beforeunload",()=>sessionStorage.setItem("observablehq-sidebar-scrolly",`${e.scrollTop}`));const a=sessionStorage.getItem("observablehq-sidebar-scrolly");a!=null&&(e.style.cssText="overflow: hidden;",e.scrollTop=+a,e.style.cssText="");}</script>
@@ -189,15 +190,17 @@ Plot.plot({
 <h1 id="set-time-distribution" tabindex="-1"><a class="observablehq-header-anchor" href="#set-time-distribution">Set time distribution</a></h1>
 <div class="observablehq observablehq--block"><!--:6624bf2c:--></div>
 <h2 id="longline-logsheet" tabindex="-1"><a class="observablehq-header-anchor" href="#longline-logsheet">Longline logsheet</a></h2>
-<p>Fishing set start times across <strong><observablehq-loading></observablehq-loading><!--:c715a025:--> sets</strong> (<code>log.sets_ll</code>).</p>
+<p>Fishing set start times across <strong><observablehq-loading></observablehq-loading><!--:c715a025:--> sets</strong> (<code>log.sets_ll</code> where <code>log.l_activity_id = 1</code>).</p>
+<p>This time distribution is consistent with the <a href="https://www.pirfo.org/index.php/resources/downloads/category/33-manuals?download=115:horizontal-longline-fishing-manual-for-fishermen" target="_blank" rel="noopener noreferrer">Horizontal Longline Fishing Manual for Fishermen</a>.</p>
 <div class="observablehq observablehq--block"><observablehq-loading></observablehq-loading><!--:9a30f6fe:--></div>
 <h2 id="purseseine-logsheet" tabindex="-1"><a class="observablehq-header-anchor" href="#purseseine-logsheet">Purseseine logsheet</a></h2>
-<p>Fishing set start times across <strong><observablehq-loading></observablehq-loading><!--:541e4f50:--> sets</strong> (<code>log.sets_ps</code>).</p>
+<p>Fishing set start times across <strong><observablehq-loading></observablehq-loading><!--:541e4f50:--> sets</strong> (<code>log.sets_ps</code> where <code>s_activity_id = 1</code>).</p>
+<p>This time distribution shows no trends, and is consistent with <a href="https://www.pirfo.org/index.php/resources/downloads/category/33-manuals?download=229:spc-purse-seine-observer-guide-english-vs-2021" target="_blank" rel="noopener noreferrer">Purse-seine Observer Guide</a>.</p>
 <div class="observablehq observablehq--block"><observablehq-loading></observablehq-loading><!--:789ecc51:--></div>
 </main>
 <footer id="observablehq-footer">
 <nav><a rel="prev" href="./"><span>Logsheet UTC Analysis</span></a><a rel="next" href="./observer-offsets"><span>Observer offsets by vessel flag</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-12T08:54:49">May 12, 2026</a>.</div>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-12T15:41:21">May 12, 2026</a>.</div>
 </footer>
 </div>
 </body>

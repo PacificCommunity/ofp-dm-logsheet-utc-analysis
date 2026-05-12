@@ -173,7 +173,8 @@ display(html`<div style="display:flex;gap:1.5rem;align-items:center;font-size:0.
     <li class="observablehq-link"><a href="./">Summary</a></li>
     <li class="observablehq-link"><a href="./set-time-distribution">Set time distribution</a></li>
     <li class="observablehq-link observablehq-link-active"><a href="./observer-offsets">Observer offsets by vessel flag</a></li>
-    <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity offset by vessel flag</a></li>
+    <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity IANA timezone offset by vessel flag</a></li>
+    <li class="observablehq-link"><a href="./logsheet-nautical-offsets">Logsheet activity Nautical timezone offset by vessel flag</a></li>
   </ol>
 </nav>
 <script>{const e=document.querySelector("#observablehq-sidebar"),o=document.querySelector("#observablehq-sidebar-toggle"),r=sessionStorage.getItem("observablehq-sidebar");r?o.checked=r==="true":o.indeterminate=!0;for(const t of document.querySelectorAll("#observablehq-sidebar summary")){const s=t.parentElement;switch(sessionStorage.getItem(`observablehq-sidebar:${t.textContent}`)){case"true":s.open=!0;break;case"false":s.classList.contains("observablehq-section-active")||(s.open=!1);break}}addEventListener("beforeunload",()=>sessionStorage.setItem("observablehq-sidebar-scrolly",`${e.scrollTop}`));const a=sessionStorage.getItem("observablehq-sidebar-scrolly");a!=null&&(e.style.cssText="overflow: hidden;",e.scrollTop=+a,e.style.cssText="");}</script>
@@ -192,8 +193,8 @@ Each pair of charts shows the distribution of <strong>UTC offsets</strong> deriv
 <div class="observablehq observablehq--block"><!--:d599b880:--></div>
 </main>
 <footer id="observablehq-footer">
-<nav><a rel="prev" href="./set-time-distribution"><span>Set time distribution</span></a><a rel="next" href="./logsheet-offsets"><span>Logsheet activity offset by vessel flag</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-12T08:54:49">May 12, 2026</a>.</div>
+<nav><a rel="prev" href="./set-time-distribution"><span>Set time distribution</span></a><a rel="next" href="./logsheet-offsets"><span>Logsheet activity IANA timezone offset by vessel flag</span></a></nav>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-12T15:41:21">May 12, 2026</a>.</div>
 </footer>
 </div>
 </body>
