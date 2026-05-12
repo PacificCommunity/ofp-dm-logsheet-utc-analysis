@@ -20,65 +20,59 @@ import { CONNECTION_STRING } from "./db.js";
 // Aggregate by (type, vessel_flag, 1° grid cell) to minimise geo-tz lookups.
 // latd / lond are stored as decimal(13,8).
 const SQL = `
-WITH vessel_flag AS (
-    SELECT DISTINCT
-        vi.vessel_id,
-        FIRST_VALUE(vi.flag_id) OVER (
-            PARTITION BY vi.vessel_id
-            ORDER BY vi.start_date DESC
-        ) AS flag_id
-    FROM ref.vessel_instances vi
-    WHERE vi.flag_id IS NOT NULL
-),
-all_sets AS (
-    -- Longline fishing sets (l_activity_id = 1)
-    SELECT
-        'LonglineLogsheet'         AS type,
-        vf.flag_id                 AS vessel_flag,
-        ROUND(sl.latd, 0)          AS lat_r,
-        ROUND(sl.lond, 0)          AS lon_r
-    FROM log.sets_ll sl
-    INNER JOIN log.trips_ll tl
-        ON tl.log_trip_id = sl.log_trip_id
-    INNER JOIN vessel_flag vf
-        ON vf.vessel_id = tl.vessel_id
-    WHERE sl.l_activity_id  = 1
-      AND sl.latd           IS NOT NULL
-      AND sl.lond           IS NOT NULL
-      AND sl.latd           BETWEEN -90  AND  90
-      AND sl.lond           BETWEEN -180 AND 180
-      AND tl.vessel_id      IS NOT NULL
-      AND sl.logdate        >= '2017-01-01'
+  WITH vessel_flag AS (SELECT DISTINCT vi.vessel_id,
+                                       FIRST_VALUE(vi.flag_id) OVER (
+                                         PARTITION BY vi.vessel_id
+                                         ORDER BY vi.start_date DESC
+                                         ) AS flag_id
+                       FROM ref.vessel_instances vi
+                       WHERE vi.flag_id IS NOT NULL),
+       all_sets AS (
+         -- Longline fishing sets (l_activity_id = 1)
+         SELECT 'LonglineLogsheet' AS type,
+                vf.flag_id         AS vessel_flag,
+                ROUND(sl.latd, 0)  AS lat_r,
+                ROUND(sl.lond, 0)  AS lon_r
+         FROM log.sets_ll sl
+                INNER JOIN log.trips_ll tl
+                           ON tl.log_trip_id = sl.log_trip_id
+                INNER JOIN vessel_flag vf
+                           ON vf.vessel_id = tl.vessel_id
+         WHERE sl.l_activity_id = 1
+           AND sl.latd IS NOT NULL
+           AND sl.lond IS NOT NULL
+           AND sl.latd BETWEEN -90 AND 90
+           AND sl.lond BETWEEN -180 AND 180
+           AND tl.vessel_id IS NOT NULL
+           AND sl.logdate >= '2017-01-01'
 
-    UNION ALL
+         UNION ALL
 
-    -- Purseseine fishing sets (all sets_ps with valid coordinates)
-    SELECT
-        'PurseseineLogsheet'       AS type,
-        vf.flag_id                 AS vessel_flag,
-        ROUND(sl.latd, 0)          AS lat_r,
-        ROUND(sl.lond, 0)          AS lon_r
-    FROM log.sets_ps sl
-    INNER JOIN log.trips_ps tl
-        ON tl.log_trip_id = sl.log_trip_id
-    INNER JOIN vessel_flag vf
-        ON vf.vessel_id = tl.vessel_id
-    WHERE sl.latd           IS NOT NULL
-      AND sl.lond           IS NOT NULL
-      AND sl.latd           BETWEEN -90  AND  90
-      AND sl.lond           BETWEEN -180 AND 180
-      AND tl.vessel_id      IS NOT NULL
-      AND sl.logdate        >= '2017-01-01'
-)
-SELECT
-    type,
-    vessel_flag,
-    lat_r,
-    lon_r,
-    COUNT(*) AS [count]
-FROM all_sets
-GROUP BY type, vessel_flag, lat_r, lon_r
-ORDER BY type, vessel_flag, lat_r, lon_r
+         -- Purseseine fishing sets (all sets_ps with valid coordinates)
+         SELECT 'PurseseineLogsheet' AS type,
+                vf.flag_id           AS vessel_flag,
+                ROUND(sl.latd, 0)    AS lat_r,
+                ROUND(sl.lond, 0)    AS lon_r
+         FROM log.sets_ps sl
+                INNER JOIN log.trips_ps tl
+                           ON tl.log_trip_id = sl.log_trip_id
+                INNER JOIN vessel_flag vf
+                           ON vf.vessel_id = tl.vessel_id
+         WHERE sl.s_activity_id = 1
+           AND sl.latd IS NOT NULL
+           AND sl.lond IS NOT NULL
+           AND sl.latd BETWEEN -90 AND 90
+           AND sl.lond BETWEEN -180 AND 180
+           AND tl.vessel_id IS NOT NULL
+           AND sl.logdate >= '2017-01-01')
+  SELECT type,
+         vessel_flag,
+         lat_r,
+         lon_r,
+         COUNT(*) AS [count]
+  FROM all_sets
+  GROUP BY type, vessel_flag, lat_r, lon_r
+  ORDER BY type, vessel_flag, lat_r, lon_r
 `;
 
 /**

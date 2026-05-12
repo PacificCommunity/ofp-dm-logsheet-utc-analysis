@@ -62,10 +62,6 @@ ll_raw AS (
     WHERE sl.l_activity_id    = 1
       AND sl.set_time         IS NOT NULL
       AND sl.set_time         <> ''
-      AND LEN(sl.set_time)    = 4
-      AND ISNUMERIC(sl.set_time) = 1
-      AND CAST(LEFT(sl.set_time,  2) AS INT) BETWEEN 0 AND 23
-      AND CAST(RIGHT(sl.set_time, 2) AS INT) BETWEEN 0 AND 59
       AND os.utc_set_dtime    IS NOT NULL
       AND tl.vessel_id        IS NOT NULL
       AND sl.logdate          >= '2017-01-01'
@@ -95,10 +91,6 @@ ll_raw AS (
     WHERE sl.l_activity_id    = 1
       AND sl.set_time         IS NOT NULL
       AND sl.set_time         <> ''
-      AND LEN(sl.set_time)    = 4
-      AND ISNUMERIC(sl.set_time) = 1
-      AND CAST(LEFT(sl.set_time,  2) AS INT) BETWEEN 0 AND 23
-      AND CAST(RIGHT(sl.set_time, 2) AS INT) BETWEEN 0 AND 59
       AND os.utc_set_dtime    IS NOT NULL
       AND tl.vessel_id        IS NOT NULL
       AND sl.logdate          >= '2017-01-01'
@@ -148,10 +140,6 @@ ps_raw AS (
     WHERE sl.s_activity_id  = 1
       AND sl.set_time        IS NOT NULL
       AND sl.set_time        <> ''
-      AND LEN(sl.set_time)   = 4
-      AND ISNUMERIC(sl.set_time) = 1
-      AND CAST(LEFT(sl.set_time,  2) AS INT) BETWEEN 0 AND 23
-      AND CAST(RIGHT(sl.set_time, 2) AS INT) BETWEEN 0 AND 59
       AND tl.vessel_id       IS NOT NULL
       AND sl.logdate         >= '2017-01-01'
 
@@ -180,10 +168,6 @@ ps_raw AS (
     WHERE sl.s_activity_id  = 1
       AND sl.set_time        IS NOT NULL
       AND sl.set_time        <> ''
-      AND LEN(sl.set_time)   = 4
-      AND ISNUMERIC(sl.set_time) = 1
-      AND CAST(LEFT(sl.set_time,  2) AS INT) BETWEEN 0 AND 23
-      AND CAST(RIGHT(sl.set_time, 2) AS INT) BETWEEN 0 AND 59
       AND tl.vessel_id       IS NOT NULL
       AND sl.logdate         >= '2017-01-01'
 ),

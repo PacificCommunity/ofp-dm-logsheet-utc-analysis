@@ -7,7 +7,8 @@ export default {
     {name: "Summary", path: "/"},
     {name: "Set time distribution", path: "/set-time-distribution"},
     {name: "Observer offsets by vessel flag", path: "/observer-offsets"},
-    {name: "Logsheet activity offset by vessel flag", path: "/logsheet-offsets"},
+    {name: "Logsheet activity IANA timezone offset by vessel flag", path: "/logsheet-offsets"},
+    {name: "Logsheet activity Nautical timezone offset by vessel flag", path: "/logsheet-nautical-offsets"},
   ],
 
   // Content to add to the head of the page, e.g. for a favicon:

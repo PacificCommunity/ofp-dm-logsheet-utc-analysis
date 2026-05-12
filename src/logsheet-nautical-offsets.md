@@ -1,26 +1,27 @@
 ---
 theme: air
-title: Logsheet activity IANA timezone offset by vessel flag
+title: Logsheet activity Nautical timezone offset by vessel flag
 toc: false
 ---
 
-# Logsheet activity IANA timezone offset by vessel flag
+# Logsheet activity Nautical timezone offset by vessel flag
 
-UTC offset estimated from the **geographic coordinates** of each fishing set,
-resolved via [geo-tz](https://github.com/evansiroky/timezone-boundary-builder)
-(IANA political timezone boundaries), then converted to a UTC offset (½ h resolution).
+UTC offset estimated from the **geographic coordinates** of each fishing set
+using the **nautical timezone convention** :
+
+> offset = round(longitude / 15)
+
+Each 15° longitude band = 1 hour. This reflects how a GPS device at sea would
+determine local time, absent any cellular network or land-based timezone lookup.
 
 - **Longline** — `log.sets_ll` (`l_activity_id = 1`)
 - **Purseseine** — `log.sets_ps` (`s_activity_id = 1`)
-
-Please note that in open ocean, geo-tz willl return Etc/GMT+-N zones, which will be the same 
-result as the nautical timezone.
 
 ```js
 import * as Plot from "npm:@observablehq/plot";
 import * as d3 from "npm:d3";
 
-const raw = await FileAttachment("data/longline-logsheet-activities-offset-per-vessel-flag.csv").csv({typed: true});
+const raw = await FileAttachment("data/longline-logsheet-activities-nautical-offset-per-vessel-flag.csv").csv({typed: true});
 
 const TYPES = ["LonglineLogsheet", "PurseseineLogsheet"];
 const TYPE_LABEL = {LonglineLogsheet: "Longline", PurseseineLogsheet: "Purseseine"};
