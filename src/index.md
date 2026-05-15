@@ -24,22 +24,12 @@ const coordRows = allFlags1.map(flag => ({
   return pctA - pctB;
 });
 
-// ── Table 2: Logsheet set_time offset vs observer offset ──────────────────
+// ── Table 2: Logsheet set_time offset vs observer offset (Longline only) ────
+// NOTE: Purseseine is excluded — obsv.s_daylog.utc_act_dtime is NULL for 83%
+// of fishing rows, making per-set UTC comparison unreliable for PS.
 const llTimeMatch = await FileAttachment("data/ll-logsheet-time-quality.csv").csv({typed: true});
-const psTimeMatch = await FileAttachment("data/ps-logsheet-time-quality.csv").csv({typed: true});
 
-const psMap2 = new Map(psTimeMatch.map(d => [d.vessel_flag, d]));
-const allFlags2 = [...new Set([...llTimeMatch.map(d => d.vessel_flag), ...psTimeMatch.map(d => d.vessel_flag)])].sort();
-
-const timeRows = allFlags2.map(flag => ({
-  flag,
-  ll: llTimeMatch.find(d => d.vessel_flag === flag) ?? null,
-  ps: psMap2.get(flag) ?? null,
-})).sort((a, b) => {
-  const pctA = a.ll?.match_pct ?? a.ps?.match_pct ?? 100;
-  const pctB = b.ll?.match_pct ?? b.ps?.match_pct ?? 100;
-  return pctA - pctB;
-});
+const timeRows = [...llTimeMatch].sort((a, b) => a.match_pct - b.match_pct);
 ```
 
 ## Observer offset vs logsheet coordinate offset — by vessel flag
@@ -83,20 +73,21 @@ display(html`<table style="width:100%;border-collapse:collapse;font-size:0.9rem"
 </table>`);
 ```
 
-## Logsheet set time vs Observer set time — by vessel flag
+## Logsheet set time vs Observer set time — Longline only
 
-For each **fishing set** that has a matching **observer trip set**,
-The table below shows the percentage of matching, between the observer set time utc offset, 
-and the logsheet set time utc offset calculated from the difference between the observer utc time and the logsheet timestamp.  
-It's possible that the observer and the captain entered the set time not exactly at the same time, so there is a tolerance of 2h.  
-However a difference of more than 2h is likely a data quality issue. If the calculated offset is 0, then it's  
-the sign that the logsheet set time was entered entered in UTC.
+For each **longline fishing set** that has a matching **observer trip set**,
+the table below shows the percentage of sets where the logsheet set time
+agrees with the observer-recorded UTC offset.
+
+> **Note — Purseseine excluded**: The PS observer database stores UTC timestamps only
+> at the daily level (`s_day.utc_start_dtime`). Per-set UTC times (`s_daylog.utc_act_dtime`)
+> are NULL for 83 % of fishing rows, making this comparison unreliable for PS.
 
 **Method:**
 - Logsheet datetime: `logdate + set_time` (combining date and HHMM time columns)
 - Logsheet offset: `DATEDIFF(MINUTE, utc_set_dtime, logsheet_dt) / 60` — how far is the logsheet timestamp from observer UTC?
 - Observer offset: `DATEDIFF(MINUTE, utc_set_dtime, set_dtime) / 60`
-- Match if `ABS(logsheet_offset − observer_offset_normalised) ≤ 2`
+- Match if `ABS(logsheet_offset − observer_offset_normalised) ≤ 1`
 - Offsets > UTC+12 are folded back across the dateline (+13 → −11, +14 → −10)
 
 
@@ -106,14 +97,12 @@ display(html`<table style="width:100%;border-collapse:collapse;font-size:0.9rem"
     <tr style="border-bottom:2px solid #e5e7eb;text-align:left">
       <th style="padding:6px 12px">Flag</th>
       <th style="padding:6px 12px;text-align:right">Longline match (paired sets)</th>
-      <th style="padding:6px 12px;text-align:right">Purseseine match (paired sets)</th>
     </tr>
   </thead>
   <tbody>
     ${timeRows.map((row, i) => html`<tr style="background:${i % 2 === 0 ? "transparent" : "#f9fafb"}">
-      <td style="padding:5px 12px;font-weight:600">${row.flag}</td>
-      <td style="padding:5px 12px;text-align:right;${bar(row.ll?.match_pct, color(row.ll?.match_pct))}">${pct(row.ll?.match_pct, row.ll?.total_sets)}</td>
-      <td style="padding:5px 12px;text-align:right;${bar(row.ps?.match_pct, color(row.ps?.match_pct))}">${pct(row.ps?.match_pct, row.ps?.total_sets)}</td>
+      <td style="padding:5px 12px;font-weight:600">${row.vessel_flag}</td>
+      <td style="padding:5px 12px;text-align:right;${bar(row.match_pct, color(row.match_pct))}">${pct(row.match_pct, row.total_sets)}</td>
     </tr>`)}
   </tbody>
 </table>`);
