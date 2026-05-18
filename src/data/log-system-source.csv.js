@@ -15,7 +15,7 @@ import { csvFormat } from "d3-dsv";
 import { CONNECTION_STRING } from "./db.js";
 
 const SQL = `
-SELECT 'HandlineLogsheet'    AS entity, 'log.trips_hl' AS db_table, ISNULL(system_source, '(null)') AS system_source, COUNT(*) AS row_count FROM log.trips_hl  GROUP BY system_source
+SELECT 'HandlineLogsheet'    AS entity, 'log.t  rips_hl' AS db_table, ISNULL(system_source, '(null)') AS system_source, COUNT(*) AS row_count FROM log.trips_hl  GROUP BY system_source
 UNION ALL
 SELECT 'LonglineLogsheet'    AS entity, 'log.trips_ll' AS db_table, ISNULL(system_source, '(null)') AS system_source, COUNT(*) AS row_count FROM log.trips_ll  GROUP BY system_source
 UNION ALL
