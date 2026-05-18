@@ -41,7 +41,7 @@ total.toLocaleString()
 ))
 }});
 
-define({id: "f3927a42", inputs: ["data","display","total"], outputs: ["html","catalogue","countMap","rows","schemaColors","cell","hdr"], body: async (data,display,total) => {
+define({id: "2301b758", inputs: ["data","display","total"], outputs: ["html","catalogue","countMap","rows","schemaColors","cell","hdr"], body: async (data,display,total) => {
 const {html} = await import("./_node/htl@0.3.1/index.0caf36e7.js");
 
 // Static definition of all Date+Time field pairs per entity.
@@ -110,7 +110,8 @@ const hdr = (align = "left") =>
   `border-bottom:2px solid #ccc;background:#f7f7f7;white-space:nowrap;`;
 
 display(html`
-  <div style="display:grid;grid-template-columns:190px 70px 160px 1fr 1fr 90px;font-size:12px;border:1px solid #e0e0e0;border-radius:6px;overflow:hidden;max-width:100%;">
+  <div style="overflow-x:auto;">
+  <div style="display:grid;grid-template-columns:repeat(6,auto);font-size:12px;border:1px solid #e0e0e0;border-radius:6px;overflow:hidden;width:max-content;">
     <div style="${hdr()}">Entity</div>
     <div style="${hdr()}">Schema</div>
     <div style="${hdr()}">Base class</div>
@@ -127,6 +128,7 @@ display(html`
     ])}
     <div style="padding:5px 10px;font-weight:bold;border-top:2px solid #ccc;background:#f7f7f7;grid-column:span 5;">Total</div>
     <div style="padding:5px 10px;text-align:right;font-weight:bold;border-top:2px solid #ccc;background:#f7f7f7;">${total.toLocaleString()}</div>
+  </div>
   </div>
 `);
 return {html,catalogue,countMap,rows,schemaColors,cell,hdr};
@@ -161,11 +163,11 @@ Properties inherited from abstract base classes are included.</p>
 <p><strong><observablehq-loading></observablehq-loading><!--:5112417b:--> entities · <observablehq-loading></observablehq-loading><!--:c6ace45d:--> total records</strong></p>
 <hr>
 <h2 id="entity-catalogue" tabindex="-1"><a class="observablehq-header-anchor" href="#entity-catalogue">Entity catalogue</a></h2>
-<div class="observablehq observablehq--block"><!--:f3927a42:--></div>
+<div class="observablehq observablehq--block"><!--:2301b758:--></div>
 </main>
 <footer id="observablehq-footer">
 <nav><a rel="prev" href="./set-time-distribution"><span>Set time distribution</span></a><a rel="next" href="./observer-offsets"><span>Observer offsets by vessel flag</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-18T16:28:57">May 18, 2026</a>.</div>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-18T16:40:52">May 18, 2026</a>.</div>
 </footer>
 </div>
 </body>

@@ -89,7 +89,8 @@ const hdr = (align = "left") =>
   `border-bottom:2px solid #ccc;background:#f7f7f7;white-space:nowrap;`;
 
 display(html`
-  <div style="display:grid;grid-template-columns:190px 70px 160px 1fr 1fr 90px;font-size:12px;border:1px solid #e0e0e0;border-radius:6px;overflow:hidden;max-width:100%;">
+  <div style="overflow-x:auto;">
+  <div style="display:grid;grid-template-columns:repeat(6,auto);font-size:12px;border:1px solid #e0e0e0;border-radius:6px;overflow:hidden;width:max-content;">
     <div style="${hdr()}">Entity</div>
     <div style="${hdr()}">Schema</div>
     <div style="${hdr()}">Base class</div>
@@ -106,6 +107,7 @@ display(html`
     ])}
     <div style="padding:5px 10px;font-weight:bold;border-top:2px solid #ccc;background:#f7f7f7;grid-column:span 5;">Total</div>
     <div style="padding:5px 10px;text-align:right;font-weight:bold;border-top:2px solid #ccc;background:#f7f7f7;">${total.toLocaleString()}</div>
+  </div>
   </div>
 `);
 ```
