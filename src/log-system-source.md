@@ -102,36 +102,46 @@ const sourceTotals = [...pivot.entries()].map(([src, byEntity]) => ({
   byEntity,
 })).sort((a, b) => b.total - a.total);
 
+const cols = colEntities.length + 2; // source + entities + total
+const cellStyle = (align = "right", bold = false, muted = false, mono = false) =>
+  `padding:5px 10px;text-align:${align};font-weight:${bold?"bold":"normal"};` +
+  `color:${muted?"#bbb":"inherit"};font-family:${mono?"monospace":"inherit"};` +
+  `border-bottom:1px solid #e8e8e8;`;
+
+const headerStyle = (align = "right") =>
+  `padding:5px 10px;text-align:${align};font-weight:600;` +
+  `border-bottom:2px solid #ccc;background:#f7f7f7;font-size:11px;line-height:1.3;`;
+
 display(html`
-  <table style="border-collapse:collapse;font-size:13px;">
-    <thead>
-      <tr>
-        <th style="text-align:left;padding:4px 8px;border-bottom:2px solid #ccc;">system_source</th>
-        ${colEntities.map(e => html`<th style="padding:4px 8px;border-bottom:2px solid #ccc;text-align:right;">${e.replace("Logsheet","<br>Logsheet")}</th>`)}
-        <th style="padding:4px 8px;border-bottom:2px solid #ccc;text-align:right;font-weight:bold;">Total</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${sourceTotals.map(({ source, total, byEntity }) => html`
-        <tr>
-          <td style="padding:4px 8px;border-bottom:1px solid #eee;font-family:monospace;">${source}</td>
-          ${colEntities.map(e => html`<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right;color:${byEntity[e] ? "#333" : "#ccc"};">
-            ${byEntity[e] ? byEntity[e].toLocaleString() : "—"}
-          </td>`)}
-          <td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right;font-weight:bold;">${total.toLocaleString()}</td>
-        </tr>
-      `)}
-    </tbody>
-    <tfoot>
-      <tr>
-        <td style="padding:4px 8px;border-top:2px solid #ccc;font-weight:bold;">Total</td>
-        ${colEntities.map(e => {
-          const colTotal = data.filter(d => d.entity === e).reduce((s, d) => s + d.row_count, 0);
-          return html`<td style="padding:4px 8px;border-top:2px solid #ccc;text-align:right;font-weight:bold;">${colTotal.toLocaleString()}</td>`;
-        })}
-        <td style="padding:4px 8px;border-top:2px solid #ccc;text-align:right;font-weight:bold;">${data.reduce((s,d)=>s+d.row_count,0).toLocaleString()}</td>
-      </tr>
-    </tfoot>
-  </table>
+  <div style="
+    display:grid;
+    grid-template-columns: 160px ${colEntities.map(() => "1fr").join(" ")} 90px;
+    font-size:13px;
+    border:1px solid #e0e0e0;
+    border-radius:6px;
+    overflow:hidden;
+    width:fit-content;
+    max-width:100%;
+  ">
+    <!-- Header row -->
+    <div style="${headerStyle("left")}">system_source</div>
+    ${colEntities.map(e => html`<div style="${headerStyle()}">${e.replace("Logsheet", " L'sheet")}</div>`)}
+    <div style="${headerStyle()}">Total</div>
+
+    <!-- Data rows -->
+    ${sourceTotals.flatMap(({ source, total, byEntity }) => [
+      html`<div style="${cellStyle("left", false, false, true)}">${source}</div>`,
+      ...colEntities.map(e => html`<div style="${cellStyle("right", false, !byEntity[e])}">${byEntity[e] ? byEntity[e].toLocaleString() : "—"}</div>`),
+      html`<div style="${cellStyle("right", true)}">${total.toLocaleString()}</div>`,
+    ])}
+
+    <!-- Footer row -->
+    <div style="padding:5px 10px;font-weight:bold;border-top:2px solid #ccc;background:#f7f7f7;">Total</div>
+    ${colEntities.map(e => {
+      const colTotal = data.filter(d => d.entity === e).reduce((s, d) => s + d.row_count, 0);
+      return html`<div style="padding:5px 10px;text-align:right;font-weight:bold;border-top:2px solid #ccc;background:#f7f7f7;">${colTotal.toLocaleString()}</div>`;
+    })}
+    <div style="padding:5px 10px;text-align:right;font-weight:bold;border-top:2px solid #ccc;background:#f7f7f7;">${data.reduce((s,d)=>s+d.row_count,0).toLocaleString()}</div>
+  </div>
 `);
 ```
