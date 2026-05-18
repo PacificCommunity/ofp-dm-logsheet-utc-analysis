@@ -18,42 +18,6 @@ const total = data.reduce((s, d) => s + d.row_count, 0);
 
 ---
 
-## Record counts by entity
-
-```js
-import * as Plot from "npm:@observablehq/plot";
-
-display(Plot.plot({
-  marginLeft: 230,
-  marginRight: 90,
-  width: 750,
-  height: data.length * 26 + 40,
-  x: { label: "Records", grid: true, type: "log" },
-  y: { label: null },
-  color: { legend: true },
-  marks: [
-    Plot.barX(data, {
-      x: "row_count",
-      y: "entity",
-      fill: "schema",
-      sort: { y: "-x" },
-      tip: true,
-    }),
-    Plot.text(data, {
-      x: "row_count",
-      y: "entity",
-      text: d => d.row_count.toLocaleString(),
-      dx: 5,
-      textAnchor: "start",
-      fontSize: 11,
-      sort: { y: "-x" },
-    }),
-  ],
-}));
-```
-
----
-
 ## Entity catalogue
 
 ```js
