@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="generator" content="Observable Framework v1.13.4">
+<title>Log Schema — system_source Distribution | Logsheet UTC Analysis</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
+<link rel="preload" as="style" href="./_observablehq/theme-air,near-midnight.b050d634.css">
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
+<link rel="stylesheet" type="text/css" href="./_observablehq/theme-air,near-midnight.b050d634.css">
+<link rel="modulepreload" href="./_observablehq/client.d8a38aae.js">
+<link rel="modulepreload" href="./_observablehq/runtime.607a8173.js">
+<link rel="modulepreload" href="./_observablehq/stdlib.277aeab8.js">
+<link rel="modulepreload" href="./_node/htl@0.3.1/index.0caf36e7.js">
+<link rel="modulepreload" href="./_npm/d3-dsv@3.0.1/9cffc2bd.js">
+<link rel="icon" href="./_file/observable.1af93621.png" type="image/png" sizes="32x32">
+<script type="module">
+
+import {define} from "./_observablehq/client.d8a38aae.js";
+import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
+
+registerFile("./data/log-system-source.csv", {"name":"./data/log-system-source.csv","mimeType":"text/csv","path":"./_file/data/log-system-source.a962df0b.csv","lastModified":1779075836259,"size":1058});
+
+define({id: "52ea7c90", inputs: ["FileAttachment"], outputs: ["data","entities","allSources"], body: async (FileAttachment) => {
+const data = await FileAttachment("./data/log-system-source.csv").csv({ typed: true });
+
+const entities = [...new Set(data.map(d => d.entity))];
+const allSources = [...new Set(data.map(d => d.system_source))].sort();
+return {data,entities,allSources};
+}});
+
+define({id: "8697f651", inputs: ["entities","data","display","html"], outputs: ["Plot"], body: async (entities,data,display,html) => {
+const Plot = await import("@observablehq/plot");
+
+// One bar chart per entity
+for (const entity of entities) {
+  const rows = data.filter(d => d.entity === entity);
+  const total = rows.reduce((s, d) => s + d.row_count, 0);
+
+  display(html`<h3>${entity} <small style="font-weight:normal;color:#666;">(${total.toLocaleString()} records)</small></h3>`);
+
+  display(Plot.plot({
+    marginLeft: 120,
+    marginRight: 80,
+    width: 700,
+    height: Math.max(60, rows.length * 32 + 30),
+    x: { label: "Records", grid: true },
+    y: { label: null },
+    marks: [
+      Plot.barX(rows, {
+        x: "row_count",
+        y: "system_source",
+        sort: { y: "-x" },
+        fill: "steelblue",
+        tip: true,
+      }),
+      Plot.text(rows, {
+        x: "row_count",
+        y: "system_source",
+        text: d => d.row_count.toLocaleString(),
+        dx: 5,
+        textAnchor: "start",
+        fontSize: 12,
+        sort: { y: "-x" },
+      }),
+    ],
+  }));
+}
+return {Plot};
+}});
+
+define({id: "c12bca1e", inputs: ["entities","data","display"], outputs: ["html","colEntities","pivot","sourceTotals"], body: async (entities,data,display) => {
+const {html} = await import("./_node/htl@0.3.1/index.0caf36e7.js");
+
+const colEntities = entities;
+
+// Build pivot map: source → { entity → count }
+const pivot = new Map();
+for (const row of data) {
+  if (!pivot.has(row.system_source)) pivot.set(row.system_source, {});
+  pivot.get(row.system_source)[row.entity] = row.row_count;
+}
+
+// Sort sources by total descending
+const sourceTotals = [...pivot.entries()].map(([src, byEntity]) => ({
+  source: src,
+  total: Object.values(byEntity).reduce((s, v) => s + v, 0),
+  byEntity,
+})).sort((a, b) => b.total - a.total);
+
+display(html`
+  <table style="border-collapse:collapse;font-size:13px;">
+    <thead>
+      <tr>
+        <th style="text-align:left;padding:4px 8px;border-bottom:2px solid #ccc;">system_source</th>
+        ${colEntities.map(e => html`<th style="padding:4px 8px;border-bottom:2px solid #ccc;text-align:right;">${e.replace("Logsheet","<br>Logsheet")}</th>`)}
+        <th style="padding:4px 8px;border-bottom:2px solid #ccc;text-align:right;font-weight:bold;">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${sourceTotals.map(({ source, total, byEntity }) => html`
+        <tr>
+          <td style="padding:4px 8px;border-bottom:1px solid #eee;font-family:monospace;">${source}</td>
+          ${colEntities.map(e => html`<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right;color:${byEntity[e] ? "#333" : "#ccc"};">
+            ${byEntity[e] ? byEntity[e].toLocaleString() : "—"}
+          </td>`)}
+          <td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right;font-weight:bold;">${total.toLocaleString()}</td>
+        </tr>
+      `)}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td style="padding:4px 8px;border-top:2px solid #ccc;font-weight:bold;">Total</td>
+        ${colEntities.map(e => {
+          const colTotal = data.filter(d => d.entity === e).reduce((s, d) => s + d.row_count, 0);
+          return html`<td style="padding:4px 8px;border-top:2px solid #ccc;text-align:right;font-weight:bold;">${colTotal.toLocaleString()}</td>`;
+        })}
+        <td style="padding:4px 8px;border-top:2px solid #ccc;text-align:right;font-weight:bold;">${data.reduce((s,d)=>s+d.row_count,0).toLocaleString()}</td>
+      </tr>
+    </tfoot>
+  </table>
+`);
+return {html,colEntities,pivot,sourceTotals};
+}});
+
+</script>
+</head>
+<body>
+<input id="observablehq-sidebar-toggle" type="checkbox" title="Toggle sidebar">
+<label id="observablehq-sidebar-backdrop" for="observablehq-sidebar-toggle"></label>
+<nav id="observablehq-sidebar">
+  <ol>
+    <label id="observablehq-sidebar-close" for="observablehq-sidebar-toggle"></label>
+    <li class="observablehq-link"><a href="./">Logsheet UTC Analysis</a></li>
+  </ol>
+  <ol>
+    <li class="observablehq-link"><a href="./">Summary</a></li>
+    <li class="observablehq-link"><a href="./set-time-distribution">Set time distribution</a></li>
+    <li class="observablehq-link"><a href="./observer-offsets">Observer offsets by vessel flag</a></li>
+    <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity IANA timezone offset by vessel flag</a></li>
+    <li class="observablehq-link"><a href="./logsheet-nautical-offsets">Logsheet activity Nautical timezone offset by vessel flag</a></li>
+  </ol>
+</nav>
+<script>{const e=document.querySelector("#observablehq-sidebar"),o=document.querySelector("#observablehq-sidebar-toggle"),r=sessionStorage.getItem("observablehq-sidebar");r?o.checked=r==="true":o.indeterminate=!0;for(const t of document.querySelectorAll("#observablehq-sidebar summary")){const s=t.parentElement;switch(sessionStorage.getItem(`observablehq-sidebar:${t.textContent}`)){case"true":s.open=!0;break;case"false":s.classList.contains("observablehq-section-active")||(s.open=!1);break}}addEventListener("beforeunload",()=>sessionStorage.setItem("observablehq-sidebar-scrolly",`${e.scrollTop}`));const a=sessionStorage.getItem("observablehq-sidebar-scrolly");a!=null&&(e.style.cssText="overflow: hidden;",e.scrollTop=+a,e.style.cssText="");}</script>
+<div id="observablehq-center">
+<aside id="observablehq-toc" data-selector="h1:not(:first-of-type)[id], h2:first-child[id], :not(h1) + h2[id]">
+<nav>
+<div>Contents</div>
+<ol>
+<li class="observablehq-secondary-link"><a href="#entities-with-system-source">Entities with system_source</a></li>
+<li class="observablehq-secondary-link"><a href="#entities-without-system-source-child-tables">Entities without system_source (child tables)</a></li>
+<li class="observablehq-secondary-link"><a href="#per-entity-breakdown">Per-entity breakdown</a></li>
+<li class="observablehq-secondary-link"><a href="#cross-entity-pivot">Cross-entity pivot</a></li>
+</ol>
+</nav>
+</aside>
+<main id="observablehq-main" class="observablehq">
+<h1 id="log-schema-system-source-distribution" tabindex="-1"><a class="observablehq-header-anchor" href="#log-schema-system-source-distribution">Log Schema — system_source Distribution</a></h1>
+<p>The <code>log</code> schema contains <strong>25 entities</strong> (6 logsheet tables + 19 activity/catch child tables).
+Only the <strong>6 logsheet (trip-level)</strong> tables carry a <code>system_source</code> column.
+Activity and catch tables do not — they inherit context from their parent logsheet.</p>
+<h2 id="entities-with-system-source" tabindex="-1"><a class="observablehq-header-anchor" href="#entities-with-system-source">Entities with system_source</a></h2>
+<table>
+<thead>
+<tr>
+<th>Entity</th>
+<th>Table</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HandlineLogsheet</td>
+<td>log.trips_hl</td>
+<td>Trip</td>
+</tr>
+<tr>
+<td>LonglineLogsheet</td>
+<td>log.trips_ll</td>
+<td>Trip</td>
+</tr>
+<tr>
+<td>PoleAndLineLogsheet</td>
+<td>log.trips_pl</td>
+<td>Trip</td>
+</tr>
+<tr>
+<td>PurseseineLogsheet</td>
+<td>log.trips_ps</td>
+<td>Trip</td>
+</tr>
+<tr>
+<td>SnapperLogsheet</td>
+<td>log.trips_ds</td>
+<td>Trip</td>
+</tr>
+<tr>
+<td>VietnamLogsheet</td>
+<td>log.trips_vn</td>
+<td>Trip</td>
+</tr>
+</tbody>
+</table>
+<h2 id="entities-without-system-source-child-tables" tabindex="-1"><a class="observablehq-header-anchor" href="#entities-without-system-source-child-tables">Entities without system_source (child tables)</a></h2>
+<p>HandlineActivity, HandlineCatch, LonglineActivity, LonglineCatch,
+PoleAndLineActivity, PoleAndLineCatch, PurseseineActivity, PurseseineCatch,
+SnapperActivity, SnapperCatch, VietnamActivity, VietnamCatch,
+Encirclement, WellTransfer, NetShareReceive, NetShareReceiveDetail,
+NetShareCatch, TransshipmentTransfer, Transshipment</p>
+<hr>
+<div class="observablehq observablehq--block"><!--:52ea7c90:--></div>
+<h2 id="per-entity-breakdown" tabindex="-1"><a class="observablehq-header-anchor" href="#per-entity-breakdown">Per-entity breakdown</a></h2>
+<div class="observablehq observablehq--block"><!--:8697f651:--></div>
+<h2 id="cross-entity-pivot" tabindex="-1"><a class="observablehq-header-anchor" href="#cross-entity-pivot">Cross-entity pivot</a></h2>
+<p>Rows = system_source values, Columns = entities. Blank = source not present in that entity.</p>
+<div class="observablehq observablehq--block"><!--:c12bca1e:--></div>
+</main>
+<footer id="observablehq-footer">
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-18T14:43:55">May 18, 2026</a>.</div>
+</footer>
+</div>
+</body>
+</html>

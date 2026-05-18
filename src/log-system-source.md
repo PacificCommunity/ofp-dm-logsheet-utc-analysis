@@ -1,5 +1,7 @@
 ---
+theme: air
 title: Log Schema — system_source Distribution
+toc: false
 ---
 
 # Log Schema — system_source Distribution
@@ -39,7 +41,7 @@ const allSources = [...new Set(data.map(d => d.system_source))].sort();
 ## Per-entity breakdown
 
 ```js
-import * as Plot from "@observablehq/plot";
+import * as Plot from "npm:@observablehq/plot";
 
 // One bar chart per entity
 for (const entity of entities) {
