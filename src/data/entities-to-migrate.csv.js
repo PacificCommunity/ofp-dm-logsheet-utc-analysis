@@ -22,8 +22,6 @@ UNION ALL
 SELECT 'PurseseineLogsheet', 'log', 'log.trips_ps', COUNT(*) FROM log.trips_ps
 UNION ALL
 SELECT 'SnapperLogsheet',    'log', 'log.trips_ds', COUNT(*) FROM log.trips_ds
-UNION ALL
-SELECT 'VietnamLogsheet',    'log', 'log.trips_vn', COUNT(*) FROM log.trips_vn
 
 -- ActivityDomainBase subclasses (log schema)
 UNION ALL
@@ -36,8 +34,6 @@ UNION ALL
 SELECT 'PurseseineActivity',  'log', 'log.sets_ps', COUNT(*) FROM log.sets_ps
 UNION ALL
 SELECT 'SnapperActivity',     'log', 'log.sets_ds', COUNT(*) FROM log.sets_ds
-UNION ALL
-SELECT 'VietnamActivity',     'log', 'log.sets_vn', COUNT(*) FROM log.sets_vn
 
 -- ObserverDaylogBase subclasses (obsv schema)
 UNION ALL
@@ -68,10 +64,6 @@ UNION ALL
 SELECT 'NetShareReceive', 'log', 'log.net_share_receives', COUNT(*) FROM log.net_share_receives
 UNION ALL
 SELECT 'Transshipment',   'log', 'log.transshipments',     COUNT(*) FROM log.transshipments
-
--- Unloading
-UNION ALL
-SELECT 'Unloading', 'unload2', 'unload2.unloadings', COUNT(*) FROM unload2.unloadings
 
 -- Tagging
 UNION ALL

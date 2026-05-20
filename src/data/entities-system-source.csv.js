@@ -22,8 +22,6 @@ SELECT 'PurseseineLogsheet'         AS entity, 'log'      AS [schema], ISNULL(sy
 UNION ALL
 SELECT 'SnapperLogsheet'            AS entity, 'log'      AS [schema], ISNULL(system_source,'(null)') AS system_source, COUNT(*) AS row_count FROM log.trips_ds              GROUP BY system_source
 UNION ALL
-SELECT 'VietnamLogsheet'            AS entity, 'log'      AS [schema], ISNULL(system_source,'(null)') AS system_source, COUNT(*) AS row_count FROM log.trips_vn              GROUP BY system_source
-UNION ALL
 SELECT 'ObserverTrip'               AS entity, 'obsv'     AS [schema], ISNULL(system_source,'(null)') AS system_source, COUNT(*) AS row_count FROM obsv.trip                GROUP BY system_source
 UNION ALL
 SELECT 'CarrierObserverTrip'        AS entity, 'obsv'     AS [schema], ISNULL(system_source,'(null)') AS system_source, COUNT(*) AS row_count FROM obsv.carrier_trip         GROUP BY system_source
@@ -31,8 +29,6 @@ UNION ALL
 SELECT 'ArtisanalLogsheet'          AS entity, 'art2'     AS [schema], ISNULL(system_source,'(null)') AS system_source, COUNT(*) AS row_count FROM art2.trips               GROUP BY system_source
 UNION ALL
 SELECT 'ArtisanalFishingActivityLog' AS entity,'art2'     AS [schema], ISNULL(system_source,'(null)') AS system_source, COUNT(*) AS row_count FROM art2.fishing_activity_log GROUP BY system_source
-UNION ALL
-SELECT 'Unloading'                  AS entity, 'unload2'  AS [schema], ISNULL(system_source,'(null)') AS system_source, COUNT(*) AS row_count FROM unload2.unloadings        GROUP BY system_source
 ORDER BY [schema], entity, row_count DESC
 `;
 

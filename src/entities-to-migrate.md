@@ -32,7 +32,6 @@ const catalogue = [
   { entity: "PoleAndLineLogsheet", schema: "log",     base: "LogsheetDomainBase",  dateFields: ["DepartureDate","ReturnDate","FirstLogDate","LastLogDate","ReceivedDate"], timeFields: ["DepartureTime","ReturnTime"] },
   { entity: "PurseseineLogsheet",  schema: "log",     base: "LogsheetDomainBase",  dateFields: ["DepartureDate","ReturnDate","FirstLogDate","LastLogDate","ReceivedDate"], timeFields: ["DepartureTime","ReturnTime"] },
   { entity: "SnapperLogsheet",     schema: "log",     base: "LogsheetDomainBase",  dateFields: ["DepartureDate","ReturnDate","FirstLogDate","LastLogDate","ReceivedDate"], timeFields: ["DepartureTime","ReturnTime"] },
-  { entity: "VietnamLogsheet",     schema: "log",     base: "LogsheetDomainBase",  dateFields: ["DepartureDate","ReturnDate","FirstLogDate","LastLogDate","ReceivedDate"], timeFields: ["DepartureTime","ReturnTime"] },
 
   // ── ActivityDomainBase ──────────────────────────────────────────────────────
   { entity: "HandlineActivity",    schema: "log",     base: "ActivityDomainBase",  dateFields: ["LogDate"], timeFields: ["ActivityTime"] },
@@ -40,7 +39,6 @@ const catalogue = [
   { entity: "PoleAndLineActivity", schema: "log",     base: "ActivityDomainBase",  dateFields: ["LogDate"], timeFields: ["ActivityTime"] },
   { entity: "PurseseineActivity",  schema: "log",     base: "ActivityDomainBase",  dateFields: ["LogDate"], timeFields: ["ActivityTime"] },
   { entity: "SnapperActivity",     schema: "log",     base: "ActivityDomainBase",  dateFields: ["LogDate"], timeFields: ["ActivityTime"] },
-  { entity: "VietnamActivity",     schema: "log",     base: "ActivityDomainBase",  dateFields: ["LogDate"], timeFields: ["ActivityTime"] },
 
   // ── log misc ────────────────────────────────────────────────────────────────
   { entity: "NetShareReceive", schema: "log",     base: null, dateFields: ["TransferDate"], timeFields: ["TransferTime"] },
@@ -60,9 +58,6 @@ const catalogue = [
   // ── Artisanal ───────────────────────────────────────────────────────────────
   { entity: "ArtisanalLogsheet",           schema: "art2", base: null, dateFields: ["DepartureDate","ReturnDate"], timeFields: ["DepartureTime","ReturnTime"] },
   { entity: "ArtisanalFishingActivityLog", schema: "art2", base: null, dateFields: ["ActivityDate"], timeFields: ["StartTime","EndTime"] },
-
-  // ── Unloading ────────────────────────────────────────────────────────────────
-  { entity: "Unloading", schema: "unload2", base: null, dateFields: ["FirstLogDate","LastLogDate","ReceivedDate"], timeFields: ["TranshipmentAtSeaStartTime","TranshipmentAtSeaEndTime"] },
 
   // ── Tagging ──────────────────────────────────────────────────────────────────
   { entity: "TaggingBaitCaptureSet", schema: "tagging", base: null, dateFields: ["SetDate"], timeFields: ["SetTime"] },
