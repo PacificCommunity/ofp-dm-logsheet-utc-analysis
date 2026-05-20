@@ -53,12 +53,6 @@ SELECT 'ObserverLonglineSet',                 'obsv', 'obsv.l_set',             
 UNION ALL
 SELECT 'ObserverLonglineSetCatch',            'obsv', 'obsv.l_setcatch',         COUNT(*) FROM obsv.l_setcatch
 
--- Artisanal
-UNION ALL
-SELECT 'ArtisanalLogsheet',          'art2', 'art2.trips',                COUNT(*) FROM art2.trips
-UNION ALL
-SELECT 'ArtisanalFishingActivityLog','art2', 'art2.fishing_activity_log', COUNT(*) FROM art2.fishing_activity_log
-
 -- log schema misc
 UNION ALL
 SELECT 'NetShareReceive', 'log', 'log.net_share_receives', COUNT(*) FROM log.net_share_receives

@@ -10,7 +10,7 @@
 <link rel="preload" as="style" href="./_observablehq/theme-air.d5b7fcbe.css">
 <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
 <link rel="stylesheet" type="text/css" href="./_observablehq/theme-air.d5b7fcbe.css">
-<link rel="modulepreload" href="./_observablehq/client.705ff829.js">
+<link rel="modulepreload" href="./_observablehq/client.596fd57f.js">
 <link rel="modulepreload" href="./_observablehq/runtime.607a8173.js">
 <link rel="modulepreload" href="./_observablehq/stdlib.277aeab8.js">
 <link rel="modulepreload" href="./_node/htl@0.3.1/index.0caf36e7.js">
@@ -18,11 +18,11 @@
 <link rel="icon" href="./_file/observable.1af93621.png" type="image/png" sizes="32x32">
 <script type="module">
 
-import {define} from "./_observablehq/client.705ff829.js";
+import {define} from "./_observablehq/client.596fd57f.js";
 import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
 
-registerFile("./data/entities-system-source.csv", {"name":"./data/entities-system-source.csv","mimeType":"text/csv","path":"./_file/data/entities-system-source.056350a3.csv","lastModified":1779083984493,"size":1479});
-registerFile("./data/entities-to-migrate.csv", {"name":"./data/entities-to-migrate.csv","mimeType":"text/csv","path":"./_file/data/entities-to-migrate.99085305.csv","lastModified":1779083983744,"size":1172});
+registerFile("./data/entities-system-source.csv", {"name":"./data/entities-system-source.csv","mimeType":"text/csv","path":"./_file/data/entities-system-source.c75382f5.csv","lastModified":1779244399836,"size":906});
+registerFile("./data/entities-to-migrate.csv", {"name":"./data/entities-to-migrate.csv","mimeType":"text/csv","path":"./_file/data/entities-to-migrate.b4b285e4.csv","lastModified":1779244399606,"size":943});
 
 define({id: "fa042fe0", inputs: ["FileAttachment"], outputs: ["data","total"], body: async (FileAttachment) => {
 const data = await FileAttachment("./data/entities-to-migrate.csv").csv({ typed: true });
@@ -42,7 +42,7 @@ total.toLocaleString()
 ))
 }});
 
-define({id: "2301b758", inputs: ["data","display","total"], outputs: ["html","catalogue","countMap","rows","schemaColors","cell","hdr"], body: async (data,display,total) => {
+define({id: "b269a264", inputs: ["data","display","total"], outputs: ["html","catalogue","countMap","rows","schemaColors","cell","hdr"], body: async (data,display,total) => {
 const {html} = await import("./_node/htl@0.3.1/index.0caf36e7.js");
 
 // Static definition of all Date+Time field pairs per entity.
@@ -54,7 +54,6 @@ const catalogue = [
   { entity: "PoleAndLineLogsheet", schema: "log",     base: "LogsheetDomainBase",  dateFields: ["DepartureDate","ReturnDate","FirstLogDate","LastLogDate","ReceivedDate"], timeFields: ["DepartureTime","ReturnTime"] },
   { entity: "PurseseineLogsheet",  schema: "log",     base: "LogsheetDomainBase",  dateFields: ["DepartureDate","ReturnDate","FirstLogDate","LastLogDate","ReceivedDate"], timeFields: ["DepartureTime","ReturnTime"] },
   { entity: "SnapperLogsheet",     schema: "log",     base: "LogsheetDomainBase",  dateFields: ["DepartureDate","ReturnDate","FirstLogDate","LastLogDate","ReceivedDate"], timeFields: ["DepartureTime","ReturnTime"] },
-  { entity: "VietnamLogsheet",     schema: "log",     base: "LogsheetDomainBase",  dateFields: ["DepartureDate","ReturnDate","FirstLogDate","LastLogDate","ReceivedDate"], timeFields: ["DepartureTime","ReturnTime"] },
 
   // ── ActivityDomainBase ──────────────────────────────────────────────────────
   { entity: "HandlineActivity",    schema: "log",     base: "ActivityDomainBase",  dateFields: ["LogDate"], timeFields: ["ActivityTime"] },
@@ -62,7 +61,6 @@ const catalogue = [
   { entity: "PoleAndLineActivity", schema: "log",     base: "ActivityDomainBase",  dateFields: ["LogDate"], timeFields: ["ActivityTime"] },
   { entity: "PurseseineActivity",  schema: "log",     base: "ActivityDomainBase",  dateFields: ["LogDate"], timeFields: ["ActivityTime"] },
   { entity: "SnapperActivity",     schema: "log",     base: "ActivityDomainBase",  dateFields: ["LogDate"], timeFields: ["ActivityTime"] },
-  { entity: "VietnamActivity",     schema: "log",     base: "ActivityDomainBase",  dateFields: ["LogDate"], timeFields: ["ActivityTime"] },
 
   // ── log misc ────────────────────────────────────────────────────────────────
   { entity: "NetShareReceive", schema: "log",     base: null, dateFields: ["TransferDate"], timeFields: ["TransferTime"] },
@@ -78,13 +76,6 @@ const catalogue = [
   { entity: "CarrierObserverTransshipmentActivity", schema: "obsv", base: null, dateFields: ["TransshipmentStartDate","TransshipmentEndDate"], timeFields: ["TransshipmentStartTime","TransshipmentEndTime"] },
   { entity: "ObserverLonglineSet",                  schema: "obsv", base: null, dateFields: ["LocalDate","UtcDate"], timeFields: ["LocalTime","UtcTime"] },
   { entity: "ObserverLonglineSetCatch",             schema: "obsv", base: null, dateFields: ["CatchDate"], timeFields: ["CatchTime"] },
-
-  // ── Artisanal ───────────────────────────────────────────────────────────────
-  { entity: "ArtisanalLogsheet",           schema: "art2", base: null, dateFields: ["DepartureDate","ReturnDate"], timeFields: ["DepartureTime","ReturnTime"] },
-  { entity: "ArtisanalFishingActivityLog", schema: "art2", base: null, dateFields: ["ActivityDate"], timeFields: ["StartTime","EndTime"] },
-
-  // ── Unloading ────────────────────────────────────────────────────────────────
-  { entity: "Unloading", schema: "unload2", base: null, dateFields: ["FirstLogDate","LastLogDate","ReceivedDate"], timeFields: ["TranshipmentAtSeaStartTime","TranshipmentAtSeaEndTime"] },
 
   // ── Tagging ──────────────────────────────────────────────────────────────────
   { entity: "TaggingBaitCaptureSet", schema: "tagging", base: null, dateFields: ["SetDate"], timeFields: ["SetTime"] },
@@ -221,14 +212,14 @@ Properties inherited from abstract base classes are included.</p>
 <p><strong><observablehq-loading></observablehq-loading><!--:5112417b:--> entities · <observablehq-loading></observablehq-loading><!--:c6ace45d:--> total records</strong></p>
 <hr>
 <h2 id="entity-catalogue" tabindex="-1"><a class="observablehq-header-anchor" href="#entity-catalogue">Entity catalogue</a></h2>
-<div class="observablehq observablehq--block"><!--:2301b758:--></div>
+<div class="observablehq observablehq--block"><!--:b269a264:--></div>
 <hr>
 <h2 id="records-by-system-source" tabindex="-1"><a class="observablehq-header-anchor" href="#records-by-system-source">Records by system_source</a></h2>
 <div class="observablehq observablehq--block"><!--:bbd29042:--></div>
 </main>
 <footer id="observablehq-footer">
 <nav><a rel="prev" href="./set-time-distribution"><span>Set time distribution</span></a><a rel="next" href="./observer-offsets"><span>Observer offsets by vessel flag</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-18T16:59:35">May 18, 2026</a>.</div>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-20T13:33:12">May 20, 2026</a>.</div>
 </footer>
 </div>
 </body>

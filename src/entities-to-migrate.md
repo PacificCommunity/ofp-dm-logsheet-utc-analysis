@@ -55,10 +55,6 @@ const catalogue = [
   { entity: "ObserverLonglineSet",                  schema: "obsv", base: null, dateFields: ["LocalDate","UtcDate"], timeFields: ["LocalTime","UtcTime"] },
   { entity: "ObserverLonglineSetCatch",             schema: "obsv", base: null, dateFields: ["CatchDate"], timeFields: ["CatchTime"] },
 
-  // ── Artisanal ───────────────────────────────────────────────────────────────
-  { entity: "ArtisanalLogsheet",           schema: "art2", base: null, dateFields: ["DepartureDate","ReturnDate"], timeFields: ["DepartureTime","ReturnTime"] },
-  { entity: "ArtisanalFishingActivityLog", schema: "art2", base: null, dateFields: ["ActivityDate"], timeFields: ["StartTime","EndTime"] },
-
   // ── Tagging ──────────────────────────────────────────────────────────────────
   { entity: "TaggingBaitCaptureSet", schema: "tagging", base: null, dateFields: ["SetDate"], timeFields: ["SetTime"] },
 ];
