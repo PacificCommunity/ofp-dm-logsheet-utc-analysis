@@ -10,7 +10,7 @@
  * A set is considered "matching" when the dateline-normalised observer offset
  * agrees with the coordinate offset within ±1 hour.
  *
- * Output columns: vessel_flag, total_sets, matching_sets, match_pct
+ * Output columns: vessel_flag, port_name, total_sets, matching_sets, match_pct
  */
 
 import odbc from "odbc";
@@ -53,6 +53,7 @@ LonglineLogsheetWithObserverTrip AS (
 ll_matched_sets AS (
     SELECT
         tl.vessel_id,
+        p.port_name,
         ROUND(sl.lond / 15.0, 0)                                          AS coordinate_offset,
         ROUND(
             CAST(DATEDIFF(MINUTE, os.utc_set_dtime, os.set_dtime) AS FLOAT)
@@ -61,6 +62,8 @@ ll_matched_sets AS (
     FROM log.sets_ll sl
     INNER JOIN log.trips_ll tl
         ON  tl.log_trip_id = sl.log_trip_id
+    LEFT JOIN ref.ports p
+        ON  p.port_id = tl.depart_port_id
     INNER JOIN LonglineLogsheetWithObserverTrip lot
         ON  lot.log_trip_id = tl.log_trip_id
     INNER JOIN obsv.l_set os
@@ -79,6 +82,7 @@ ll_matched_sets AS (
 ll_normalised AS (
     SELECT
         vessel_id,
+        port_name,
         coordinate_offset,
         observer_offset,
         -- Fold +13 → -11, +14 → -10 (same clock time, opposite side of dateline)
@@ -90,9 +94,10 @@ ll_normalised AS (
     WHERE ABS(observer_offset) <= 14   -- discard obviously erroneous values
 )
 
--- ── Aggregate per vessel flag ─────────────────────────────────────────────────
+-- ── Aggregate per vessel flag + departure port ────────────────────────────────
 SELECT
     vf.flag_id                                           AS vessel_flag,
+    ISNULL(ln.port_name, '(unknown)')                    AS port_name,
     COUNT(*)                                             AS total_sets,
     SUM(CASE
         WHEN ABS(ln.observer_offset_norm - ln.coordinate_offset) <= 1
@@ -106,8 +111,8 @@ SELECT
     1)                                                   AS match_pct
 FROM ll_normalised ln
 INNER JOIN vessel_flag vf ON vf.vessel_id = ln.vessel_id
-GROUP BY vf.flag_id
-ORDER BY vf.flag_id
+GROUP BY vf.flag_id, ln.port_name
+ORDER BY vf.flag_id, ln.port_name
 `;
 
 const conn = await odbc.connect(CONNECTION_STRING);
@@ -116,6 +121,7 @@ await conn.close();
 
 process.stdout.write(csvFormat(rows.map(r => ({
   vessel_flag:   String(r.vessel_flag).trim(),
+  port_name:     r.port_name ? String(r.port_name).trim() : '(unknown)',
   total_sets:    Number(r.total_sets),
   matching_sets: Number(r.matching_sets),
   match_pct:     Number(r.match_pct),
