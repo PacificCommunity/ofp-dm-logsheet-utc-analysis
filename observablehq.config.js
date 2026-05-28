@@ -10,7 +10,6 @@ export default {
     {name: "Observer offsets by vessel flag", path: "/observer-offsets"},
     {name: "Logsheet activity IANA timezone offset by vessel flag", path: "/logsheet-offsets"},
     {name: "Logsheet activity Nautical timezone offset by vessel flag", path: "/logsheet-nautical-offsets"},
-    {name: "UTC offset decision tree (flag × timezone)", path: "/offset-decision-tree"},
     {name: "Observer offset distribution by EEZ", path: "/observer-offset-per-eez"},
   ],
 
