@@ -48,7 +48,7 @@ function offsetListSection(rows, label, totalTrips) {
   const sorted = [...rows].sort((a, b) => b.count - a.count);
   const pct = n => (n / totalTrips * 100).toFixed(1);
   return html`<div style="margin-bottom:0.75rem">
-    <div style="font-weight:600;font-size:0.8rem;color:#6b7280;margin-bottom:0.3rem">${label} — ${d3.format(",")(totalTrips)} trips with observer</div>
+    <div style="font-weight:600;font-size:0.8rem;color:#6b7280;margin-bottom:0.3rem">${label} — ${d3.format(",")(totalTrips)} observer trips</div>
     <table style="width:100%;font-size:0.82rem;border-collapse:collapse">
       ${sorted.map(r => html`<tr style="border-bottom:1px solid #f3f4f6">
         <td style="padding:2px 6px 2px 0;font-family:monospace;white-space:nowrap">${r.offset_list}</td>
