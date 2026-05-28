@@ -7,6 +7,10 @@ toc: false
 # Logsheet UTC analysis
 
 ```js
+// ── Chapter 1: Trip offset count distribution per EEZ ────────────────────────
+const llCount = await FileAttachment("data/ll-trip-offset-count-per-eez.csv").csv({typed: true});
+const psCount = await FileAttachment("data/ps-trip-offset-count-per-eez.csv").csv({typed: true});
+
 // ── Table 1: GPS coordinate offset vs observer offset ─────────────────────
 const llMatch = await FileAttachment("data/ll-observer-coordinate-match.csv").csv({typed: true});
 const psMatch = await FileAttachment("data/ps-observer-coordinate-match.csv").csv({typed: true});
@@ -47,6 +51,87 @@ const coordRows = allFlags1.flatMap(flag => {
 const llTimeMatch = await FileAttachment("data/ll-logsheet-time-quality.csv").csv({typed: true});
 
 const timeRows = [...llTimeMatch].sort((a, b) => a.match_pct - b.match_pct);
+```
+
+## UTC offset stability per EEZ — how many distinct offsets per trip?
+
+For each **EEZ**, this table shows what percentage of observer-linked trips encountered
+exactly **1**, **2**, or **3+** distinct UTC offsets across all their fishing sets.
+A high "1 offset" share indicates a stable timezone; higher buckets suggest cross-timezone fishing.
+
+```js
+{
+  // Pivot per EEZ: bucket → trip_count
+  const pivot = (rows) => {
+    const byEez = d3.rollup(rows, rs => rs, d => d.eez_code);
+    return byEez;
+  };
+  const llPivot = pivot(llCount);
+  const psPivot = pivot(psCount);
+
+  // All EEZ codes sorted by LL observer trips desc, then PS
+  const llTotals = d3.rollup(llCount, rs => rs[0].observer_trips, d => d.eez_code);
+  const psTotals = d3.rollup(psCount, rs => rs[0].observer_trips, d => d.eez_code);
+  const allEezCodes = [...new Set([...llPivot.keys(), ...psPivot.keys()])]
+    .sort((a, b) => {
+      const diff = (llTotals.get(b) ?? 0) - (llTotals.get(a) ?? 0);
+      return diff !== 0 ? diff : (psTotals.get(b) ?? 0) - (psTotals.get(a) ?? 0);
+    });
+
+  const bucketColor = b => b === 1 ? "#86efac" : b === 2 ? "#fde68a" : "#fca5a5";
+  const bucketLabel = b => b === 3 ? "3+" : String(b);
+
+  const cellPct = (rows, bucket, total) => {
+    if (!rows || total === 0) return html`<td style="padding:4px 8px;text-align:right;color:#9ca3af">—</td>`;
+    const row = rows.find(r => r.offset_bucket === bucket);
+    const n = row ? row.trip_count : 0;
+    const p = n / total * 100;
+    const bg = n > 0 ? `background:linear-gradient(90deg,${bucketColor(bucket)}88 ${p.toFixed(1)}%,transparent 0)` : "";
+    return html`<td style="padding:4px 8px;text-align:right;${bg};font-variant-numeric:tabular-nums">
+      ${n > 0 ? html`${p.toFixed(1)}<span style="color:#9ca3af;font-size:0.8em"> %</span>` : html`<span style="color:#9ca3af">0</span>`}
+    </td>`;
+  };
+
+  display(html`<table style="width:100%;border-collapse:collapse;font-size:0.88rem">
+    <thead>
+      <tr style="border-bottom:2px solid #e5e7eb;text-align:left">
+        <th style="padding:5px 8px" rowspan="2">EEZ</th>
+        <th style="padding:5px 8px;text-align:center;border-bottom:1px solid #e5e7eb" colspan="4">Longline</th>
+        <th style="padding:5px 8px;text-align:center;border-bottom:1px solid #e5e7eb" colspan="4">Purseseine</th>
+      </tr>
+      <tr style="border-bottom:1px solid #e5e7eb">
+        <th style="padding:4px 8px;text-align:right;font-weight:500">1 offset</th>
+        <th style="padding:4px 8px;text-align:right;font-weight:500">2 offsets</th>
+        <th style="padding:4px 8px;text-align:right;font-weight:500">3+</th>
+        <th style="padding:4px 8px;text-align:right;font-weight:500;color:#6b7280">trips</th>
+        <th style="padding:4px 8px;text-align:right;font-weight:500">1 offset</th>
+        <th style="padding:4px 8px;text-align:right;font-weight:500">2 offsets</th>
+        <th style="padding:4px 8px;text-align:right;font-weight:500">3+</th>
+        <th style="padding:4px 8px;text-align:right;font-weight:500;color:#6b7280">trips</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${allEezCodes.map((eez, i) => {
+        const llRows = llPivot.get(eez);
+        const psRows = psPivot.get(eez);
+        const llTotal = llTotals.get(eez) ?? 0;
+        const psTotal = psTotals.get(eez) ?? 0;
+        const bg = i % 2 === 0 ? "transparent" : "#f9fafb";
+        return html`<tr style="background:${bg};border-bottom:1px solid #f3f4f6">
+          <td style="padding:4px 8px;font-weight:600">${eez}</td>
+          ${cellPct(llRows, 1, llTotal)}
+          ${cellPct(llRows, 2, llTotal)}
+          ${cellPct(llRows, 3, llTotal)}
+          <td style="padding:4px 8px;text-align:right;color:#6b7280;font-size:0.82rem">${llTotal > 0 ? d3.format(",")(llTotal) : "—"}</td>
+          ${cellPct(psRows, 1, psTotal)}
+          ${cellPct(psRows, 2, psTotal)}
+          ${cellPct(psRows, 3, psTotal)}
+          <td style="padding:4px 8px;text-align:right;color:#6b7280;font-size:0.82rem">${psTotal > 0 ? d3.format(",")(psTotal) : "—"}</td>
+        </tr>`;
+      })}
+    </tbody>
+  </table>`);
+}
 ```
 
 ## Observer offset vs logsheet coordinate offset — by vessel flag and departure port
