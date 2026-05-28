@@ -17,6 +17,22 @@ import { html } from "npm:htl";
 export const allOffsets = d3.range(-14, 14.5, 0.5);
 export const PLOT_H = 155;
 
+export const TYPES = ["LonglineLogsheet", "PurseseineLogsheet"];
+export const TYPE_LABEL = { LonglineLogsheet: "Longline", PurseseineLogsheet: "Purseseine" };
+
+/**
+ * Groups raw CSV rows (with `vessel_flag` and `type` columns) into a nested
+ * rollup and returns sorted flag list (descending total count).
+ */
+export function groupByFlagType(raw) {
+  const byFlagType = d3.rollup(raw, rows => rows, d => d.vessel_flag, d => d.type);
+  const allFlags = [...byFlagType.keys()].sort((a, b) => {
+    const tot = f => d3.sum(TYPES.flatMap(t => byFlagType.get(f)?.get(t) ?? []), d => d.count);
+    return tot(b) - tot(a);
+  });
+  return { byFlagType, allFlags };
+}
+
 /** Blue (negative) / Red (zero) / Orange (positive) colour scale. */
 export function offsetColor(offset) {
   if (offset === 0) return "#ef4444";

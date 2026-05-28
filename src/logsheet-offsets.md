@@ -18,20 +18,10 @@ result as the nautical timezone.
 
 ```js
 import * as d3 from "npm:d3";
-import { miniPlot, offsetColorKey, offsetGrid, offsetCard } from "./components/offset-charts.js";
+import { miniPlot, offsetColorKey, offsetGrid, offsetCard, groupByFlagType, TYPE_LABEL } from "./components/offset-charts.js";
 
 const raw = await FileAttachment("data/longline-logsheet-activities-offset-per-vessel-flag.csv").csv({typed: true});
-
-const TYPES = ["LonglineLogsheet", "PurseseineLogsheet"];
-const TYPE_LABEL = {LonglineLogsheet: "Longline", PurseseineLogsheet: "Purseseine"};
-
-const byFlagType = d3.rollup(raw, rows => rows, d => d.vessel_flag, d => d.type);
-const allFlags   = [...byFlagType.keys()]
-  .sort((a, b) => {
-    const tot = f => d3.sum(TYPES.flatMap(t => byFlagType.get(f)?.get(t) ?? []), d => d.count);
-    return tot(b) - tot(a);
-  });
-
+const { byFlagType, allFlags } = groupByFlagType(raw);
 const plotW = Math.max(200, Math.floor((width - 80) / 2));
 ```
 
