@@ -6,6 +6,7 @@
  *   PLOT_H         — standard chart height (px)
  *   offsetColor    — colour scale for an offset value
  *   miniPlot       — bar chart of offset % distribution
+ *   rankedList     — label|bar|%|count distribution table
  *   offsetColorKey — colour legend HTML element
  *   offsetGrid     — card grid HTML element
  */
@@ -31,6 +32,55 @@ export function groupByFlagType(raw) {
     return tot(b) - tot(a);
   });
   return { byFlagType, allFlags };
+}
+
+/**
+ * Ranked distribution list — label | bar | % | count.
+ *
+ * @param {object[]} rows
+ * @param {object}   opts
+ * @param {string}   opts.labelKey       - field name for the label column
+ * @param {string}   opts.countKey       - field name for the count
+ * @param {string}   [opts.title]        - section heading
+ * @param {string}   [opts.subtitle]     - shown after " — " in heading
+ * @param {number}   [opts.total]        - % denominator; defaults to sum of counts
+ * @param {string}   [opts.barColor]     - bar fill colour (default "#bfdbfe")
+ * @param {string}   [opts.noDataText]   - shown when rows is null/empty
+ * @param {function} [opts.labelFormat]  - formatter for label values (default String)
+ */
+export function rankedList(rows, {
+  labelKey,
+  countKey,
+  title,
+  subtitle,
+  total,
+  barColor = "#bfdbfe",
+  noDataText,
+  labelFormat = String,
+} = {}) {
+  if (!rows || rows.length === 0) {
+    const msg = noDataText ?? (title ? `No ${title.toLowerCase()} data` : "No data");
+    return html`<div style="color:#9ca3af;font-size:0.85rem;padding:0.5rem 0">${msg}</div>`;
+  }
+  const sorted = [...rows].sort((a, b) => b[countKey] - a[countKey]);
+  const denominator = total ?? d3.sum(sorted, d => d[countKey]);
+  const maxCount = sorted[0][countKey];
+  const heading = title
+    ? html`<div style="font-weight:600;font-size:0.8rem;color:#6b7280;margin-bottom:0.3rem">${title}${subtitle ? html` — ${subtitle}` : ""}</div>`
+    : "";
+  return html`<div style="margin-bottom:0.75rem">
+    ${heading}
+    <table style="width:100%;font-size:0.82rem;border-collapse:collapse">
+      ${sorted.map(r => html`<tr style="border-bottom:1px solid #f3f4f6">
+        <td style="padding:2px 6px 2px 0;font-family:monospace;white-space:nowrap">${labelFormat(r[labelKey])}</td>
+        <td style="padding:2px 6px;width:100%">
+          <div style="background:${barColor};height:10px;width:${Math.max(2, r[countKey] / maxCount * 100)}%;border-radius:2px"></div>
+        </td>
+        <td style="padding:2px 0 2px 6px;text-align:right;white-space:nowrap;color:#374151">${(r[countKey] / denominator * 100).toFixed(1)}%</td>
+        <td style="padding:2px 0 2px 8px;text-align:right;white-space:nowrap;color:#9ca3af">${d3.format(",")(r[countKey])}</td>
+      </tr>`)}
+    </table>
+  </div>`;
 }
 
 /** Blue (negative) / Red (zero) / Orange (positive) colour scale. */

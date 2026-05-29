@@ -14,7 +14,9 @@
 <link rel="modulepreload" href="./_observablehq/runtime.607a8173.js">
 <link rel="modulepreload" href="./_observablehq/stdlib.277aeab8.js">
 <link rel="modulepreload" href="./_npm/d3@7.9.0/66d82917.js">
+<link rel="modulepreload" href="./_import/components/offset-charts.aa33165e.js">
 <link rel="modulepreload" href="./_npm/htl@1.0.0/87d6f6ef.js">
+<link rel="modulepreload" href="./_npm/@observablehq/plot@0.6.17/a96a6bbb.js">
 <link rel="modulepreload" href="./_npm/d3-dsv@3.0.1/9cffc2bd.js">
 <link rel="modulepreload" href="./_npm/d3-array@3.2.4/e93ca09f.js">
 <link rel="modulepreload" href="./_npm/d3-axis@3.0.0/0f2de24d.js">
@@ -45,8 +47,11 @@
 <link rel="modulepreload" href="./_npm/d3-timer@3.0.1/b58a267d.js">
 <link rel="modulepreload" href="./_npm/d3-transition@3.0.1/004da2ac.js">
 <link rel="modulepreload" href="./_npm/d3-zoom@3.0.0/b5786b3f.js">
+<link rel="modulepreload" href="./_npm/isoformat@0.2.1/18cbf477.js">
+<link rel="modulepreload" href="./_npm/interval-tree-1d@1.0.4/53fe8176.js">
 <link rel="modulepreload" href="./_npm/internmap@2.0.3/e08981d9.js">
 <link rel="modulepreload" href="./_npm/delaunator@5.1.0/d4ec0aa1.js">
+<link rel="modulepreload" href="./_npm/binary-search-bounds@2.0.5/cbf6ba23.js">
 <link rel="modulepreload" href="./_npm/robust-predicates@3.0.3/42820bfa.js">
 <link rel="icon" href="./_file/observable.1af93621.png" type="image/png" sizes="32x32">
 <script type="module">
@@ -57,47 +62,18 @@ import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
 registerFile("./data/ll-eez-list-per-trip.csv", {"name":"./data/ll-eez-list-per-trip.csv","mimeType":"text/csv","path":"./_file/data/ll-eez-list-per-trip.c360cc7c.csv","lastModified":1780015130232,"size":14206});
 registerFile("./data/ps-eez-list-per-trip.csv", {"name":"./data/ps-eez-list-per-trip.csv","mimeType":"text/csv","path":"./_file/data/ps-eez-list-per-trip.252ce9d1.csv","lastModified":1780015131715,"size":29852});
 
-define({id: "fccecbb0", inputs: ["FileAttachment","html","d3"], outputs: ["llEezList","psEezList","eezListSection"], body: async (FileAttachment,html,d3) => {
+define({id: "93ed646d", inputs: ["FileAttachment"], outputs: ["d3","rankedList","llEezList","psEezList"], body: async (FileAttachment) => {
+const [d3, {rankedList}] = await Promise.all([import("./_npm/d3@7.9.0/66d82917.js"), import("./_import/components/offset-charts.aa33165e.js")]);
+
 const llEezList = await FileAttachment("./data/ll-eez-list-per-trip.csv").csv({typed: true});
 const psEezList = await FileAttachment("./data/ps-eez-list-per-trip.csv").csv({typed: true});
-
-function eezListSection(rows, label) {
-  const total = rows[0]?.total_trips ?? 0;
-  const pct = n => (n / total * 100).toFixed(1);
-  const maxCount = rows[0]?.trip_count ?? 1;
-  return html`<div style="flex:1;min-width:280px">
-    <div style="font-weight:600;font-size:0.9rem;color:#374151;margin-bottom:0.5rem">
-      ${label} — ${d3.format(",")(total)} trips
-    </div>
-    <table style="width:100%;font-size:0.83rem;border-collapse:collapse">
-      <thead>
-        <tr style="border-bottom:2px solid #e5e7eb;text-align:left">
-          <th style="padding:4px 6px 4px 0;font-weight:500;color:#6b7280">EEZ list</th>
-          <th style="padding:4px 6px"></th>
-          <th style="padding:4px 0 4px 6px;text-align:right;font-weight:500;color:#6b7280">%</th>
-          <th style="padding:4px 0 4px 8px;text-align:right;font-weight:500;color:#6b7280">trips</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${rows.map(r => html`<tr style="border-bottom:1px solid #f3f4f6">
-          <td style="padding:3px 6px 3px 0;font-family:monospace;white-space:nowrap">${r.eez_list}</td>
-          <td style="padding:3px 6px;width:100%">
-            <div style="background:#bfdbfe;height:10px;width:${Math.max(2, r.trip_count / maxCount * 100)}%;border-radius:2px"></div>
-          </td>
-          <td style="padding:3px 0 3px 6px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums">${pct(r.trip_count)}%</td>
-          <td style="padding:3px 0 3px 8px;text-align:right;white-space:nowrap;color:#9ca3af">${d3.format(",")(r.trip_count)}</td>
-        </tr>`)}
-      </tbody>
-    </table>
-  </div>`;
-}
-return {llEezList,psEezList,eezListSection};
+return {d3,rankedList,llEezList,psEezList};
 }});
 
-define({id: "ed8a5ac1", inputs: ["display","html","eezListSection","llEezList","psEezList"], body: (display,html,eezListSection,llEezList,psEezList) => {
+define({id: "2a2bacd0", inputs: ["display","html","rankedList","llEezList","d3","psEezList"], body: (display,html,rankedList,llEezList,d3,psEezList) => {
 display(html`<div style="display:flex;gap:2.5rem;flex-wrap:wrap;align-items:flex-start">
-  ${eezListSection(llEezList, "Longline")}
-  ${eezListSection(psEezList, "Purseseine")}
+  <div style="flex:1;min-width:280px">${rankedList(llEezList, { labelKey: "eez_list", countKey: "trip_count", title: "Longline",    subtitle: `${d3.format(",")(llEezList[0]?.total_trips ?? 0)} trips`, total: llEezList[0]?.total_trips })}</div>
+  <div style="flex:1;min-width:280px">${rankedList(psEezList, { labelKey: "eez_list", countKey: "trip_count", title: "Purseseine", subtitle: `${d3.format(",")(psEezList[0]?.total_trips ?? 0)} trips`, total: psEezList[0]?.total_trips })}</div>
 </div>`);
 }});
 
@@ -127,20 +103,19 @@ display(html`<div style="display:flex;gap:2.5rem;flex-wrap:wrap;align-items:flex
 <main id="observablehq-main" class="observablehq">
 <h1 id="eez-combinations-fished-per-trip" tabindex="-1"><a class="observablehq-header-anchor" href="#eez-combinations-fished-per-trip">EEZ combinations fished per trip</a></h1>
 <p>For each <strong>trip</strong> with at least one set with a known EEZ code (since 2017), shows the
-distribution of unique sorted EEZ combinations — how many trips fished exclusively in
-one EEZ, how many spanned two or more, and which multi-EEZ combinations are most common.</p>
+distribution of unique sorted EEZ combinations.</p>
 <ul>
 <li><strong>Longline</strong> — sets from <code>log.sets_ll</code> (<code>l_activity_id = 1</code>)</li>
 <li><strong>Purseseine</strong> — sets from <code>log.sets_ps</code> (<code>s_activity_id = 1</code>)</li>
 <li>EEZ codes are sorted alphabetically within each combination</li>
-<li>Covers <strong>all trips</strong> (not just observer-linked); sets with <code>eez_code IS NULL</code> are excluded</li>
+<li>Covers all longline and purseseine logsheets.</li>
 </ul>
-<div class="observablehq observablehq--block"><!--:fccecbb0:--></div>
-<div class="observablehq observablehq--block"><!--:ed8a5ac1:--></div>
+<div class="observablehq observablehq--block"><!--:93ed646d:--></div>
+<div class="observablehq observablehq--block"><!--:2a2bacd0:--></div>
 </main>
 <footer id="observablehq-footer">
 <nav><a rel="prev" href="./observer-offset-per-eez"><span>Observer offset distribution by EEZ</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-29T11:43:50">May 29, 2026</a>.</div>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-29T13:53:07">May 29, 2026</a>.</div>
 </footer>
 </div>
 </body>

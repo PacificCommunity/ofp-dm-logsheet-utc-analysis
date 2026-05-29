@@ -19,8 +19,7 @@ sorted from most to least common.
 
 ```js
 import * as d3 from "npm:d3";
-import { html } from "npm:htl";
-import { offsetGrid, offsetCard } from "./components/offset-charts.js";
+import { offsetGrid, offsetCard, rankedList } from "./components/offset-charts.js";
 
 const llRaw = await FileAttachment("data/ll-trip-offset-list-per-eez.csv").csv({typed: true});
 const psRaw = await FileAttachment("data/ps-trip-offset-list-per-eez.csv").csv({typed: true});
@@ -40,27 +39,6 @@ const allEezCodes = [...new Set([...llByEez.keys(), ...psByEez.keys()])]
     if (llB !== llA) return llB - llA;
     return (psTotals.get(b) ?? 0) - (psTotals.get(a) ?? 0);
   });
-
-function offsetListSection(rows, label, totalTrips) {
-  if (!rows || rows.length === 0) {
-    return html`<div style="color:#9ca3af;font-size:0.85rem;padding:0.5rem 0">No ${label} observer data</div>`;
-  }
-  const sorted = [...rows].sort((a, b) => b.count - a.count);
-  const pct = n => (n / totalTrips * 100).toFixed(1);
-  return html`<div style="margin-bottom:0.75rem">
-    <div style="font-weight:600;font-size:0.8rem;color:#6b7280;margin-bottom:0.3rem">${label} — ${d3.format(",")(totalTrips)} observer trips</div>
-    <table style="width:100%;font-size:0.82rem;border-collapse:collapse">
-      ${sorted.map(r => html`<tr style="border-bottom:1px solid #f3f4f6">
-        <td style="padding:2px 6px 2px 0;font-family:monospace;white-space:nowrap">${r.offset_list}</td>
-        <td style="padding:2px 6px;width:100%">
-          <div style="background:#dbeafe;height:10px;width:${Math.max(2, r.count / sorted[0].count * 100)}%;border-radius:2px"></div>
-        </td>
-        <td style="padding:2px 0 2px 6px;text-align:right;white-space:nowrap;color:#374151">${pct(r.count)}%</td>
-        <td style="padding:2px 0 2px 8px;text-align:right;white-space:nowrap;color:#9ca3af">${d3.format(",")(r.count)}</td>
-      </tr>`)}
-    </table>
-  </div>`;
-}
 ```
 
 ```js
@@ -69,8 +47,8 @@ display(offsetGrid(allEezCodes, eez => {
   const psRows = psByEez.get(eez);
   return offsetCard(
     eez,
-    offsetListSection(llRows, "Longline",    llTotals.get(eez) ?? 0),
-    offsetListSection(psRows, "Purseseine", psTotals.get(eez) ?? 0),
+    rankedList(llRows, { labelKey: "offset_list", countKey: "count", title: "Longline",    subtitle: `${d3.format(",")(llTotals.get(eez) ?? 0)} observer trips`, total: llTotals.get(eez), noDataText: "No longline observer data" }),
+    rankedList(psRows, { labelKey: "offset_list", countKey: "count", title: "Purseseine", subtitle: `${d3.format(",")(psTotals.get(eez) ?? 0)} observer trips`, total: psTotals.get(eez), noDataText: "No purseseine observer data" }),
   );
 }));
 ```

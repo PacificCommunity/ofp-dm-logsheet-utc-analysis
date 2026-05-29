@@ -14,7 +14,7 @@
 <link rel="modulepreload" href="./_observablehq/runtime.607a8173.js">
 <link rel="modulepreload" href="./_observablehq/stdlib.277aeab8.js">
 <link rel="modulepreload" href="./_npm/d3@7.9.0/66d82917.js">
-<link rel="modulepreload" href="./_import/components/offset-charts.0db7dba9.js">
+<link rel="modulepreload" href="./_import/components/offset-charts.aa33165e.js">
 <link rel="modulepreload" href="./_npm/@observablehq/plot@0.6.17/a96a6bbb.js">
 <link rel="modulepreload" href="./_npm/htl@1.0.0/87d6f6ef.js">
 <link rel="modulepreload" href="./_npm/d3-dsv@3.0.1/9cffc2bd.js">
@@ -61,28 +61,25 @@ import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
 
 registerFile("./data/longline-logsheet-activities-offset-per-vessel-flag.csv", {"name":"./data/longline-logsheet-activities-offset-per-vessel-flag.csv","mimeType":"text/csv","path":"./_file/data/longline-logsheet-activities-offset-per-vessel-flag.8f3fa63c.csv","lastModified":1780010553078,"size":9449});
 
-define({id: "ee02dc69", inputs: ["FileAttachment","width"], outputs: ["d3","miniPlot","offsetColorKey","offsetGrid","offsetCard","groupByFlagType","TYPE_LABEL","raw","byFlagType","allFlags","plotW"], body: async (FileAttachment,width) => {
-const [d3, {miniPlot, offsetColorKey, offsetGrid, offsetCard, groupByFlagType, TYPE_LABEL}] = await Promise.all([import("./_npm/d3@7.9.0/66d82917.js"), import("./_import/components/offset-charts.0db7dba9.js")]);
+define({id: "e1d75a91", inputs: ["FileAttachment"], outputs: ["d3","rankedList","offsetGrid","offsetCard","groupByFlagType","TYPE_LABEL","raw","byFlagType","allFlags"], body: async (FileAttachment) => {
+const [d3, {rankedList, offsetGrid, offsetCard, groupByFlagType, TYPE_LABEL}] = await Promise.all([import("./_npm/d3@7.9.0/66d82917.js"), import("./_import/components/offset-charts.aa33165e.js")]);
 
 const raw = await FileAttachment("./data/longline-logsheet-activities-offset-per-vessel-flag.csv").csv({typed: true});
 const { byFlagType, allFlags } = groupByFlagType(raw);
-const plotW = Math.max(200, Math.floor((width - 80) / 2));
-return {d3,miniPlot,offsetColorKey,offsetGrid,offsetCard,groupByFlagType,TYPE_LABEL,raw,byFlagType,allFlags,plotW};
+return {d3,rankedList,offsetGrid,offsetCard,groupByFlagType,TYPE_LABEL,raw,byFlagType,allFlags};
 }});
 
-define({id: "dc183265", inputs: ["display","offsetGrid","allFlags","byFlagType","offsetCard","miniPlot","TYPE_LABEL","plotW"], body: (display,offsetGrid,allFlags,byFlagType,offsetCard,miniPlot,TYPE_LABEL,plotW) => {
+define({id: "562b92dc", inputs: ["display","offsetGrid","allFlags","byFlagType","offsetCard","rankedList","TYPE_LABEL","d3"], body: (display,offsetGrid,allFlags,byFlagType,offsetCard,rankedList,TYPE_LABEL,d3) => {
 display(offsetGrid(allFlags, flag => {
   const byType = byFlagType.get(flag) ?? new Map();
+  const llRows = byType.get("LonglineLogsheet") ?? [];
+  const psRows = byType.get("PurseseineLogsheet") ?? [];
   return offsetCard(
     flag,
-    miniPlot(byType.get("LonglineLogsheet") ?? [],    { title: TYPE_LABEL.LonglineLogsheet,    plotW }),
-    miniPlot(byType.get("PurseseineLogsheet") ?? [], { title: TYPE_LABEL.PurseseineLogsheet, plotW }),
+    rankedList(llRows, { labelKey: "offset", countKey: "count", title: TYPE_LABEL.LonglineLogsheet,    subtitle: `${d3.format(",")(d3.sum(llRows, d => d.count))} sets`, labelFormat: v => `${v >= 0 ? "+" : ""}${v} h` }),
+    rankedList(psRows, { labelKey: "offset", countKey: "count", title: TYPE_LABEL.PurseseineLogsheet, subtitle: `${d3.format(",")(d3.sum(psRows, d => d.count))} sets`, labelFormat: v => `${v >= 0 ? "+" : ""}${v} h` }),
   );
 }));
-}});
-
-define({id: "72e678ec", inputs: ["display","offsetColorKey"], body: (display,offsetColorKey) => {
-display(offsetColorKey({ zero: "Zero offset — coordinate on a UTC boundary" }));
 }});
 
 </script>
@@ -119,14 +116,12 @@ resolved via <a href="https://github.com/evansiroky/timezone-boundary-builder" t
 </ul>
 <p>Please note that in open ocean, geo-tz willl return Etc/GMT+-N zones, which will be the same
 result as the nautical timezone.</p>
-<div class="observablehq observablehq--block"><!--:ee02dc69:--></div>
-<div class="observablehq observablehq--block"><!--:dc183265:--></div>
-<h3 id="colour-key" tabindex="-1"><a class="observablehq-header-anchor" href="#colour-key">Colour key</a></h3>
-<div class="observablehq observablehq--block"><!--:72e678ec:--></div>
+<div class="observablehq observablehq--block"><!--:e1d75a91:--></div>
+<div class="observablehq observablehq--block"><!--:562b92dc:--></div>
 </main>
 <footer id="observablehq-footer">
 <nav><a rel="prev" href="./observer-offsets"><span>Observer offsets by vessel flag</span></a><a rel="next" href="./logsheet-nautical-offsets"><span>Logsheet activity Nautical timezone offset by vessel flag</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-29T11:43:50">May 29, 2026</a>.</div>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-29T13:53:07">May 29, 2026</a>.</div>
 </footer>
 </div>
 </body>
