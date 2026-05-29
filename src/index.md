@@ -53,11 +53,10 @@ const llTimeMatch = await FileAttachment("data/ll-logsheet-time-quality.csv").cs
 const timeRows = [...llTimeMatch].sort((a, b) => a.match_pct - b.match_pct);
 ```
 
-## UTC offset stability per EEZ — how many distinct offsets per trip?
+## Number of offsets per trip per EEZ
 
 For each **EEZ**, this table shows what percentage of observer-linked trips encountered
 exactly **1**, **2**, or **3+** distinct UTC offsets across all their fishing sets.
-A high "1 offset" share indicates a stable timezone; higher buckets suggest cross-timezone fishing.
 
 ```js
 {

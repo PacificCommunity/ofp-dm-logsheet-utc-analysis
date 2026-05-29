@@ -7,13 +7,12 @@ toc: false
 # EEZ combinations fished per trip
 
 For each **trip** with at least one set with a known EEZ code (since 2017), shows the
-distribution of unique sorted EEZ combinations — how many trips fished exclusively in
-one EEZ, how many spanned two or more, and which multi-EEZ combinations are most common.
+distribution of unique sorted EEZ combinations.
 
 - **Longline** — sets from `log.sets_ll` (`l_activity_id = 1`)
 - **Purseseine** — sets from `log.sets_ps` (`s_activity_id = 1`)
 - EEZ codes are sorted alphabetically within each combination
-- Covers **all trips** (not just observer-linked); sets with `eez_code IS NULL` are excluded
+- Covers all longline and purseseine logsheets.
 
 ```js
 const llEezList = await FileAttachment("data/ll-eez-list-per-trip.csv").csv({typed: true});
