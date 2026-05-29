@@ -54,22 +54,16 @@
 import {define} from "./_observablehq/client.f5f986c7.js";
 import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
 
-registerFile("./data/ll-eez-list-per-trip.csv", {"name":"./data/ll-eez-list-per-trip.csv","mimeType":"text/csv","path":"./_file/data/ll-eez-list-per-trip.c360cc7c.csv","lastModified":1780015130232,"size":14206});
 registerFile("./data/ll-logsheet-time-quality.csv", {"name":"./data/ll-logsheet-time-quality.csv","mimeType":"text/csv","path":"./_file/data/ll-logsheet-time-quality.3e980dd8.csv","lastModified":1780010546146,"size":309});
 registerFile("./data/ll-observer-coordinate-match.csv", {"name":"./data/ll-observer-coordinate-match.csv","mimeType":"text/csv","path":"./_file/data/ll-observer-coordinate-match.69cd762d.csv","lastModified":1780010501411,"size":1440});
 registerFile("./data/ll-trip-offset-count-per-eez.csv", {"name":"./data/ll-trip-offset-count-per-eez.csv","mimeType":"text/csv","path":"./_file/data/ll-trip-offset-count-per-eez.10b45316.csv","lastModified":1780010423285,"size":700});
-registerFile("./data/ps-eez-list-per-trip.csv", {"name":"./data/ps-eez-list-per-trip.csv","mimeType":"text/csv","path":"./_file/data/ps-eez-list-per-trip.252ce9d1.csv","lastModified":1780015131715,"size":29852});
 registerFile("./data/ps-observer-coordinate-match.csv", {"name":"./data/ps-observer-coordinate-match.csv","mimeType":"text/csv","path":"./_file/data/ps-observer-coordinate-match.2bde3bd8.csv","lastModified":1780010538207,"size":403});
 registerFile("./data/ps-trip-offset-count-per-eez.csv", {"name":"./data/ps-trip-offset-count-per-eez.csv","mimeType":"text/csv","path":"./_file/data/ps-trip-offset-count-per-eez.3d5af9f1.csv","lastModified":1780010498818,"size":935});
 
-define({id: "ce789045", inputs: ["FileAttachment"], outputs: ["llCount","psCount","llEezList","psEezList","llMatch","psMatch","allFlags1","psMap1","llByFlag","coordRows","llTimeMatch","timeRows"], body: async (FileAttachment) => {
+define({id: "58a0f606", inputs: ["FileAttachment"], outputs: ["llCount","psCount","llMatch","psMatch","allFlags1","psMap1","llByFlag","coordRows","llTimeMatch","timeRows"], body: async (FileAttachment) => {
 // ── Chapter 1: Trip offset count distribution per EEZ ────────────────────────
 const llCount = await FileAttachment("./data/ll-trip-offset-count-per-eez.csv").csv({typed: true});
 const psCount = await FileAttachment("./data/ps-trip-offset-count-per-eez.csv").csv({typed: true});
-
-// ── Chapter 2: EEZ list distribution per trip ─────────────────────────────────
-const llEezList = await FileAttachment("./data/ll-eez-list-per-trip.csv").csv({typed: true});
-const psEezList = await FileAttachment("./data/ps-eez-list-per-trip.csv").csv({typed: true});
 
 // ── Table 1: GPS coordinate offset vs observer offset ─────────────────────
 const llMatch = await FileAttachment("./data/ll-observer-coordinate-match.csv").csv({typed: true});
@@ -111,7 +105,7 @@ const coordRows = allFlags1.flatMap(flag => {
 const llTimeMatch = await FileAttachment("./data/ll-logsheet-time-quality.csv").csv({typed: true});
 
 const timeRows = [...llTimeMatch].sort((a, b) => a.match_pct - b.match_pct);
-return {llCount,psCount,llEezList,psEezList,llMatch,psMatch,allFlags1,psMap1,llByFlag,coordRows,llTimeMatch,timeRows};
+return {llCount,psCount,llMatch,psMatch,allFlags1,psMap1,llByFlag,coordRows,llTimeMatch,timeRows};
 }});
 
 define({id: "bc5b0491", inputs: ["d3","llCount","psCount","html","display"], body: (d3,llCount,psCount,html,display) => {
@@ -189,36 +183,6 @@ define({id: "bc5b0491", inputs: ["d3","llCount","psCount","html","display"], bod
 }
 }});
 
-define({id: "c67ecbcc", inputs: ["html","d3","display","llEezList","psEezList"], body: (html,d3,display,llEezList,psEezList) => {
-{
-  function eezListSection(rows, label) {
-    const total = rows[0]?.total_trips ?? 0;
-    const pct = n => (n / total * 100).toFixed(1);
-    const maxCount = rows[0]?.trip_count ?? 1;
-    return html`<div style="flex:1;min-width:260px">
-      <div style="font-weight:600;font-size:0.85rem;color:#374151;margin-bottom:0.4rem">
-        ${label} — ${d3.format(",")(total)} trips
-      </div>
-      <table style="width:100%;font-size:0.82rem;border-collapse:collapse">
-        ${rows.map(r => html`<tr style="border-bottom:1px solid #f3f4f6">
-          <td style="padding:2px 6px 2px 0;font-family:monospace;white-space:nowrap">${r.eez_list}</td>
-          <td style="padding:2px 6px;width:100%">
-            <div style="background:#bfdbfe;height:10px;width:${Math.max(2, r.trip_count / maxCount * 100)}%;border-radius:2px"></div>
-          </td>
-          <td style="padding:2px 0 2px 6px;text-align:right;white-space:nowrap;color:#374151;font-variant-numeric:tabular-nums">${pct(r.trip_count)}%</td>
-          <td style="padding:2px 0 2px 8px;text-align:right;white-space:nowrap;color:#9ca3af">${d3.format(",")(r.trip_count)}</td>
-        </tr>`)}
-      </table>
-    </div>`;
-  }
-
-  display(html`<div style="display:flex;gap:2rem;flex-wrap:wrap;align-items:flex-start">
-    ${eezListSection(llEezList, "Longline")}
-    ${eezListSection(psEezList, "Purseseine")}
-  </div>`);
-}
-}});
-
 define({id: "b7cc6ea6", inputs: ["html","display","coordRows"], outputs: ["fmt","pct","bar","color"], body: (html,display,coordRows) => {
 const fmt = n => n == null ? "—" : n.toLocaleString();
 const pct = (v, n) => v == null ? "—" : html`<span style="font-variant-numeric:tabular-nums">${v.toFixed(1)} %</span><span style="color:#9ca3af;font-size:0.8em"> (${fmt(n)})</span>`;
@@ -293,23 +257,19 @@ display(html`<table style="width:100%;border-collapse:collapse;font-size:0.9rem"
     <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity IANA timezone offset by vessel flag</a></li>
     <li class="observablehq-link"><a href="./logsheet-nautical-offsets">Logsheet activity Nautical timezone offset by vessel flag</a></li>
     <li class="observablehq-link"><a href="./observer-offset-per-eez">Observer offset distribution by EEZ</a></li>
+    <li class="observablehq-link"><a href="./eez-list-per-trip">EEZ combinations per trip</a></li>
   </ol>
 </nav>
 <script>{const e=document.querySelector("#observablehq-sidebar"),o=document.querySelector("#observablehq-sidebar-toggle"),r=sessionStorage.getItem("observablehq-sidebar");r?o.checked=r==="true":o.indeterminate=!0;for(const t of document.querySelectorAll("#observablehq-sidebar summary")){const s=t.parentElement;switch(sessionStorage.getItem(`observablehq-sidebar:${t.textContent}`)){case"true":s.open=!0;break;case"false":s.classList.contains("observablehq-section-active")||(s.open=!1);break}}addEventListener("beforeunload",()=>sessionStorage.setItem("observablehq-sidebar-scrolly",`${e.scrollTop}`));const a=sessionStorage.getItem("observablehq-sidebar-scrolly");a!=null&&(e.style.cssText="overflow: hidden;",e.scrollTop=+a,e.style.cssText="");}</script>
 <div id="observablehq-center">
 <main id="observablehq-main" class="observablehq">
 <h1 id="logsheet-utc-analysis" tabindex="-1"><a class="observablehq-header-anchor" href="#logsheet-utc-analysis">Logsheet UTC analysis</a></h1>
-<div class="observablehq observablehq--block"><!--:ce789045:--></div>
+<div class="observablehq observablehq--block"><!--:58a0f606:--></div>
 <h2 id="utc-offset-stability-per-eez-how-many-distinct-offsets-per-trip" tabindex="-1"><a class="observablehq-header-anchor" href="#utc-offset-stability-per-eez-how-many-distinct-offsets-per-trip">UTC offset stability per EEZ — how many distinct offsets per trip?</a></h2>
 <p>For each <strong>EEZ</strong>, this table shows what percentage of observer-linked trips encountered
 exactly <strong>1</strong>, <strong>2</strong>, or <strong>3+</strong> distinct UTC offsets across all their fishing sets.
 A high "1 offset" share indicates a stable timezone; higher buckets suggest cross-timezone fishing.</p>
 <div class="observablehq observablehq--block"><!--:bc5b0491:--></div>
-<h2 id="eez-combinations-fished-per-trip" tabindex="-1"><a class="observablehq-header-anchor" href="#eez-combinations-fished-per-trip">EEZ combinations fished per trip</a></h2>
-<p>For each <strong>trip</strong> with at least one set with a known EEZ code (since 2017), the table below
-shows the distribution of unique EEZ combinations — i.e. how many trips fished exclusively
-in one EEZ, how many spanned two EEZs, etc.</p>
-<div class="observablehq observablehq--block"><!--:c67ecbcc:--></div>
 <h2 id="observer-offset-vs-logsheet-coordinate-offset-by-vessel-flag-and-departure-port" tabindex="-1"><a class="observablehq-header-anchor" href="#observer-offset-vs-logsheet-coordinate-offset-by-vessel-flag-and-departure-port">Observer offset vs logsheet coordinate offset — by vessel flag and departure port</a></h2>
 <p>For each <strong>fishing set</strong> that has both an <strong>observer trip record</strong> and a valid <strong>GPS longitude</strong>,
 the table below shows what percentage of sets have a GPS-derived UTC offset that agrees
@@ -345,7 +305,7 @@ are NULL for 83 % of fishing rows, making this comparison unreliable for PS.</p>
 </main>
 <footer id="observablehq-footer">
 <nav><a rel="next" href="./set-time-distribution"><span>Set time distribution</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-29T11:39:31">May 29, 2026</a>.</div>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-29T11:43:50">May 29, 2026</a>.</div>
 </footer>
 </div>
 </body>

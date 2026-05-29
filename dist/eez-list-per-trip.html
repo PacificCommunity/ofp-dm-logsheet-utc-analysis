@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="generator" content="Observable Framework v1.13.4">
-<title>Logsheet activity IANA timezone offset by vessel flag | Logsheet UTC Analysis</title>
+<title>EEZ combinations fished per trip | Logsheet UTC Analysis</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
 <link rel="preload" as="style" href="./_observablehq/theme-air.d5b7fcbe.css">
@@ -14,8 +14,6 @@
 <link rel="modulepreload" href="./_observablehq/runtime.607a8173.js">
 <link rel="modulepreload" href="./_observablehq/stdlib.277aeab8.js">
 <link rel="modulepreload" href="./_npm/d3@7.9.0/66d82917.js">
-<link rel="modulepreload" href="./_import/components/offset-charts.0db7dba9.js">
-<link rel="modulepreload" href="./_npm/@observablehq/plot@0.6.17/a96a6bbb.js">
 <link rel="modulepreload" href="./_npm/htl@1.0.0/87d6f6ef.js">
 <link rel="modulepreload" href="./_npm/d3-dsv@3.0.1/9cffc2bd.js">
 <link rel="modulepreload" href="./_npm/d3-array@3.2.4/e93ca09f.js">
@@ -47,11 +45,8 @@
 <link rel="modulepreload" href="./_npm/d3-timer@3.0.1/b58a267d.js">
 <link rel="modulepreload" href="./_npm/d3-transition@3.0.1/004da2ac.js">
 <link rel="modulepreload" href="./_npm/d3-zoom@3.0.0/b5786b3f.js">
-<link rel="modulepreload" href="./_npm/isoformat@0.2.1/18cbf477.js">
-<link rel="modulepreload" href="./_npm/interval-tree-1d@1.0.4/53fe8176.js">
 <link rel="modulepreload" href="./_npm/internmap@2.0.3/e08981d9.js">
 <link rel="modulepreload" href="./_npm/delaunator@5.1.0/d4ec0aa1.js">
-<link rel="modulepreload" href="./_npm/binary-search-bounds@2.0.5/cbf6ba23.js">
 <link rel="modulepreload" href="./_npm/robust-predicates@3.0.3/42820bfa.js">
 <link rel="icon" href="./_file/observable.1af93621.png" type="image/png" sizes="32x32">
 <script type="module">
@@ -59,30 +54,51 @@
 import {define} from "./_observablehq/client.f5f986c7.js";
 import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
 
-registerFile("./data/longline-logsheet-activities-offset-per-vessel-flag.csv", {"name":"./data/longline-logsheet-activities-offset-per-vessel-flag.csv","mimeType":"text/csv","path":"./_file/data/longline-logsheet-activities-offset-per-vessel-flag.8f3fa63c.csv","lastModified":1780010553078,"size":9449});
+registerFile("./data/ll-eez-list-per-trip.csv", {"name":"./data/ll-eez-list-per-trip.csv","mimeType":"text/csv","path":"./_file/data/ll-eez-list-per-trip.c360cc7c.csv","lastModified":1780015130232,"size":14206});
+registerFile("./data/ps-eez-list-per-trip.csv", {"name":"./data/ps-eez-list-per-trip.csv","mimeType":"text/csv","path":"./_file/data/ps-eez-list-per-trip.252ce9d1.csv","lastModified":1780015131715,"size":29852});
 
-define({id: "ee02dc69", inputs: ["FileAttachment","width"], outputs: ["d3","miniPlot","offsetColorKey","offsetGrid","offsetCard","groupByFlagType","TYPE_LABEL","raw","byFlagType","allFlags","plotW"], body: async (FileAttachment,width) => {
-const [d3, {miniPlot, offsetColorKey, offsetGrid, offsetCard, groupByFlagType, TYPE_LABEL}] = await Promise.all([import("./_npm/d3@7.9.0/66d82917.js"), import("./_import/components/offset-charts.0db7dba9.js")]);
+define({id: "fccecbb0", inputs: ["FileAttachment","html","d3"], outputs: ["llEezList","psEezList","eezListSection"], body: async (FileAttachment,html,d3) => {
+const llEezList = await FileAttachment("./data/ll-eez-list-per-trip.csv").csv({typed: true});
+const psEezList = await FileAttachment("./data/ps-eez-list-per-trip.csv").csv({typed: true});
 
-const raw = await FileAttachment("./data/longline-logsheet-activities-offset-per-vessel-flag.csv").csv({typed: true});
-const { byFlagType, allFlags } = groupByFlagType(raw);
-const plotW = Math.max(200, Math.floor((width - 80) / 2));
-return {d3,miniPlot,offsetColorKey,offsetGrid,offsetCard,groupByFlagType,TYPE_LABEL,raw,byFlagType,allFlags,plotW};
+function eezListSection(rows, label) {
+  const total = rows[0]?.total_trips ?? 0;
+  const pct = n => (n / total * 100).toFixed(1);
+  const maxCount = rows[0]?.trip_count ?? 1;
+  return html`<div style="flex:1;min-width:280px">
+    <div style="font-weight:600;font-size:0.9rem;color:#374151;margin-bottom:0.5rem">
+      ${label} — ${d3.format(",")(total)} trips
+    </div>
+    <table style="width:100%;font-size:0.83rem;border-collapse:collapse">
+      <thead>
+        <tr style="border-bottom:2px solid #e5e7eb;text-align:left">
+          <th style="padding:4px 6px 4px 0;font-weight:500;color:#6b7280">EEZ list</th>
+          <th style="padding:4px 6px"></th>
+          <th style="padding:4px 0 4px 6px;text-align:right;font-weight:500;color:#6b7280">%</th>
+          <th style="padding:4px 0 4px 8px;text-align:right;font-weight:500;color:#6b7280">trips</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map(r => html`<tr style="border-bottom:1px solid #f3f4f6">
+          <td style="padding:3px 6px 3px 0;font-family:monospace;white-space:nowrap">${r.eez_list}</td>
+          <td style="padding:3px 6px;width:100%">
+            <div style="background:#bfdbfe;height:10px;width:${Math.max(2, r.trip_count / maxCount * 100)}%;border-radius:2px"></div>
+          </td>
+          <td style="padding:3px 0 3px 6px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums">${pct(r.trip_count)}%</td>
+          <td style="padding:3px 0 3px 8px;text-align:right;white-space:nowrap;color:#9ca3af">${d3.format(",")(r.trip_count)}</td>
+        </tr>`)}
+      </tbody>
+    </table>
+  </div>`;
+}
+return {llEezList,psEezList,eezListSection};
 }});
 
-define({id: "dc183265", inputs: ["display","offsetGrid","allFlags","byFlagType","offsetCard","miniPlot","TYPE_LABEL","plotW"], body: (display,offsetGrid,allFlags,byFlagType,offsetCard,miniPlot,TYPE_LABEL,plotW) => {
-display(offsetGrid(allFlags, flag => {
-  const byType = byFlagType.get(flag) ?? new Map();
-  return offsetCard(
-    flag,
-    miniPlot(byType.get("LonglineLogsheet") ?? [],    { title: TYPE_LABEL.LonglineLogsheet,    plotW }),
-    miniPlot(byType.get("PurseseineLogsheet") ?? [], { title: TYPE_LABEL.PurseseineLogsheet, plotW }),
-  );
-}));
-}});
-
-define({id: "72e678ec", inputs: ["display","offsetColorKey"], body: (display,offsetColorKey) => {
-display(offsetColorKey({ zero: "Zero offset — coordinate on a UTC boundary" }));
+define({id: "ed8a5ac1", inputs: ["display","html","eezListSection","llEezList","psEezList"], body: (display,html,eezListSection,llEezList,psEezList) => {
+display(html`<div style="display:flex;gap:2.5rem;flex-wrap:wrap;align-items:flex-start">
+  ${eezListSection(llEezList, "Longline")}
+  ${eezListSection(psEezList, "Purseseine")}
+</div>`);
 }});
 
 </script>
@@ -100,32 +116,30 @@ display(offsetColorKey({ zero: "Zero offset — coordinate on a UTC boundary" })
     <li class="observablehq-link"><a href="./set-time-distribution">Set time distribution</a></li>
     <li class="observablehq-link"><a href="./entities-to-migrate">Entities to migrate</a></li>
     <li class="observablehq-link"><a href="./observer-offsets">Observer offsets by vessel flag</a></li>
-    <li class="observablehq-link observablehq-link-active"><a href="./logsheet-offsets">Logsheet activity IANA timezone offset by vessel flag</a></li>
+    <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity IANA timezone offset by vessel flag</a></li>
     <li class="observablehq-link"><a href="./logsheet-nautical-offsets">Logsheet activity Nautical timezone offset by vessel flag</a></li>
     <li class="observablehq-link"><a href="./observer-offset-per-eez">Observer offset distribution by EEZ</a></li>
-    <li class="observablehq-link"><a href="./eez-list-per-trip">EEZ combinations per trip</a></li>
+    <li class="observablehq-link observablehq-link-active"><a href="./eez-list-per-trip">EEZ combinations per trip</a></li>
   </ol>
 </nav>
 <script>{const e=document.querySelector("#observablehq-sidebar"),o=document.querySelector("#observablehq-sidebar-toggle"),r=sessionStorage.getItem("observablehq-sidebar");r?o.checked=r==="true":o.indeterminate=!0;for(const t of document.querySelectorAll("#observablehq-sidebar summary")){const s=t.parentElement;switch(sessionStorage.getItem(`observablehq-sidebar:${t.textContent}`)){case"true":s.open=!0;break;case"false":s.classList.contains("observablehq-section-active")||(s.open=!1);break}}addEventListener("beforeunload",()=>sessionStorage.setItem("observablehq-sidebar-scrolly",`${e.scrollTop}`));const a=sessionStorage.getItem("observablehq-sidebar-scrolly");a!=null&&(e.style.cssText="overflow: hidden;",e.scrollTop=+a,e.style.cssText="");}</script>
 <div id="observablehq-center">
 <main id="observablehq-main" class="observablehq">
-<h1 id="logsheet-activity-iana-timezone-offset-by-vessel-flag" tabindex="-1"><a class="observablehq-header-anchor" href="#logsheet-activity-iana-timezone-offset-by-vessel-flag">Logsheet activity IANA timezone offset by vessel flag</a></h1>
-<p>UTC offset estimated from the <strong>geographic coordinates</strong> of each fishing set,
-resolved via <a href="https://github.com/evansiroky/timezone-boundary-builder" target="_blank" rel="noopener noreferrer">geo-tz</a>
-(IANA political timezone boundaries), then converted to a UTC offset (½ h resolution).</p>
+<h1 id="eez-combinations-fished-per-trip" tabindex="-1"><a class="observablehq-header-anchor" href="#eez-combinations-fished-per-trip">EEZ combinations fished per trip</a></h1>
+<p>For each <strong>trip</strong> with at least one set with a known EEZ code (since 2017), shows the
+distribution of unique sorted EEZ combinations — how many trips fished exclusively in
+one EEZ, how many spanned two or more, and which multi-EEZ combinations are most common.</p>
 <ul>
-<li><strong>Longline</strong> — <code>log.sets_ll</code> (<code>l_activity_id = 1</code>)</li>
-<li><strong>Purseseine</strong> — <code>log.sets_ps</code> (<code>s_activity_id = 1</code>)</li>
+<li><strong>Longline</strong> — sets from <code>log.sets_ll</code> (<code>l_activity_id = 1</code>)</li>
+<li><strong>Purseseine</strong> — sets from <code>log.sets_ps</code> (<code>s_activity_id = 1</code>)</li>
+<li>EEZ codes are sorted alphabetically within each combination</li>
+<li>Covers <strong>all trips</strong> (not just observer-linked); sets with <code>eez_code IS NULL</code> are excluded</li>
 </ul>
-<p>Please note that in open ocean, geo-tz willl return Etc/GMT+-N zones, which will be the same
-result as the nautical timezone.</p>
-<div class="observablehq observablehq--block"><!--:ee02dc69:--></div>
-<div class="observablehq observablehq--block"><!--:dc183265:--></div>
-<h3 id="colour-key" tabindex="-1"><a class="observablehq-header-anchor" href="#colour-key">Colour key</a></h3>
-<div class="observablehq observablehq--block"><!--:72e678ec:--></div>
+<div class="observablehq observablehq--block"><!--:fccecbb0:--></div>
+<div class="observablehq observablehq--block"><!--:ed8a5ac1:--></div>
 </main>
 <footer id="observablehq-footer">
-<nav><a rel="prev" href="./observer-offsets"><span>Observer offsets by vessel flag</span></a><a rel="next" href="./logsheet-nautical-offsets"><span>Logsheet activity Nautical timezone offset by vessel flag</span></a></nav>
+<nav><a rel="prev" href="./observer-offset-per-eez"><span>Observer offset distribution by EEZ</span></a></nav>
 <div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-29T11:43:50">May 29, 2026</a>.</div>
 </footer>
 </div>

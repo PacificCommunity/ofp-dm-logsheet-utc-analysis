@@ -11,10 +11,6 @@ toc: false
 const llCount = await FileAttachment("data/ll-trip-offset-count-per-eez.csv").csv({typed: true});
 const psCount = await FileAttachment("data/ps-trip-offset-count-per-eez.csv").csv({typed: true});
 
-// ── Chapter 2: EEZ list distribution per trip ─────────────────────────────────
-const llEezList = await FileAttachment("data/ll-eez-list-per-trip.csv").csv({typed: true});
-const psEezList = await FileAttachment("data/ps-eez-list-per-trip.csv").csv({typed: true});
-
 // ── Table 1: GPS coordinate offset vs observer offset ─────────────────────
 const llMatch = await FileAttachment("data/ll-observer-coordinate-match.csv").csv({typed: true});
 const psMatch = await FileAttachment("data/ps-observer-coordinate-match.csv").csv({typed: true});
@@ -135,42 +131,6 @@ A high "1 offset" share indicates a stable timezone; higher buckets suggest cros
       })}
     </tbody>
   </table>`);
-}
-```
-
-## EEZ combinations fished per trip
-
-For each **trip** with at least one set with a known EEZ code (since 2017), the table below
-shows the distribution of unique EEZ combinations — i.e. how many trips fished exclusively
-in one EEZ, how many spanned two EEZs, etc.
-
-```js
-{
-  function eezListSection(rows, label) {
-    const total = rows[0]?.total_trips ?? 0;
-    const pct = n => (n / total * 100).toFixed(1);
-    const maxCount = rows[0]?.trip_count ?? 1;
-    return html`<div style="flex:1;min-width:260px">
-      <div style="font-weight:600;font-size:0.85rem;color:#374151;margin-bottom:0.4rem">
-        ${label} — ${d3.format(",")(total)} trips
-      </div>
-      <table style="width:100%;font-size:0.82rem;border-collapse:collapse">
-        ${rows.map(r => html`<tr style="border-bottom:1px solid #f3f4f6">
-          <td style="padding:2px 6px 2px 0;font-family:monospace;white-space:nowrap">${r.eez_list}</td>
-          <td style="padding:2px 6px;width:100%">
-            <div style="background:#bfdbfe;height:10px;width:${Math.max(2, r.trip_count / maxCount * 100)}%;border-radius:2px"></div>
-          </td>
-          <td style="padding:2px 0 2px 6px;text-align:right;white-space:nowrap;color:#374151;font-variant-numeric:tabular-nums">${pct(r.trip_count)}%</td>
-          <td style="padding:2px 0 2px 8px;text-align:right;white-space:nowrap;color:#9ca3af">${d3.format(",")(r.trip_count)}</td>
-        </tr>`)}
-      </table>
-    </div>`;
-  }
-
-  display(html`<div style="display:flex;gap:2rem;flex-wrap:wrap;align-items:flex-start">
-    ${eezListSection(llEezList, "Longline")}
-    ${eezListSection(psEezList, "Purseseine")}
-  </div>`);
 }
 ```
 

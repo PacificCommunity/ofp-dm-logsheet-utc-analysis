@@ -11,6 +11,7 @@ export default {
     {name: "Logsheet activity IANA timezone offset by vessel flag", path: "/logsheet-offsets"},
     {name: "Logsheet activity Nautical timezone offset by vessel flag", path: "/logsheet-nautical-offsets"},
     {name: "Observer offset distribution by EEZ", path: "/observer-offset-per-eez"},
+    {name: "EEZ combinations per trip", path: "/eez-list-per-trip"},
   ],
 
   // Content to add to the head of the page, e.g. for a favicon:
