@@ -1,0 +1,26 @@
+entity,schema,system_source,row_count
+HandlineLogsheet,log,Tufman2,563
+HandlineLogsheet,log,Tufman1,503
+LonglineLogsheet,log,LogMaster,46862
+LonglineLogsheet,log,Tufman2,40295
+LonglineLogsheet,log,OnBoard,7562
+LonglineLogsheet,log,Tufman1,3009
+LonglineLogsheet,log,JsonStandard,1409
+LonglineLogsheet,log,eTunalog,351
+PoleAndLineLogsheet,log,LogMaster,21255
+PoleAndLineLogsheet,log,Tufman2,643
+PoleAndLineLogsheet,log,VFP,43
+PoleAndLineLogsheet,log,Tufman1,31
+PurseseineLogsheet,log,LogMaster,36000
+PurseseineLogsheet,log,Tufman2,15265
+PurseseineLogsheet,log,iFIMS,9523
+PurseseineLogsheet,log,FFA VAC,4671
+PurseseineLogsheet,log,VFP,2500
+PurseseineLogsheet,log,Tufman1,2493
+PurseseineLogsheet,log,eTunalog,20
+SnapperLogsheet,log,DeepWaterSnapper,3208
+SnapperLogsheet,log,Tufman2,947
+CarrierObserverTrip,obsv,Tufman2,129
+ObserverTrip,obsv,Tubs,20113
+ObserverTrip,obsv,Tufman2,17668
+ObserverTrip,obsv,Ollo,547
