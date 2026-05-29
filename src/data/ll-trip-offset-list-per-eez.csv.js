@@ -13,7 +13,7 @@
 
 import odbc from "odbc";
 import { csvFormat } from "d3-dsv";
-import { CONNECTION_STRING } from "./db.js";
+import { CONNECTION_STRING, ANALYSIS_START_DATE } from "./db.js";
 
 const SQL = `
 WITH
@@ -52,7 +52,7 @@ raw_offsets AS (
         AND CAST(os.set_date AS DATE) = CAST(sl.logdate AS DATE)
     WHERE sl.l_activity_id  = 1
       AND sl.eez_code        IS NOT NULL
-      AND sl.logdate         >= '2017-01-01'
+      AND sl.logdate         >= '${ANALYSIS_START_DATE}'
       AND os.utc_set_dtime   IS NOT NULL
       AND os.set_dtime        IS NOT NULL
 ),

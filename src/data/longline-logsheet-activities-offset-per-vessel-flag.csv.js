@@ -15,7 +15,7 @@ import { csvFormat } from "d3-dsv";
 // geo-tz v8 is CJS; use default import and destructure
 import geoTzDefault from "geo-tz";
 const { find } = geoTzDefault;
-import { CONNECTION_STRING } from "./db.js";
+import { CONNECTION_STRING, ANALYSIS_START_DATE } from "./db.js";
 
 // Aggregate by (type, vessel_flag, 1° grid cell) to minimise geo-tz lookups.
 // latd / lond are stored as decimal(13,8).
@@ -44,7 +44,7 @@ const SQL = `
            AND sl.latd BETWEEN -90 AND 90
            AND sl.lond BETWEEN -180 AND 180
            AND tl.vessel_id IS NOT NULL
-           AND sl.logdate >= '2017-01-01'
+           AND sl.logdate >= '${ANALYSIS_START_DATE}'
 
          UNION ALL
 
@@ -64,7 +64,7 @@ const SQL = `
            AND sl.latd BETWEEN -90 AND 90
            AND sl.lond BETWEEN -180 AND 180
            AND tl.vessel_id IS NOT NULL
-           AND sl.logdate >= '2017-01-01')
+           AND sl.logdate >= '${ANALYSIS_START_DATE}')
   SELECT type,
          vessel_flag,
          lat_r,

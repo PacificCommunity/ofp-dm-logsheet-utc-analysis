@@ -15,7 +15,7 @@
 
 import odbc from "odbc";
 import { csvFormat } from "d3-dsv";
-import { CONNECTION_STRING } from "./db.js";
+import { CONNECTION_STRING, ANALYSIS_START_DATE } from "./db.js";
 
 const SQL = `
   WITH vessel_flag AS (SELECT DISTINCT vi.vessel_id,
@@ -39,7 +39,7 @@ const SQL = `
            AND sl.lond IS NOT NULL
            AND sl.lond BETWEEN -180 AND 180
            AND tl.vessel_id IS NOT NULL
-           AND sl.logdate >= '2017-01-01'
+           AND sl.logdate >= '${ANALYSIS_START_DATE}'
 
          UNION ALL
 
@@ -56,7 +56,7 @@ const SQL = `
            AND sl.lond IS NOT NULL
            AND sl.lond BETWEEN -180 AND 180
            AND tl.vessel_id IS NOT NULL
-           AND sl.logdate >= '2017-01-01')
+           AND sl.logdate >= '${ANALYSIS_START_DATE}')
   SELECT type,
          vessel_flag,
          offset,

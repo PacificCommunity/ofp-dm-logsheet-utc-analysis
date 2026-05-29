@@ -14,9 +14,8 @@
 <link rel="modulepreload" href="./_observablehq/runtime.607a8173.js">
 <link rel="modulepreload" href="./_observablehq/stdlib.277aeab8.js">
 <link rel="modulepreload" href="./_npm/d3@7.9.0/66d82917.js">
-<link rel="modulepreload" href="./_import/components/offset-charts.aa33165e.js">
+<link rel="modulepreload" href="./_import/components/offset-charts.092ca3bf.js">
 <link rel="modulepreload" href="./_npm/htl@1.0.0/87d6f6ef.js">
-<link rel="modulepreload" href="./_npm/@observablehq/plot@0.6.17/a96a6bbb.js">
 <link rel="modulepreload" href="./_npm/d3-dsv@3.0.1/9cffc2bd.js">
 <link rel="modulepreload" href="./_npm/d3-array@3.2.4/e93ca09f.js">
 <link rel="modulepreload" href="./_npm/d3-axis@3.0.0/0f2de24d.js">
@@ -47,11 +46,8 @@
 <link rel="modulepreload" href="./_npm/d3-timer@3.0.1/b58a267d.js">
 <link rel="modulepreload" href="./_npm/d3-transition@3.0.1/004da2ac.js">
 <link rel="modulepreload" href="./_npm/d3-zoom@3.0.0/b5786b3f.js">
-<link rel="modulepreload" href="./_npm/isoformat@0.2.1/18cbf477.js">
-<link rel="modulepreload" href="./_npm/interval-tree-1d@1.0.4/53fe8176.js">
 <link rel="modulepreload" href="./_npm/internmap@2.0.3/e08981d9.js">
 <link rel="modulepreload" href="./_npm/delaunator@5.1.0/d4ec0aa1.js">
-<link rel="modulepreload" href="./_npm/binary-search-bounds@2.0.5/cbf6ba23.js">
 <link rel="modulepreload" href="./_npm/robust-predicates@3.0.3/42820bfa.js">
 <link rel="icon" href="./_file/observable.1af93621.png" type="image/png" sizes="32x32">
 <script type="module">
@@ -59,11 +55,11 @@
 import {define} from "./_observablehq/client.f5f986c7.js";
 import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
 
-registerFile("./data/ll-eez-list-per-trip.csv", {"name":"./data/ll-eez-list-per-trip.csv","mimeType":"text/csv","path":"./_file/data/ll-eez-list-per-trip.c360cc7c.csv","lastModified":1780015130232,"size":14206});
-registerFile("./data/ps-eez-list-per-trip.csv", {"name":"./data/ps-eez-list-per-trip.csv","mimeType":"text/csv","path":"./_file/data/ps-eez-list-per-trip.252ce9d1.csv","lastModified":1780015131715,"size":29852});
+registerFile("./data/ll-eez-list-per-trip.csv", {"name":"./data/ll-eez-list-per-trip.csv","mimeType":"text/csv","path":"./_file/data/ll-eez-list-per-trip.92857957.csv","lastModified":1780024025493,"size":14206});
+registerFile("./data/ps-eez-list-per-trip.csv", {"name":"./data/ps-eez-list-per-trip.csv","mimeType":"text/csv","path":"./_file/data/ps-eez-list-per-trip.11601eec.csv","lastModified":1780024036467,"size":29852});
 
 define({id: "93ed646d", inputs: ["FileAttachment"], outputs: ["d3","rankedList","llEezList","psEezList"], body: async (FileAttachment) => {
-const [d3, {rankedList}] = await Promise.all([import("./_npm/d3@7.9.0/66d82917.js"), import("./_import/components/offset-charts.aa33165e.js")]);
+const [d3, {rankedList}] = await Promise.all([import("./_npm/d3@7.9.0/66d82917.js"), import("./_import/components/offset-charts.092ca3bf.js")]);
 
 const llEezList = await FileAttachment("./data/ll-eez-list-per-trip.csv").csv({typed: true});
 const psEezList = await FileAttachment("./data/ps-eez-list-per-trip.csv").csv({typed: true});
@@ -115,7 +111,7 @@ distribution of unique sorted EEZ combinations.</p>
 </main>
 <footer id="observablehq-footer">
 <nav><a rel="prev" href="./observer-offset-per-eez"><span>Observer offset distribution by EEZ</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-29T13:53:07">May 29, 2026</a>.</div>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-29T14:07:38">May 29, 2026</a>.</div>
 </footer>
 </div>
 </body>

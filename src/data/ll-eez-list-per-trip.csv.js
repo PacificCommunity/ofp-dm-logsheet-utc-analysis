@@ -15,7 +15,7 @@
 
 import odbc from "odbc";
 import { csvFormat } from "d3-dsv";
-import { CONNECTION_STRING } from "./db.js";
+import { CONNECTION_STRING, ANALYSIS_START_DATE } from "./db.js";
 
 const SQL = `
 WITH
@@ -29,7 +29,7 @@ distinct_eez_per_trip AS (
     INNER JOIN log.trips_ll tl ON tl.log_trip_id = sl.log_trip_id
     WHERE sl.l_activity_id = 1
       AND sl.eez_code IS NOT NULL
-      AND sl.logdate >= '2017-01-01'
+      AND sl.logdate >= '${ANALYSIS_START_DATE}'
 ),
 
 -- ── Sorted EEZ list per trip ──────────────────────────────────────────────────

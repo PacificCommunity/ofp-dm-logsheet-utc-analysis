@@ -11,7 +11,7 @@
 
 import odbc from "odbc";
 import {csvFormat} from "d3-dsv";
-import {CONNECTION_STRING} from "./db.js";
+import {CONNECTION_STRING, ANALYSIS_START_DATE} from "./db.js";
 
 const SQL = `
     WITH all_sets AS (SELECT CAST(LEFT(set_time, 2) AS INT) AS hour,
@@ -19,7 +19,7 @@ const SQL = `
                       FROM log.sets_ll
                       WHERE set_time IS NOT NULL
                         AND l_activity_id = 1
-                        AND logdate >= '2017-01-01'
+                        AND logdate >= '${ANALYSIS_START_DATE}'
 
                       UNION ALL
 
@@ -28,7 +28,7 @@ const SQL = `
                       FROM log.sets_ps
                       WHERE set_time IS NOT NULL
                         AND s_activity_id = 1
-                        AND logdate >= '2017-01-01')
+                        AND logdate >= '${ANALYSIS_START_DATE}')
     SELECT type,
            hour,
            COUNT(*)                                                            AS [count],

@@ -15,7 +15,7 @@
 
 import odbc from "odbc";
 import { csvFormat } from "d3-dsv";
-import { CONNECTION_STRING } from "./db.js";
+import { CONNECTION_STRING, ANALYSIS_START_DATE } from "./db.js";
 
 const SQL = `
 WITH vessel_flag AS (
@@ -75,7 +75,7 @@ ll_matched_sets AS (
       AND os.utc_set_dtime   IS NOT NULL
       AND os.set_dtime        IS NOT NULL
       AND tl.vessel_id       IS NOT NULL
-      AND sl.logdate         >= '2017-01-01'
+      AND sl.logdate         >= '${ANALYSIS_START_DATE}'
 ),
 
 -- ── Per-set: normalise observer offset (fold UTC+13/+14 back across dateline) ─

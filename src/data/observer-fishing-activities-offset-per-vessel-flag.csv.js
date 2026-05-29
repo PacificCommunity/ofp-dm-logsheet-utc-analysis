@@ -12,7 +12,7 @@
 
 import odbc from "odbc";
 import { csvFormat } from "d3-dsv";
-import { CONNECTION_STRING } from "./db.js";
+import { CONNECTION_STRING, ANALYSIS_START_DATE } from "./db.js";
 
 const SQL = `
 WITH vessel_flag AS (
@@ -51,7 +51,7 @@ ll_offsets AS (
     WHERE os.utc_set_dtime IS NOT NULL
       AND os.set_dtime     IS NOT NULL
       AND ot.vessel_id     IS NOT NULL
-      AND CAST(os.set_date AS DATE) >= '2017-01-01'
+      AND CAST(os.set_date AS DATE) >= '${ANALYSIS_START_DATE}'
 ),
 
 -- ── Purseseine: linked observer trips → obsv.s_day ────────────────────────
@@ -79,7 +79,7 @@ ps_offsets AS (
     WHERE sd.utc_start_dtime IS NOT NULL
       AND sd.start_dtime     IS NOT NULL
       AND ot.vessel_id       IS NOT NULL
-      AND CAST(sd.start_dtime AS DATE) >= '2017-01-01'
+      AND CAST(sd.start_dtime AS DATE) >= '${ANALYSIS_START_DATE}'
 )
 
 -- ── Union both types ─────────────────────────────────────────────────────────

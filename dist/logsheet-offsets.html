@@ -14,8 +14,7 @@
 <link rel="modulepreload" href="./_observablehq/runtime.607a8173.js">
 <link rel="modulepreload" href="./_observablehq/stdlib.277aeab8.js">
 <link rel="modulepreload" href="./_npm/d3@7.9.0/66d82917.js">
-<link rel="modulepreload" href="./_import/components/offset-charts.aa33165e.js">
-<link rel="modulepreload" href="./_npm/@observablehq/plot@0.6.17/a96a6bbb.js">
+<link rel="modulepreload" href="./_import/components/offset-charts.092ca3bf.js">
 <link rel="modulepreload" href="./_npm/htl@1.0.0/87d6f6ef.js">
 <link rel="modulepreload" href="./_npm/d3-dsv@3.0.1/9cffc2bd.js">
 <link rel="modulepreload" href="./_npm/d3-array@3.2.4/e93ca09f.js">
@@ -47,11 +46,8 @@
 <link rel="modulepreload" href="./_npm/d3-timer@3.0.1/b58a267d.js">
 <link rel="modulepreload" href="./_npm/d3-transition@3.0.1/004da2ac.js">
 <link rel="modulepreload" href="./_npm/d3-zoom@3.0.0/b5786b3f.js">
-<link rel="modulepreload" href="./_npm/isoformat@0.2.1/18cbf477.js">
-<link rel="modulepreload" href="./_npm/interval-tree-1d@1.0.4/53fe8176.js">
 <link rel="modulepreload" href="./_npm/internmap@2.0.3/e08981d9.js">
 <link rel="modulepreload" href="./_npm/delaunator@5.1.0/d4ec0aa1.js">
-<link rel="modulepreload" href="./_npm/binary-search-bounds@2.0.5/cbf6ba23.js">
 <link rel="modulepreload" href="./_npm/robust-predicates@3.0.3/42820bfa.js">
 <link rel="icon" href="./_file/observable.1af93621.png" type="image/png" sizes="32x32">
 <script type="module">
@@ -62,7 +58,7 @@ import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
 registerFile("./data/longline-logsheet-activities-offset-per-vessel-flag.csv", {"name":"./data/longline-logsheet-activities-offset-per-vessel-flag.csv","mimeType":"text/csv","path":"./_file/data/longline-logsheet-activities-offset-per-vessel-flag.8f3fa63c.csv","lastModified":1780010553078,"size":9449});
 
 define({id: "e1d75a91", inputs: ["FileAttachment"], outputs: ["d3","rankedList","offsetGrid","offsetCard","groupByFlagType","TYPE_LABEL","raw","byFlagType","allFlags"], body: async (FileAttachment) => {
-const [d3, {rankedList, offsetGrid, offsetCard, groupByFlagType, TYPE_LABEL}] = await Promise.all([import("./_npm/d3@7.9.0/66d82917.js"), import("./_import/components/offset-charts.aa33165e.js")]);
+const [d3, {rankedList, offsetGrid, offsetCard, groupByFlagType, TYPE_LABEL}] = await Promise.all([import("./_npm/d3@7.9.0/66d82917.js"), import("./_import/components/offset-charts.092ca3bf.js")]);
 
 const raw = await FileAttachment("./data/longline-logsheet-activities-offset-per-vessel-flag.csv").csv({typed: true});
 const { byFlagType, allFlags } = groupByFlagType(raw);
@@ -121,7 +117,7 @@ result as the nautical timezone.</p>
 </main>
 <footer id="observablehq-footer">
 <nav><a rel="prev" href="./observer-offsets"><span>Observer offsets by vessel flag</span></a><a rel="next" href="./logsheet-nautical-offsets"><span>Logsheet activity Nautical timezone offset by vessel flag</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-29T13:53:07">May 29, 2026</a>.</div>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-05-29T14:07:38">May 29, 2026</a>.</div>
 </footer>
 </div>
 </body>
