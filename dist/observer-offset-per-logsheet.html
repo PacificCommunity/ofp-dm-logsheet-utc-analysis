@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="generator" content="Observable Framework v1.13.4">
-<title>EEZ combinations fished per trip | Logsheet UTC Analysis</title>
+<title>Observer offset per instance source | Logsheet UTC Analysis</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
 <link rel="preload" as="style" href="./_observablehq/theme-air.d5b7fcbe.css">
@@ -55,22 +55,62 @@
 import {define} from "./_observablehq/client.f5f986c7.js";
 import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
 
-registerFile("./data/ll-eez-list-per-trip.csv", {"name":"./data/ll-eez-list-per-trip.csv","mimeType":"text/csv","path":"./_file/data/ll-eez-list-per-trip.92857957.csv","lastModified":1780024763105,"size":14206});
-registerFile("./data/ps-eez-list-per-trip.csv", {"name":"./data/ps-eez-list-per-trip.csv","mimeType":"text/csv","path":"./_file/data/ps-eez-list-per-trip.11601eec.csv","lastModified":1780024764273,"size":29852});
+registerFile("./data/observer-fishing-activities-offset-per-instance.csv", {"name":"./data/observer-fishing-activities-offset-per-instance.csv","mimeType":"text/csv","path":"./_file/data/observer-fishing-activities-offset-per-instance.9ec670dd.csv","lastModified":1780359795052,"size":10159});
 
-define({id: "93ed646d", inputs: ["FileAttachment"], outputs: ["d3","rankedList","llEezList","psEezList"], body: async (FileAttachment) => {
-const [d3, {rankedList}] = await Promise.all([import("./_npm/d3@7.9.0/66d82917.js"), import("./_import/components/offset-charts.092ca3bf.js")]);
+define({id: "49b82b8c", inputs: ["FileAttachment"], outputs: ["d3","rankedList","offsetGrid","offsetCard","TYPE_LABEL","INSTANCE_NAMES","instanceLabel","raw","byInstanceType","allInstances"], body: async (FileAttachment) => {
+const [d3, {rankedList, offsetGrid, offsetCard, TYPE_LABEL}] = await Promise.all([import("./_npm/d3@7.9.0/66d82917.js"), import("./_import/components/offset-charts.092ca3bf.js")]);
 
-const llEezList = await FileAttachment("./data/ll-eez-list-per-trip.csv").csv({typed: true});
-const psEezList = await FileAttachment("./data/ps-eez-list-per-trip.csv").csv({typed: true});
-return {d3,rankedList,llEezList,psEezList};
+// TufmanInstance enum values → short name
+const INSTANCE_NAMES = new Map([
+  [1,        "INDUSTRY"],
+  [2,        "OFP"],
+  [4,        "MH"],
+  [16,       "CK"],
+  [32,       "UST"],
+  [128,      "KI"],
+  [256,      "TO"],
+  [512,      "WS"],
+  [1024,     "PF"],
+  [2048,     "NR"],
+  [4096,     "NU"],
+  [16384,    "TV"],
+  [32768,    "VU"],
+  [131072,   "TK"],
+  [262144,   "SB"],
+  [524288,   "FJ"],
+  [1048576,  "VN"],
+  [2097152,  "PH"],
+  [4194304,  "WCPFC"],
+  [16777216, "WF"],
+  [33554432, "DWFN"],
+]);
+
+const instanceLabel = v => INSTANCE_NAMES.get(v) ?? String(v);
+
+const raw = await FileAttachment("./data/observer-fishing-activities-offset-per-instance.csv").csv({ typed: true });
+
+// Group rows: instance_source → type → rows[]
+const byInstanceType = d3.rollup(raw, rows => rows, d => d.instance_source, d => d.type);
+
+// Sort instances by total count descending
+const allInstances = [...byInstanceType.keys()].sort((a, b) => {
+  const tot = k => d3.sum([...( byInstanceType.get(k)?.values() ?? [])].flat(), d => d.count);
+  return tot(b) - tot(a);
+});
+return {d3,rankedList,offsetGrid,offsetCard,TYPE_LABEL,INSTANCE_NAMES,instanceLabel,raw,byInstanceType,allInstances};
 }});
 
-define({id: "2a2bacd0", inputs: ["display","html","rankedList","llEezList","d3","psEezList"], body: (display,html,rankedList,llEezList,d3,psEezList) => {
-display(html`<div style="display:flex;gap:2.5rem;flex-wrap:wrap;align-items:flex-start">
-  <div style="flex:1;min-width:280px">${rankedList(llEezList, { labelKey: "eez_list", countKey: "trip_count", title: "Longline",    subtitle: `${d3.format(",")(llEezList[0]?.total_trips ?? 0)} trips`, total: llEezList[0]?.total_trips })}</div>
-  <div style="flex:1;min-width:280px">${rankedList(psEezList, { labelKey: "eez_list", countKey: "trip_count", title: "Purseseine", subtitle: `${d3.format(",")(psEezList[0]?.total_trips ?? 0)} trips`, total: psEezList[0]?.total_trips })}</div>
-</div>`);
+define({id: "963e6f61", inputs: ["display","offsetGrid","allInstances","byInstanceType","offsetCard","instanceLabel","rankedList","TYPE_LABEL","d3"], body: (display,offsetGrid,allInstances,byInstanceType,offsetCard,instanceLabel,rankedList,TYPE_LABEL,d3) => {
+display(offsetGrid(allInstances, instance => {
+  const byType = byInstanceType.get(instance) ?? new Map();
+  const llRows = byType.get("LonglineLogsheet")    ?? [];
+  const psRows = byType.get("PurseseineLogsheet")  ?? [];
+  return offsetCard(
+    instanceLabel(instance),
+    rankedList(llRows, { labelKey: "offset_bucket", countKey: "count", title: TYPE_LABEL.LonglineLogsheet,    subtitle: `${d3.format(",")(d3.sum(llRows, d => d.count))} sets`, labelFormat: v => `${v >= 0 ? "+" : ""}${v} h` }),
+    rankedList(psRows, { labelKey: "offset_bucket", countKey: "count", title: TYPE_LABEL.PurseseineLogsheet, subtitle: `${d3.format(",")(d3.sum(psRows, d => d.count))} sets`, labelFormat: v => `${v >= 0 ? "+" : ""}${v} h` }),
+  );
+}));
 }});
 
 </script>
@@ -91,27 +131,25 @@ display(html`<div style="display:flex;gap:2.5rem;flex-wrap:wrap;align-items:flex
     <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity IANA timezone offset by vessel flag</a></li>
     <li class="observablehq-link"><a href="./logsheet-nautical-offsets">Logsheet activity Nautical timezone offset by vessel flag</a></li>
     <li class="observablehq-link"><a href="./observer-offset-per-eez">Observer offset distribution by EEZ</a></li>
-    <li class="observablehq-link"><a href="./observer-offset-per-logsheet">Observer offset per instance source</a></li>
-    <li class="observablehq-link observablehq-link-active"><a href="./eez-list-per-trip">EEZ combinations per trip</a></li>
+    <li class="observablehq-link observablehq-link-active"><a href="./observer-offset-per-logsheet">Observer offset per instance source</a></li>
+    <li class="observablehq-link"><a href="./eez-list-per-trip">EEZ combinations per trip</a></li>
   </ol>
 </nav>
 <script>{const e=document.querySelector("#observablehq-sidebar"),o=document.querySelector("#observablehq-sidebar-toggle"),r=sessionStorage.getItem("observablehq-sidebar");r?o.checked=r==="true":o.indeterminate=!0;for(const t of document.querySelectorAll("#observablehq-sidebar summary")){const s=t.parentElement;switch(sessionStorage.getItem(`observablehq-sidebar:${t.textContent}`)){case"true":s.open=!0;break;case"false":s.classList.contains("observablehq-section-active")||(s.open=!1);break}}addEventListener("beforeunload",()=>sessionStorage.setItem("observablehq-sidebar-scrolly",`${e.scrollTop}`));const a=sessionStorage.getItem("observablehq-sidebar-scrolly");a!=null&&(e.style.cssText="overflow: hidden;",e.scrollTop=+a,e.style.cssText="");}</script>
 <div id="observablehq-center">
 <main id="observablehq-main" class="observablehq">
-<h1 id="eez-combinations-fished-per-trip" tabindex="-1"><a class="observablehq-header-anchor" href="#eez-combinations-fished-per-trip">EEZ combinations fished per trip</a></h1>
-<p>For each <strong>trip</strong> with at least one set with a known EEZ code (since 2017), shows the
-distribution of unique sorted EEZ combinations.</p>
+<h1 id="observer-utc-offset-per-instance-source" tabindex="-1"><a class="observablehq-header-anchor" href="#observer-utc-offset-per-instance-source">Observer UTC offset per instance source</a></h1>
+<p>Observer trips linked to a logsheet, grouped by logsheet instance source (i.e. which Tufman instance entered the data).
+Each pair of charts shows the distribution of <strong>UTC offsets</strong> derived from the observer's own datetime data:</p>
 <ul>
-<li><strong>Longline</strong> — sets from <code>log.sets_ll</code> (<code>l_activity_id = 1</code>)</li>
-<li><strong>Purseseine</strong> — sets from <code>log.sets_ps</code> (<code>s_activity_id = 1</code>)</li>
-<li>EEZ codes are sorted alphabetically within each combination</li>
-<li>Covers all longline and purseseine logsheets.</li>
+<li><strong>Longline</strong> — <code>obsv.l_set.set_dtime − utc_set_dtime</code> (per fishing set)</li>
+<li><strong>Purseseine</strong> — <code>obsv.s_day.start_dtime − utc_start_dtime</code> (per fishing day)</li>
 </ul>
-<div class="observablehq observablehq--block"><!--:93ed646d:--></div>
-<div class="observablehq observablehq--block"><!--:2a2bacd0:--></div>
+<div class="observablehq observablehq--block"><!--:49b82b8c:--></div>
+<div class="observablehq observablehq--block"><!--:963e6f61:--></div>
 </main>
 <footer id="observablehq-footer">
-<nav><a rel="prev" href="./observer-offset-per-logsheet"><span>Observer offset per instance source</span></a></nav>
+<nav><a rel="prev" href="./observer-offset-per-eez"><span>Observer offset distribution by EEZ</span></a><a rel="next" href="./eez-list-per-trip"><span>EEZ combinations per trip</span></a></nav>
 <div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-02T11:23:12">Jun 2, 2026</a>.</div>
 </footer>
 </div>
