@@ -20,7 +20,7 @@ Prediction uses a 4-tier fallback:
 > cd utc-estimator
 > python bayesian_offset_estimator.py
 > ```
-> Reads from `dist/_file/data/`. Writes `utc-estimator/output/ll-predicted-offsets.csv` and `ps-predicted-offsets.csv`.
+> Reads from `src/.observablehq/cache/data/` (the Observable Framework data cache — run `npm run build` first). Writes `utc-estimator/output/ll-predicted-offsets.csv` and `ps-predicted-offsets.csv`.
 
 ```js
 import * as d3 from "npm:d3";

@@ -30,7 +30,7 @@ Usage:
   python bayesian_offset_estimator.py [--data-dir <path>] [--out-dir <path>]
 
   --data-dir  path to the folder containing the four input CSVs
-              (default: ../dist/_file/data relative to this script)
+              (default: src/.observablehq/cache/data relative to the project root)
   --out-dir   path for output CSVs (default: ./output)
 """
 
@@ -189,7 +189,7 @@ def print_coverage(label: str, results: list[dict]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Bayesian UTC offset estimator")
     script_dir = Path(__file__).parent
-    default_data = script_dir.parent / "dist" / "_file" / "data"
+    default_data = script_dir.parent / "src" / ".observablehq" / "cache" / "data"
     parser.add_argument("--data-dir", type=Path, default=default_data,
                         help="Folder containing the four input CSVs")
     parser.add_argument("--out-dir",  type=Path, default=script_dir / "output",
