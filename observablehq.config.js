@@ -11,6 +11,7 @@ export default {
     {name: "Logsheet activity IANA timezone offset by vessel flag", path: "/logsheet-offsets"},
     {name: "Logsheet activity Nautical timezone offset by vessel flag", path: "/logsheet-nautical-offsets"},
     {name: "Observer offset distribution by EEZ", path: "/observer-offset-per-eez"},
+    {name: "Observer offset distribution by vessel flag", path: "/observer-offset-per-flag"},
     {name: "Observer offset per instance source", path: "/observer-offset-per-logsheet"},
     {name: "EEZ combinations per trip", path: "/eez-list-per-trip"},
   ],
