@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="generator" content="Observable Framework v1.13.4">
+<title>Logsheet UTC analysis | Logsheet UTC Analysis</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
+<link rel="preload" as="style" href="./_observablehq/theme-air.d5b7fcbe.css">
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
+<link rel="stylesheet" type="text/css" href="./_observablehq/theme-air.d5b7fcbe.css">
+<link rel="modulepreload" href="./_observablehq/client.1774e20a.js">
+<link rel="modulepreload" href="./_observablehq/runtime.607a8173.js">
+<link rel="modulepreload" href="./_observablehq/stdlib.277aeab8.js">
+<link rel="modulepreload" href="./_npm/d3@7.9.0/66d82917.js">
+<link rel="modulepreload" href="./_npm/htl@1.0.0/87d6f6ef.js">
+<link rel="modulepreload" href="./_npm/d3-dsv@3.0.1/9cffc2bd.js">
+<link rel="modulepreload" href="./_npm/d3-array@3.2.4/e93ca09f.js">
+<link rel="modulepreload" href="./_npm/d3-axis@3.0.0/0f2de24d.js">
+<link rel="modulepreload" href="./_npm/d3-brush@3.0.0/65eb105b.js">
+<link rel="modulepreload" href="./_npm/d3-chord@3.0.1/7ef8fb2e.js">
+<link rel="modulepreload" href="./_npm/d3-color@3.1.0/aeb57b94.js">
+<link rel="modulepreload" href="./_npm/d3-contour@4.0.2/1d2aed74.js">
+<link rel="modulepreload" href="./_npm/d3-delaunay@6.0.4/87adea64.js">
+<link rel="modulepreload" href="./_npm/d3-dispatch@3.0.1/9ba9c7f3.js">
+<link rel="modulepreload" href="./_npm/d3-drag@3.0.0/4202580c.js">
+<link rel="modulepreload" href="./_npm/d3-ease@3.0.1/cdd7e898.js">
+<link rel="modulepreload" href="./_npm/d3-fetch@3.0.1/b4e2ad9a.js">
+<link rel="modulepreload" href="./_npm/d3-force@3.0.0/5e804d15.js">
+<link rel="modulepreload" href="./_npm/d3-format@3.1.2/3785bf2d.js">
+<link rel="modulepreload" href="./_npm/d3-geo@3.1.1/40599fb3.js">
+<link rel="modulepreload" href="./_npm/d3-hierarchy@3.1.2/e49e792c.js">
+<link rel="modulepreload" href="./_npm/d3-interpolate@3.0.1/8d1e5425.js">
+<link rel="modulepreload" href="./_npm/d3-path@3.1.0/20d3f133.js">
+<link rel="modulepreload" href="./_npm/d3-polygon@3.0.1/7553081f.js">
+<link rel="modulepreload" href="./_npm/d3-quadtree@3.0.1/0dfd751c.js">
+<link rel="modulepreload" href="./_npm/d3-random@3.0.1/3c90ee06.js">
+<link rel="modulepreload" href="./_npm/d3-scale@4.0.2/720b7f0a.js">
+<link rel="modulepreload" href="./_npm/d3-scale-chromatic@3.1.0/ba24c2e7.js">
+<link rel="modulepreload" href="./_npm/d3-selection@3.0.0/4d94e5b7.js">
+<link rel="modulepreload" href="./_npm/d3-shape@3.2.0/6d3a6726.js">
+<link rel="modulepreload" href="./_npm/d3-time@3.1.0/9f03c579.js">
+<link rel="modulepreload" href="./_npm/d3-time-format@4.1.0/07c9626f.js">
+<link rel="modulepreload" href="./_npm/d3-timer@3.0.1/b58a267d.js">
+<link rel="modulepreload" href="./_npm/d3-transition@3.0.1/004da2ac.js">
+<link rel="modulepreload" href="./_npm/d3-zoom@3.0.0/b5786b3f.js">
+<link rel="modulepreload" href="./_npm/internmap@2.0.3/e08981d9.js">
+<link rel="modulepreload" href="./_npm/delaunator@5.1.0/d4ec0aa1.js">
+<link rel="modulepreload" href="./_npm/robust-predicates@3.0.3/42820bfa.js">
+<link rel="icon" href="./_file/observable.1af93621.png" type="image/png" sizes="32x32">
+<script type="module">
+
+import {define} from "./_observablehq/client.1774e20a.js";
+import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
+
+registerFile("./data/ll-logsheet-time-quality.csv", {"name":"./data/ll-logsheet-time-quality.csv","mimeType":"text/csv","path":"./_file/data/ll-logsheet-time-quality.9caf6acb.csv","lastModified":1781644360843,"size":309});
+registerFile("./data/ll-observer-coordinate-match.csv", {"name":"./data/ll-observer-coordinate-match.csv","mimeType":"text/csv","path":"./_file/data/ll-observer-coordinate-match.4a05ae98.csv","lastModified":1781644313043,"size":1458});
+registerFile("./data/ll-trip-offset-count-per-eez.csv", {"name":"./data/ll-trip-offset-count-per-eez.csv","mimeType":"text/csv","path":"./_file/data/ll-trip-offset-count-per-eez.4d7087fb.csv","lastModified":1781644209698,"size":704});
+registerFile("./data/ps-observer-coordinate-match.csv", {"name":"./data/ps-observer-coordinate-match.csv","mimeType":"text/csv","path":"./_file/data/ps-observer-coordinate-match.3c1355c2.csv","lastModified":1781644352991,"size":404});
+registerFile("./data/ps-trip-offset-count-per-eez.csv", {"name":"./data/ps-trip-offset-count-per-eez.csv","mimeType":"text/csv","path":"./_file/data/ps-trip-offset-count-per-eez.5dff3afb.csv","lastModified":1781644310523,"size":936});
+
+define({id: "58a0f606", inputs: ["FileAttachment"], outputs: ["llCount","psCount","llMatch","psMatch","allFlags1","psMap1","llByFlag","coordRows","llTimeMatch","timeRows"], body: async (FileAttachment) => {
+// ── Chapter 1: Trip offset count distribution per EEZ ────────────────────────
+const llCount = await FileAttachment("./data/ll-trip-offset-count-per-eez.csv").csv({typed: true});
+const psCount = await FileAttachment("./data/ps-trip-offset-count-per-eez.csv").csv({typed: true});
+
+// ── Table 1: GPS coordinate offset vs observer offset ─────────────────────
+const llMatch = await FileAttachment("./data/ll-observer-coordinate-match.csv").csv({typed: true});
+const psMatch = await FileAttachment("./data/ps-observer-coordinate-match.csv").csv({typed: true});
+
+// Derive unique flags across both datasets
+const allFlags1 = [...new Set([...llMatch.map(d => d.vessel_flag), ...psMatch.map(d => d.vessel_flag)])].sort();
+const psMap1 = new Map(psMatch.map(d => [d.vessel_flag, d]));
+
+// Group ll rows by vessel_flag → array of port rows
+const llByFlag = Map.groupBy(llMatch, d => d.vessel_flag);
+
+// Build display rows: a header row per flag (aggregate LL + PS), then one port sub-row per departure port
+const coordRows = allFlags1.flatMap(flag => {
+  const llPorts = llByFlag.get(flag) ?? [];
+  const ps = psMap1.get(flag) ?? null;
+
+  // Compute aggregate LL totals for the flag header row
+  const llTotal    = llPorts.reduce((s, d) => s + d.total_sets,    0);
+  const llMatching = llPorts.reduce((s, d) => s + d.matching_sets, 0);
+  const llAggrPct  = llTotal > 0 ? Math.round(10 * 100 * llMatching / llTotal) / 10 : null;
+  const llAggr     = llTotal > 0 ? { total_sets: llTotal, matching_sets: llMatching, match_pct: llAggrPct } : null;
+
+  const header = { flag, isHeader: true, ll: llAggr, ps };
+
+  // Only show port sub-rows when there are multiple ports
+  const portRows = llPorts.length > 1
+    ? llPorts
+        .sort((a, b) => a.match_pct - b.match_pct)
+        .map(d => ({ flag, isHeader: false, portName: d.port_name, ll: d, ps: null }))
+    : [];
+
+  return [header, ...portRows];
+});
+
+// ── Table 2: Logsheet set_time offset vs observer offset (Longline only) ────
+// NOTE: Purseseine is excluded — obsv.s_daylog.utc_act_dtime is NULL for 83%
+// of fishing rows, making per-set UTC comparison unreliable for PS.
+const llTimeMatch = await FileAttachment("./data/ll-logsheet-time-quality.csv").csv({typed: true});
+
+const timeRows = [...llTimeMatch].sort((a, b) => a.match_pct - b.match_pct);
+return {llCount,psCount,llMatch,psMatch,allFlags1,psMap1,llByFlag,coordRows,llTimeMatch,timeRows};
+}});
+
+define({id: "bc5b0491", inputs: ["d3","llCount","psCount","html","display"], body: (d3,llCount,psCount,html,display) => {
+{
+  // Pivot per EEZ: bucket → trip_count
+  const pivot = (rows) => {
+    const byEez = d3.rollup(rows, rs => rs, d => d.eez_code);
+    return byEez;
+  };
+  const llPivot = pivot(llCount);
+  const psPivot = pivot(psCount);
+
+  // All EEZ codes sorted by LL observer trips desc, then PS
+  const llTotals = d3.rollup(llCount, rs => rs[0].observer_trips, d => d.eez_code);
+  const psTotals = d3.rollup(psCount, rs => rs[0].observer_trips, d => d.eez_code);
+  const allEezCodes = [...new Set([...llPivot.keys(), ...psPivot.keys()])]
+    .sort((a, b) => {
+      const diff = (llTotals.get(b) ?? 0) - (llTotals.get(a) ?? 0);
+      return diff !== 0 ? diff : (psTotals.get(b) ?? 0) - (psTotals.get(a) ?? 0);
+    });
+
+  const bucketColor = b => b === 1 ? "#86efac" : b === 2 ? "#fde68a" : "#fca5a5";
+  const bucketLabel = b => b === 3 ? "3+" : String(b);
+
+  const cellPct = (rows, bucket, total) => {
+    if (!rows || total === 0) return html`<td style="padding:4px 8px;text-align:right;color:#9ca3af">—</td>`;
+    const row = rows.find(r => r.offset_bucket === bucket);
+    const n = row ? row.trip_count : 0;
+    const p = n / total * 100;
+    const bg = n > 0 ? `background:linear-gradient(90deg,${bucketColor(bucket)}88 ${p.toFixed(1)}%,transparent 0)` : "";
+    return html`<td style="padding:4px 8px;text-align:right;${bg};font-variant-numeric:tabular-nums">
+      ${n > 0 ? html`${p.toFixed(1)}<span style="color:#9ca3af;font-size:0.8em"> %</span>` : html`<span style="color:#9ca3af">0</span>`}
+    </td>`;
+  };
+
+  display(html`<table style="width:100%;border-collapse:collapse;font-size:0.88rem">
+    <thead>
+      <tr style="border-bottom:2px solid #e5e7eb;text-align:left">
+        <th style="padding:5px 8px" rowspan="2">EEZ</th>
+        <th style="padding:5px 8px;text-align:center;border-bottom:1px solid #e5e7eb" colspan="4">Longline</th>
+        <th style="padding:5px 8px;text-align:center;border-bottom:1px solid #e5e7eb" colspan="4">Purseseine</th>
+      </tr>
+      <tr style="border-bottom:1px solid #e5e7eb">
+        <th style="padding:4px 8px;text-align:right;font-weight:500">1 offset</th>
+        <th style="padding:4px 8px;text-align:right;font-weight:500">2 offsets</th>
+        <th style="padding:4px 8px;text-align:right;font-weight:500">3+</th>
+        <th style="padding:4px 8px;text-align:right;font-weight:500;color:#6b7280">trips</th>
+        <th style="padding:4px 8px;text-align:right;font-weight:500">1 offset</th>
+        <th style="padding:4px 8px;text-align:right;font-weight:500">2 offsets</th>
+        <th style="padding:4px 8px;text-align:right;font-weight:500">3+</th>
+        <th style="padding:4px 8px;text-align:right;font-weight:500;color:#6b7280">trips</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${allEezCodes.map((eez, i) => {
+        const llRows = llPivot.get(eez);
+        const psRows = psPivot.get(eez);
+        const llTotal = llTotals.get(eez) ?? 0;
+        const psTotal = psTotals.get(eez) ?? 0;
+        const bg = i % 2 === 0 ? "transparent" : "#f9fafb";
+        return html`<tr style="background:${bg};border-bottom:1px solid #f3f4f6">
+          <td style="padding:4px 8px;font-weight:600">${eez}</td>
+          ${cellPct(llRows, 1, llTotal)}
+          ${cellPct(llRows, 2, llTotal)}
+          ${cellPct(llRows, 3, llTotal)}
+          <td style="padding:4px 8px;text-align:right;color:#6b7280;font-size:0.82rem">${llTotal > 0 ? d3.format(",")(llTotal) : "—"}</td>
+          ${cellPct(psRows, 1, psTotal)}
+          ${cellPct(psRows, 2, psTotal)}
+          ${cellPct(psRows, 3, psTotal)}
+          <td style="padding:4px 8px;text-align:right;color:#6b7280;font-size:0.82rem">${psTotal > 0 ? d3.format(",")(psTotal) : "—"}</td>
+        </tr>`;
+      })}
+    </tbody>
+  </table>`);
+}
+}});
+
+define({id: "b7cc6ea6", inputs: ["html","display","coordRows"], outputs: ["fmt","pct","bar","color"], body: (html,display,coordRows) => {
+const fmt = n => n == null ? "—" : n.toLocaleString();
+const pct = (v, n) => v == null ? "—" : html`<span style="font-variant-numeric:tabular-nums">${v.toFixed(1)} %</span><span style="color:#9ca3af;font-size:0.8em"> (${fmt(n)})</span>`;
+
+const bar = (v, col) =>
+  v == null ? "" : `background:linear-gradient(90deg,${col} ${v.toFixed(1)}%,transparent 0)`;
+
+const color = v => v == null ? "" : v >= 80 ? "#86efac" : v >= 60 ? "#fde68a" : "#fca5a5";
+
+display(html`<table style="width:100%;border-collapse:collapse;font-size:0.9rem">
+  <thead>
+    <tr style="border-bottom:2px solid #e5e7eb;text-align:left">
+      <th style="padding:6px 12px">Flag</th>
+      <th style="padding:6px 12px">Departure port</th>
+      <th style="padding:6px 12px;text-align:right">Longline match (paired sets)</th>
+      <th style="padding:6px 12px;text-align:right">Purseseine match (paired sets)</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${coordRows.map((row, i) => {
+      const bg = row.isHeader ? "#f1f5f9" : (i % 2 === 0 ? "transparent" : "#f9fafb");
+      const flagCell = row.isHeader
+        ? html`<td style="padding:5px 12px;font-weight:700;border-top:1px solid #e5e7eb" colspan="${row.ll ? 1 : 2}">${row.flag}</td>`
+        : html`<td style="padding:5px 12px"></td>`;
+      const portCell = row.isHeader
+        ? (row.ll ? html`<td style="padding:5px 12px;font-style:italic;color:#6b7280;border-top:1px solid #e5e7eb">all ports</td>` : html``)
+        : html`<td style="padding:5px 12px;padding-left:2rem;color:#374151">${row.portName}</td>`;
+      return html`<tr style="background:${bg}">
+        ${flagCell}
+        ${portCell}
+        <td style="padding:5px 12px;text-align:right;${bar(row.ll?.match_pct, color(row.ll?.match_pct))}">${pct(row.ll?.match_pct, row.ll?.total_sets)}</td>
+        <td style="padding:5px 12px;text-align:right;${bar(row.ps?.match_pct, color(row.ps?.match_pct))}">${pct(row.ps?.match_pct, row.ps?.total_sets)}</td>
+      </tr>`;
+    })}
+  </tbody>
+</table>`);
+return {fmt,pct,bar,color};
+}});
+
+define({id: "b257f9f4", inputs: ["display","html","timeRows","bar","color","pct"], body: (display,html,timeRows,bar,color,pct) => {
+display(html`<table style="width:100%;border-collapse:collapse;font-size:0.9rem">
+  <thead>
+    <tr style="border-bottom:2px solid #e5e7eb;text-align:left">
+      <th style="padding:6px 12px">Flag</th>
+      <th style="padding:6px 12px;text-align:right">Longline match (paired sets)</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${timeRows.map((row, i) => html`<tr style="background:${i % 2 === 0 ? "transparent" : "#f9fafb"}">
+      <td style="padding:5px 12px;font-weight:600">${row.vessel_flag}</td>
+      <td style="padding:5px 12px;text-align:right;${bar(row.match_pct, color(row.match_pct))}">${pct(row.match_pct, row.total_sets)}</td>
+    </tr>`)}
+  </tbody>
+</table>`);
+}});
+
+</script>
+</head>
+<body>
+<input id="observablehq-sidebar-toggle" type="checkbox" title="Toggle sidebar">
+<label id="observablehq-sidebar-backdrop" for="observablehq-sidebar-toggle"></label>
+<nav id="observablehq-sidebar">
+  <ol>
+    <label id="observablehq-sidebar-close" for="observablehq-sidebar-toggle"></label>
+    <li class="observablehq-link observablehq-link-active"><a href="./">Logsheet UTC Analysis</a></li>
+  </ol>
+  <ol>
+    <li class="observablehq-link observablehq-link-active"><a href="./">Summary</a></li>
+    <li class="observablehq-link"><a href="./set-time-distribution">Set time distribution</a></li>
+    <li class="observablehq-link"><a href="./entities-to-migrate">Entities to migrate</a></li>
+    <li class="observablehq-link"><a href="./observer-offsets">Observer offsets by vessel flag</a></li>
+    <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity IANA timezone offset by vessel flag</a></li>
+    <li class="observablehq-link"><a href="./logsheet-nautical-offsets">Logsheet activity Nautical timezone offset by vessel flag</a></li>
+    <li class="observablehq-link"><a href="./observer-offset-per-eez">Observer offset distribution by EEZ</a></li>
+    <li class="observablehq-link"><a href="./observer-offset-per-flag">Observer offset distribution by vessel flag</a></li>
+    <li class="observablehq-link"><a href="./observer-offset-per-logsheet">Observer offset per instance source</a></li>
+    <li class="observablehq-link"><a href="./eez-list-per-trip">EEZ combinations per trip</a></li>
+    <li class="observablehq-link"><a href="./utc-offset-predictions">UTC offset predictions</a></li>
+    <li class="observablehq-link"><a href="./bayesian-estimator-explained">Bayesian estimator — how it works</a></li>
+  </ol>
+</nav>
+<script>{const e=document.querySelector("#observablehq-sidebar"),o=document.querySelector("#observablehq-sidebar-toggle"),r=sessionStorage.getItem("observablehq-sidebar");r?o.checked=r==="true":o.indeterminate=!0;for(const t of document.querySelectorAll("#observablehq-sidebar summary")){const s=t.parentElement;switch(sessionStorage.getItem(`observablehq-sidebar:${t.textContent}`)){case"true":s.open=!0;break;case"false":s.classList.contains("observablehq-section-active")||(s.open=!1);break}}addEventListener("beforeunload",()=>sessionStorage.setItem("observablehq-sidebar-scrolly",`${e.scrollTop}`));const a=sessionStorage.getItem("observablehq-sidebar-scrolly");a!=null&&(e.style.cssText="overflow: hidden;",e.scrollTop=+a,e.style.cssText="");}</script>
+<div id="observablehq-center">
+<main id="observablehq-main" class="observablehq">
+<h1 id="logsheet-utc-analysis" tabindex="-1"><a class="observablehq-header-anchor" href="#logsheet-utc-analysis">Logsheet UTC analysis</a></h1>
+<div class="observablehq observablehq--block"><!--:58a0f606:--></div>
+<h2 id="number-of-offsets-per-trip-per-eez" tabindex="-1"><a class="observablehq-header-anchor" href="#number-of-offsets-per-trip-per-eez">Number of offsets per trip per EEZ</a></h2>
+<p>For each <strong>EEZ</strong>, this table shows what percentage of observer-linked trips encountered
+exactly <strong>1</strong>, <strong>2</strong>, or <strong>3+</strong> distinct UTC offsets across all their fishing sets.</p>
+<div class="observablehq observablehq--block"><!--:bc5b0491:--></div>
+<h2 id="observer-offset-vs-logsheet-coordinate-offset-by-vessel-flag-and-departure-port" tabindex="-1"><a class="observablehq-header-anchor" href="#observer-offset-vs-logsheet-coordinate-offset-by-vessel-flag-and-departure-port">Observer offset vs logsheet coordinate offset — by vessel flag and departure port</a></h2>
+<p>For each <strong>fishing set</strong> that has both an <strong>observer trip record</strong> and a valid <strong>GPS longitude</strong>,
+the table below shows what percentage of sets have a GPS-derived UTC offset that agrees
+within ±1 h with the observer-recorded UTC offset.</p>
+<p><strong>Method :</strong></p>
+<ul>
+<li>Coordinate offset: <code>ROUND(lond / 15.0, 0)</code> — nautical timezone formula</li>
+<li>Observer offset: <code>ROUND(DATEDIFF(MINUTE, utc_dtime, local_dtime) / 60.0 × 2, 0) / 2</code></li>
+<li>Offsets &gt; UTC+12 (e.g. Kiribati UTC+13/+14) are folded back: +13 → −11, +14 → −10</li>
+<li>Sets are <strong>paired</strong>: only sets where both an observer record and valid coordinates exist are included</li>
+<li>Longline: one set per day, matched to observer <code>l_set</code> on the same date; grouped by departure port</li>
+<li>Purseseine: multiple sets per day, each matched to the observer daily record (<code>s_day</code>) on the same date</li>
+</ul>
+<div class="observablehq observablehq--block"><!--:b7cc6ea6:--></div>
+<h2 id="logsheet-set-time-vs-observer-set-time-longline-only" tabindex="-1"><a class="observablehq-header-anchor" href="#logsheet-set-time-vs-observer-set-time-longline-only">Logsheet set time vs Observer set time — Longline only</a></h2>
+<p>For each <strong>longline fishing set</strong> that has a matching <strong>observer trip set</strong>,
+the table below shows the percentage of sets where the logsheet set time
+agrees with the observer-recorded UTC offset.</p>
+<blockquote>
+<p><strong>Note — Purseseine excluded</strong>: The PS observer database stores UTC timestamps only
+at the daily level (<code>s_day.utc_start_dtime</code>). Per-set UTC times (<code>s_daylog.utc_act_dtime</code>)
+are NULL for 83 % of fishing rows, making this comparison unreliable for PS.</p>
+</blockquote>
+<p><strong>Method:</strong></p>
+<ul>
+<li>Logsheet datetime: <code>logdate + set_time</code> (combining date and HHMM time columns)</li>
+<li>Logsheet offset: <code>DATEDIFF(MINUTE, utc_set_dtime, logsheet_dt) / 60</code> — how far is the logsheet timestamp from observer UTC?</li>
+<li>Observer offset: <code>DATEDIFF(MINUTE, utc_set_dtime, set_dtime) / 60</code></li>
+<li>Match if <code>ABS(logsheet_offset − observer_offset_normalised) ≤ 1</code></li>
+<li>Offsets &gt; UTC+12 are folded back across the dateline (+13 → −11, +14 → −10)</li>
+</ul>
+<div class="observablehq observablehq--block"><!--:b257f9f4:--></div>
+</main>
+<footer id="observablehq-footer">
+<nav><a rel="next" href="./set-time-distribution"><span>Set time distribution</span></a></nav>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-17T10:09:32">Jun 17, 2026</a>.</div>
+</footer>
+</div>
+</body>
+</html>
