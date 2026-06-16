@@ -30,6 +30,7 @@ vessel_flag AS (
 ),
 
 -- ── Entity-link bridge: PS logsheet ↔ observer trip ──────────────────────────
+-- UNION ALL is safe: the two legs cover opposite link directions (no duplicates).
 PSWithObserver AS (
     SELECT el.dto_guid_left  AS log_trip_id,
            el.dto_guid_right AS obstrip_id
@@ -37,7 +38,7 @@ PSWithObserver AS (
     WHERE el.dto_type_left  = 'PurseseineLogsheetDTO'
       AND el.dto_type_right = 'ObserverTripDTO'
 
-    UNION
+    UNION ALL
 
     SELECT el.dto_guid_right AS log_trip_id,
            el.dto_guid_left  AS obstrip_id
@@ -46,26 +47,36 @@ PSWithObserver AS (
       AND el.dto_type_left  = 'ObserverTripDTO'
 ),
 
+-- ── Pre-compute date and offset from obsv.s_day once ─────────────────────────
+-- Avoids repeated CAST + DATEDIFF evaluation inside the join.
+s_day_offsets AS (
+    SELECT
+        obstrip_id,
+        CAST(start_dtime AS DATE) AS set_date,
+        ROUND(
+            CAST(DATEDIFF(MINUTE, utc_start_dtime, start_dtime) AS FLOAT)
+            / 60.0 * 2, 0
+        ) / 2.0 AS observer_offset
+    FROM obsv.s_day
+    WHERE utc_start_dtime IS NOT NULL
+      AND start_dtime      IS NOT NULL
+),
+
 -- ── Raw observer offset per (vessel_flag, log_trip_id, day) ──────────────────
 raw_offsets AS (
     SELECT
-        vf.flag_id           AS vessel_flag,
+        vf.flag_id     AS vessel_flag,
         tl.log_trip_id,
-        ROUND(
-            CAST(DATEDIFF(MINUTE, sd.utc_start_dtime, sd.start_dtime) AS FLOAT)
-            / 60.0 * 2, 0
-        ) / 2.0 AS observer_offset
+        sd.observer_offset
     FROM log.sets_ps sl
-    INNER JOIN log.trips_ps tl    ON tl.log_trip_id = sl.log_trip_id
-    INNER JOIN vessel_flag vf     ON vf.vessel_id   = tl.vessel_id
-    INNER JOIN PSWithObserver po  ON po.log_trip_id = tl.log_trip_id
-    INNER JOIN obsv.s_day sd
+    INNER JOIN log.trips_ps tl   ON tl.log_trip_id = sl.log_trip_id
+    INNER JOIN vessel_flag vf    ON vf.vessel_id   = tl.vessel_id
+    INNER JOIN PSWithObserver po ON po.log_trip_id = tl.log_trip_id
+    INNER JOIN s_day_offsets sd
         ON  sd.obstrip_id = po.obstrip_id
-        AND CAST(sd.start_dtime AS DATE) = CAST(sl.logdate AS DATE)
-    WHERE sl.s_activity_id  = 1
-      AND sl.logdate         >= '${ANALYSIS_START_DATE}'
-      AND sd.utc_start_dtime IS NOT NULL
-      AND sd.start_dtime      IS NOT NULL
+        AND sd.set_date   = CAST(sl.logdate AS DATE)
+    WHERE sl.s_activity_id = 1
+      AND sl.logdate        >= '${ANALYSIS_START_DATE}'
 ),
 
 -- ── Normalise: fold >+12 across dateline, discard outliers ───────────────────
