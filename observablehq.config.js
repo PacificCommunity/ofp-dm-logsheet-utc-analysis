@@ -15,6 +15,7 @@ export default {
     {name: "Observer offset per instance source", path: "/observer-offset-per-logsheet"},
     {name: "EEZ combinations per trip", path: "/eez-list-per-trip"},
     {name: "UTC offset predictions", path: "/utc-offset-predictions"},
+    {name: "Bayesian estimator — how it works", path: "/bayesian-estimator-explained"},
   ],
 
   // Content to add to the head of the page, e.g. for a favicon:
