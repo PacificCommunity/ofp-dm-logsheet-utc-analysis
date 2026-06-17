@@ -6,6 +6,7 @@ export default {
   pages: [
     {name: "Summary", path: "/"},
     {name: "Set time distribution", path: "/set-time-distribution"},
+    {name: "Set time — UTC or local?", path: "/set-time-utc-detection"},
     {name: "Entities to migrate", path: "/entities-to-migrate"},
     {name: "Observer offsets by vessel flag", path: "/observer-offsets"},
     {name: "Logsheet activity IANA timezone offset by vessel flag", path: "/logsheet-offsets"},
