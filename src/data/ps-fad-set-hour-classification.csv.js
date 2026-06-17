@@ -16,7 +16,7 @@
  *   instance_source  — bitmask from log.trips_ps (links to TufmanInstance enum)
  *   nautical_offset  — ROUND(lond / 15.0, 0) — nautical timezone offset for the set
  *   set_hour         — CAST(LEFT(set_time, 2) AS INT) from log.sets_ps
- *   school_type      — "Free school" (school_id 1-2) | "FAD-associated" (school_id 3-5)
+ *   school_type      — "unassociated group" (school_id 1-2) | "associated group" (school_id 3-5)
  */
 
 import odbc from "odbc";
@@ -30,8 +30,8 @@ SELECT DISTINCT
     ROUND(sl.lond / 15.0, 0)          AS nautical_offset,
     CAST(LEFT(sl.set_time, 2) AS INT)  AS set_hour,
     CASE
-        WHEN sl.school_id IN (1, 2)       THEN 'Free school'
-        WHEN sl.school_id BETWEEN 3 AND 5 THEN 'FAD-associated'
+        WHEN sl.school_id IN (1, 2)       THEN 'unassociated group'
+        WHEN sl.school_id BETWEEN 3 AND 5 THEN 'associated group'
     END                                AS school_type
 FROM log.sets_ps sl
 INNER JOIN log.trips_ps tl ON tl.log_trip_id = sl.log_trip_id
