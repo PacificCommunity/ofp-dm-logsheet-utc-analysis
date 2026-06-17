@@ -11,7 +11,7 @@ Purse-seine FAD sets (floating object / FAD-associated, `school_id` 3–5) are a
 If `log.sets_ps.set_time` was entered as **local time**, FAD set hours should cluster at 02:00–06:00.  
 If it was entered as **UTC**, the same events appear shifted: e.g. a 04:00 local set in UTC+11 waters would be stored as 17:00.
 
-This page uses observer-linked trips — where the UTC offset is known — to test both interpretations and classify each instance source.
+The UTC offset for each set is approximated using the **nautical timezone formula**: `ROUND(lond / 15.0, 0)`. This covers all PS sets with a recorded longitude — not just observer-linked trips.
 
 ```js
 import * as d3 from "npm:d3";
@@ -24,6 +24,7 @@ const INSTANCE_NAMES = new Map([
   [1,        "INDUSTRY"],
   [2,        "OFP"],
   [4,        "MH"],
+  [8,        "FM"],
   [16,       "CK"],
   [32,       "UST"],
   [128,      "KI"],
@@ -32,8 +33,10 @@ const INSTANCE_NAMES = new Map([
   [1024,     "PF"],
   [2048,     "NR"],
   [4096,     "NU"],
+    [8192,     "PG"],
   [16384,    "TV"],
   [32768,    "VU"],
+  [65536, "PW"],
   [131072,   "TK"],
   [262144,   "SB"],
   [524288,   "FJ"],
@@ -46,16 +49,17 @@ const INSTANCE_NAMES = new Map([
 
 const instanceName = v => INSTANCE_NAMES.get(v) ?? String(v);
 
-// Sunrise threshold (hours, local): good approximation for tropical Pacific year-round
+// Sunrise / sunset thresholds — good approximations for tropical Pacific year-round
 const SUNRISE = 6;
+const SUNSET  = 18;
 
 // Enrich each row with the UTC-adjusted hour
-// If set_time was entered as UTC: local_hour = (set_hour + utc_offset + 24) % 24
+// If set_time was entered as UTC: local_hour = (set_hour + nautical_offset + 24) % 24
 const data = raw.map(d => ({
   ...d,
-  set_hour_adjusted: ((d.set_hour + d.modal_utc_offset) % 24 + 24) % 24,
+  set_hour_adjusted: ((d.set_hour + d.nautical_offset) % 24 + 24) % 24,
   before_sunrise_recorded: d.set_hour < SUNRISE,
-  before_sunrise_adjusted: ((d.set_hour + d.modal_utc_offset) % 24 + 24) % 24 < SUNRISE,
+  before_sunrise_adjusted: ((d.set_hour + d.nautical_offset) % 24 + 24) % 24 < SUNRISE,
 }));
 
 const fad  = data.filter(d => d.school_type === "FAD-associated");
@@ -86,9 +90,9 @@ const pctBeforeAdjusted = d3.format(".1%")(d3.sum(fadAdjusted.filter(d => d.hour
 ```
 
 ```js
-display(html`<p><strong>${d3.format(",")(fad.length)}</strong> FAD sets across observer-linked trips.
+display(html`<p><strong>${d3.format(",")(fad.length)}</strong> FAD sets (all PS trips with longitude).
   Before 06:00 <strong>as-recorded: ${pctBeforeRecorded}</strong> &nbsp;|&nbsp;
-  Before 06:00 <strong>UTC-adjusted: ${pctBeforeAdjusted}</strong>.
+  Before 06:00 <strong>nautical-adjusted: ${pctBeforeAdjusted}</strong>.
 </p>`);
 ```
 
@@ -101,6 +105,7 @@ const sharedX = {
 const sharedY = { label: "Sets (%)", grid: true, tickFormat: v => `${v}%` };
 
 function fadHourChart(countsData, {title, fill}) {
+  const yMax = Math.max(...countsData.map(d => d.pct));
   return Plot.plot({
     title,
     width,
@@ -115,7 +120,13 @@ function fadHourChart(countsData, {title, fill}) {
       // Sunrise line
       Plot.ruleX([SUNRISE], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
       Plot.text([{ hour: SUNRISE, label: "sunrise" }], {
-        x: "hour", y: () => Math.max(...countsData.map(d => d.pct)) * 0.9,
+        x: "hour", y: () => yMax * 0.9,
+        text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start"
+      }),
+      // Sunset line
+      Plot.ruleX([SUNSET], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
+      Plot.text([{ hour: SUNSET, label: "sunset" }], {
+        x: "hour", y: () => yMax * 0.9,
         text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start"
       }),
       Plot.ruleY([0]),
@@ -127,7 +138,7 @@ function fadHourChart(countsData, {title, fill}) {
 ```js
 display(html`<div style="display:flex;gap:1.5rem;flex-wrap:wrap">
   ${fadHourChart(fadRecorded, { title: "FAD sets — as recorded (hypothesis: UTC)", fill: "#f59e0b" })}
-  ${fadHourChart(fadAdjusted, { title: "FAD sets — UTC-adjusted to local (UTC + offset)", fill: "#34d399" })}
+  ${fadHourChart(fadAdjusted, { title: "FAD sets — nautical-adjusted to local (UTC + offset)", fill: "#34d399" })}
 </div>`);
 ```
 
@@ -138,7 +149,7 @@ display(html`<div style="display:flex;gap:1.5rem;flex-wrap:wrap">
 ## 2 — Per-instance classification
 
 For each instance source, we compare the % of FAD sets before 06:00 under both interpretations.
-An instance where the **adjusted** % is far higher than the **recorded** % is almost certainly entering times as UTC.
+An instance where the **nautical-adjusted** % is far higher than the **recorded** % is almost certainly entering times as UTC.
 
 ```js
 // Per instance_source summary
@@ -167,19 +178,19 @@ const instanceRows = [...byInstance.values()]
 ```js
 // Bar chart: side-by-side recorded vs adjusted per instance
 const instanceBarData = instanceRows.flatMap(r => [
-  { instance: r.instance_name, interpretation: "As recorded", pct: r.pct_rec },
-  { instance: r.instance_name, interpretation: "UTC-adjusted", pct: r.pct_adj },
+  { instance: r.instance_name, interpretation: "As recorded",       pct: r.pct_rec },
+  { instance: r.instance_name, interpretation: "Nautical-adjusted", pct: r.pct_adj },
 ]);
 
 display(Plot.plot({
-  title: "% FAD sets before 06:00 — as recorded vs UTC-adjusted, by instance",
+  title: "% FAD sets before 06:00 — as recorded vs nautical-adjusted, by instance",
   width,
   height: 40 + instanceRows.length * 28,
   marginLeft: 80,
   marginRight: 10,
   x: { label: "% before 06:00", grid: true, tickFormat: v => `${v}%` },
   y: { label: null },
-  color: { legend: true, domain: ["As recorded", "UTC-adjusted"], range: ["#f59e0b", "#34d399"] },
+  color: { legend: true, domain: ["As recorded", "Nautical-adjusted"], range: ["#f59e0b", "#34d399"] },
   marks: [
     Plot.barX(instanceBarData, Plot.groupY({ x: "sum" }, {
       x: "pct", y: "instance", fill: "interpretation",
@@ -203,7 +214,7 @@ display(html`<table style="border-collapse:collapse;width:100%;font-size:0.9rem"
       <th style="text-align:left;padding:6px 10px">Instance</th>
       <th style="text-align:right;padding:6px 10px">FAD sets</th>
       <th style="text-align:right;padding:6px 10px">% before 06:00 (recorded)</th>
-      <th style="text-align:right;padding:6px 10px">% before 06:00 (adjusted)</th>
+      <th style="text-align:right;padding:6px 10px">% before 06:00 (nautical-adjusted)</th>
       <th style="text-align:center;padding:6px 10px">Verdict</th>
     </tr>
   </thead>
@@ -234,14 +245,14 @@ const pctDayAdjusted = d3.format(".1%")(d3.sum(freeAdjusted.filter(d => d.hour >
 ```
 
 ```js
-display(html`<p><strong>${d3.format(",")(free.length)}</strong> free school sets across observer-linked trips.
+display(html`<p><strong>${d3.format(",")(free.length)}</strong> free school sets (all PS trips with longitude).
   In daylight (06:00–18:00) <strong>as-recorded: ${pctDayRecorded}</strong> &nbsp;|&nbsp;
-  In daylight <strong>UTC-adjusted: ${pctDayAdjusted}</strong>.
+  In daylight <strong>nautical-adjusted: ${pctDayAdjusted}</strong>.
 </p>`);
 
 display(html`<div style="display:flex;gap:1.5rem;flex-wrap:wrap">
   ${fadHourChart(freeRecorded, { title: "Free school sets — as recorded", fill: "#60a5fa" })}
-  ${fadHourChart(freeAdjusted, { title: "Free school sets — UTC-adjusted", fill: "#818cf8" })}
+  ${fadHourChart(freeAdjusted, { title: "Free school sets — nautical-adjusted", fill: "#818cf8" })}
 </div>`);
 ```
 
@@ -267,7 +278,8 @@ display(html`<dl style="line-height:2">
   <dd>${unclearInstances.length ? unclearInstances.join(", ") : "none"}</dd>
 </dl>
 <p style="color:#6b7280;font-size:0.875rem">
-  Note: verdicts are based on observer-linked trips only. Non-observer trips from the same instance are assumed to follow the same convention.
+  Note: classification is based on all PS sets with a valid longitude. The nautical offset (lond / 15) is an approximation —
+  it may differ from the actual UTC offset for vessels operating near timezone boundaries.
   Instances with fewer than ~50 FAD sets should be treated with caution.
 </p>`);
 ```
