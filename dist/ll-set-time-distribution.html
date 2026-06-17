@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="generator" content="Observable Framework v1.13.4">
+<title>Set time distribution | Logsheet UTC Analysis</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
+<link rel="preload" as="style" href="./_observablehq/theme-air.d5b7fcbe.css">
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
+<link rel="stylesheet" type="text/css" href="./_observablehq/theme-air.d5b7fcbe.css">
+<link rel="modulepreload" href="./_observablehq/client.1774e20a.js">
+<link rel="modulepreload" href="./_observablehq/runtime.607a8173.js">
+<link rel="modulepreload" href="./_observablehq/stdlib.277aeab8.js">
+<link rel="modulepreload" href="./_npm/@observablehq/plot@0.6.17/a96a6bbb.js">
+<link rel="modulepreload" href="./_npm/d3@7.9.0/66d82917.js">
+<link rel="modulepreload" href="./_npm/d3-dsv@3.0.1/9cffc2bd.js">
+<link rel="modulepreload" href="./_npm/isoformat@0.2.1/18cbf477.js">
+<link rel="modulepreload" href="./_npm/interval-tree-1d@1.0.4/53fe8176.js">
+<link rel="modulepreload" href="./_npm/d3-array@3.2.4/e93ca09f.js">
+<link rel="modulepreload" href="./_npm/d3-axis@3.0.0/0f2de24d.js">
+<link rel="modulepreload" href="./_npm/d3-brush@3.0.0/65eb105b.js">
+<link rel="modulepreload" href="./_npm/d3-chord@3.0.1/7ef8fb2e.js">
+<link rel="modulepreload" href="./_npm/d3-color@3.1.0/aeb57b94.js">
+<link rel="modulepreload" href="./_npm/d3-contour@4.0.2/1d2aed74.js">
+<link rel="modulepreload" href="./_npm/d3-delaunay@6.0.4/87adea64.js">
+<link rel="modulepreload" href="./_npm/d3-dispatch@3.0.1/9ba9c7f3.js">
+<link rel="modulepreload" href="./_npm/d3-drag@3.0.0/4202580c.js">
+<link rel="modulepreload" href="./_npm/d3-ease@3.0.1/cdd7e898.js">
+<link rel="modulepreload" href="./_npm/d3-fetch@3.0.1/b4e2ad9a.js">
+<link rel="modulepreload" href="./_npm/d3-force@3.0.0/5e804d15.js">
+<link rel="modulepreload" href="./_npm/d3-format@3.1.2/3785bf2d.js">
+<link rel="modulepreload" href="./_npm/d3-geo@3.1.1/40599fb3.js">
+<link rel="modulepreload" href="./_npm/d3-hierarchy@3.1.2/e49e792c.js">
+<link rel="modulepreload" href="./_npm/d3-interpolate@3.0.1/8d1e5425.js">
+<link rel="modulepreload" href="./_npm/d3-path@3.1.0/20d3f133.js">
+<link rel="modulepreload" href="./_npm/d3-polygon@3.0.1/7553081f.js">
+<link rel="modulepreload" href="./_npm/d3-quadtree@3.0.1/0dfd751c.js">
+<link rel="modulepreload" href="./_npm/d3-random@3.0.1/3c90ee06.js">
+<link rel="modulepreload" href="./_npm/d3-scale@4.0.2/720b7f0a.js">
+<link rel="modulepreload" href="./_npm/d3-scale-chromatic@3.1.0/ba24c2e7.js">
+<link rel="modulepreload" href="./_npm/d3-selection@3.0.0/4d94e5b7.js">
+<link rel="modulepreload" href="./_npm/d3-shape@3.2.0/6d3a6726.js">
+<link rel="modulepreload" href="./_npm/d3-time@3.1.0/9f03c579.js">
+<link rel="modulepreload" href="./_npm/d3-time-format@4.1.0/07c9626f.js">
+<link rel="modulepreload" href="./_npm/d3-timer@3.0.1/b58a267d.js">
+<link rel="modulepreload" href="./_npm/d3-transition@3.0.1/004da2ac.js">
+<link rel="modulepreload" href="./_npm/d3-zoom@3.0.0/b5786b3f.js">
+<link rel="modulepreload" href="./_npm/binary-search-bounds@2.0.5/cbf6ba23.js">
+<link rel="modulepreload" href="./_npm/internmap@2.0.3/e08981d9.js">
+<link rel="modulepreload" href="./_npm/delaunator@5.1.0/d4ec0aa1.js">
+<link rel="modulepreload" href="./_npm/robust-predicates@3.0.3/42820bfa.js">
+<link rel="icon" href="./_file/observable.1af93621.png" type="image/png" sizes="32x32">
+<script type="module">
+
+import {define} from "./_observablehq/client.1774e20a.js";
+import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
+
+registerFile("./data/set-time-distribution.csv", {"name":"./data/set-time-distribution.csv","mimeType":"text/csv","path":"./_file/data/set-time-distribution.48b06f19.csv","lastModified":1781673161129,"size":778});
+
+define({id: "c104fa42", inputs: ["FileAttachment"], outputs: ["Plot","d3","sets","byType","ll","ps","totalLL","psBySchool","psFree","psFad","totalPsFree","totalPsFad","totalPS"], body: async (FileAttachment) => {
+const [Plot, d3] = await Promise.all([import("./_npm/@observablehq/plot@0.6.17/a96a6bbb.js"), import("./_npm/d3@7.9.0/66d82917.js")]);
+
+const sets = await FileAttachment("./data/set-time-distribution.csv").csv({typed: true});
+
+const byType = d3.group(sets, d => d.type);
+const ll  = byType.get("LonglineLogsheet")   ?? [];
+const ps  = byType.get("PurseseineLogsheet") ?? [];
+const totalLL = d3.sum(ll, d => d.count);
+
+const psBySchool = d3.group(ps, d => d.school_type);
+const psFree = psBySchool.get("Free school")    ?? [];
+const psFad  = psBySchool.get("FAD-associated") ?? [];
+const totalPsFree = d3.sum(psFree, d => d.count);
+const totalPsFad  = d3.sum(psFad,  d => d.count);
+const totalPS = totalPsFree + totalPsFad;
+return {Plot,d3,sets,byType,ll,ps,totalLL,psBySchool,psFree,psFad,totalPsFree,totalPsFad,totalPS};
+}});
+
+define({id: "9ed7c6d4", inputs: ["Plot","width","d3"], outputs: ["SETTING_START_WINDOW_BEGIN","SETTING_START_WINDOW_END","hourChart"], body: (Plot,width,d3) => {
+const SETTING_START_WINDOW_BEGIN = 4;
+const SETTING_START_WINDOW_END  = 8;
+
+function hourChart(data, {title, fill}) {
+    const yMax = Math.max(...data.map(d => d.pct));
+  return Plot.plot({
+    title,
+    width,
+    height: 380,
+    marginLeft: 55,
+    marginBottom: 48,
+    x: {
+      label: "Hour of day (local time)",
+      domain: d3.range(0, 24),
+      tickFormat: h => `${String(h).padStart(2, "0")}:00`
+    },
+    y: {
+      label: "Sets (%)",
+      grid: true,
+      tickFormat: v => `${v}%`
+    },
+    marks: [
+        Plot.barY(data, {
+        x: "hour",
+        y: "pct",
+        fill,
+        tip: true,
+        title: d => `${String(d.hour).padStart(2, "0")}:00 — ${d3.format(",")(d.count)} sets (${d.pct}%)`
+      }),
+      Plot.text(data.filter(d => d.pct >= 4), {
+        x: "hour",
+        y: "pct",
+        text: d => `${d.pct}%`,
+        dy: -8,
+        fontSize: 11,
+        fontWeight: "600",
+        fill: "#374151"
+      }),
+      Plot.ruleY([0]), 
+        Plot.ruleX([SETTING_START_WINDOW_BEGIN], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
+        Plot.text([{ hour: SETTING_START_WINDOW_BEGIN, label: "sunrise" }], {
+            x: "hour", y: () => yMax * 0.9,
+            text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start"
+        }),
+        Plot.ruleX([SETTING_START_WINDOW_END], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
+        Plot.text([{ hour: SETTING_START_WINDOW_END, label: "sunset" }], {
+            x: "hour", y: () => yMax * 0.9,
+            text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start"
+        }),
+    ]
+  });
+}
+return {SETTING_START_WINDOW_BEGIN,SETTING_START_WINDOW_END,hourChart};
+}});
+
+define({id: "c715a025", mode: "inline", inputs: ["d3","totalLL","display"], body: async (d3,totalLL,display) => {
+display(await(
+d3.format(",")(totalLL)
+))
+}});
+
+define({id: "0fff2706", inputs: ["hourChart","ll","display"], body: async (hourChart,ll,display) => {
+display(await(
+hourChart(ll, {
+  title: "Longline set start time distribution",
+  fill: "#60a5fa"
+})
+))
+}});
+
+</script>
+</head>
+<body>
+<input id="observablehq-sidebar-toggle" type="checkbox" title="Toggle sidebar">
+<label id="observablehq-sidebar-backdrop" for="observablehq-sidebar-toggle"></label>
+<nav id="observablehq-sidebar">
+  <ol>
+    <label id="observablehq-sidebar-close" for="observablehq-sidebar-toggle"></label>
+    <li class="observablehq-link"><a href="./">Logsheet UTC Analysis</a></li>
+  </ol>
+  <ol>
+    <li class="observablehq-link"><a href="./">Summary</a></li>
+    <li class="observablehq-link observablehq-link-active"><a href="./ll-set-time-distribution">Longline set time distribution</a></li>
+    <li class="observablehq-link"><a href="./ps-set-time-distribution">Purseseine set time distribution?</a></li>
+    <li class="observablehq-link"><a href="./entities-to-migrate">Entities to migrate</a></li>
+    <li class="observablehq-link"><a href="./observer-offsets">Observer offsets by vessel flag</a></li>
+    <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity IANA timezone offset by vessel flag</a></li>
+    <li class="observablehq-link"><a href="./logsheet-nautical-offsets">Logsheet activity Nautical timezone offset by vessel flag</a></li>
+    <li class="observablehq-link"><a href="./observer-offset-per-eez">Observer offset distribution by EEZ</a></li>
+    <li class="observablehq-link"><a href="./observer-offset-per-flag">Observer offset distribution by vessel flag</a></li>
+    <li class="observablehq-link"><a href="./observer-offset-per-logsheet">Observer offset per instance source</a></li>
+    <li class="observablehq-link"><a href="./eez-list-per-trip">EEZ combinations per trip</a></li>
+    <li class="observablehq-link"><a href="./utc-offset-predictions">UTC offset predictions</a></li>
+    <li class="observablehq-link"><a href="./bayesian-estimator-explained">Bayesian estimator — how it works</a></li>
+  </ol>
+</nav>
+<script>{const e=document.querySelector("#observablehq-sidebar"),o=document.querySelector("#observablehq-sidebar-toggle"),r=sessionStorage.getItem("observablehq-sidebar");r?o.checked=r==="true":o.indeterminate=!0;for(const t of document.querySelectorAll("#observablehq-sidebar summary")){const s=t.parentElement;switch(sessionStorage.getItem(`observablehq-sidebar:${t.textContent}`)){case"true":s.open=!0;break;case"false":s.classList.contains("observablehq-section-active")||(s.open=!1);break}}addEventListener("beforeunload",()=>sessionStorage.setItem("observablehq-sidebar-scrolly",`${e.scrollTop}`));const a=sessionStorage.getItem("observablehq-sidebar-scrolly");a!=null&&(e.style.cssText="overflow: hidden;",e.scrollTop=+a,e.style.cssText="");}</script>
+<div id="observablehq-center">
+<main id="observablehq-main" class="observablehq">
+<h1 id="set-time-distribution" tabindex="-1"><a class="observablehq-header-anchor" href="#set-time-distribution">Set time distribution</a></h1>
+<div class="observablehq observablehq--block"><!--:c104fa42:--></div>
+<div class="observablehq observablehq--block"><!--:9ed7c6d4:--></div>
+<h2 id="longline-logsheet" tabindex="-1"><a class="observablehq-header-anchor" href="#longline-logsheet">Longline logsheet</a></h2>
+<p>Fishing set start times across <strong><observablehq-loading></observablehq-loading><!--:c715a025:--> sets</strong> (<code>log.sets_ll</code> where <code>l_activity_id = 1</code>).</p>
+<p>This time distribution is consistent with the <a href="https://www.pirfo.org/index.php/resources/downloads/category/33-manuals?download=115:horizontal-longline-fishing-manual-for-fishermen" target="_blank" rel="noopener noreferrer">Horizontal Longline Fishing Manual for Fishermen</a>.</p>
+<blockquote>
+<p>In general, when fishing for tuna, the line is set in the morning sometime around first light (0400 to 0800 hours), and
+hauled starting in the afternoon or early evening (1400 to 1800 hours)</p>
+</blockquote>
+<div class="observablehq observablehq--block"><observablehq-loading></observablehq-loading><!--:0fff2706:--></div>
+</main>
+<footer id="observablehq-footer">
+<nav><a rel="prev" href="./"><span>Logsheet UTC Analysis</span></a><a rel="next" href="./ps-set-time-distribution"><span>Purseseine set time distribution?</span></a></nav>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-17T16:08:34">Jun 17, 2026</a>.</div>
+</footer>
+</div>
+</body>
+</html>

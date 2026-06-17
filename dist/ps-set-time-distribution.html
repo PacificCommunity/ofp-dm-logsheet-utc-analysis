@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="generator" content="Observable Framework v1.13.4">
+<title>Purseseine set time — UTC or local? | Logsheet UTC Analysis</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
+<link rel="preload" as="style" href="./_observablehq/theme-air.d5b7fcbe.css">
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
+<link rel="stylesheet" type="text/css" href="./_observablehq/theme-air.d5b7fcbe.css">
+<link rel="modulepreload" href="./_observablehq/client.1774e20a.js">
+<link rel="modulepreload" href="./_observablehq/runtime.607a8173.js">
+<link rel="modulepreload" href="./_observablehq/stdlib.277aeab8.js">
+<link rel="modulepreload" href="./_npm/d3@7.9.0/66d82917.js">
+<link rel="modulepreload" href="./_npm/@observablehq/plot@0.6.17/a96a6bbb.js">
+<link rel="modulepreload" href="./_npm/htl@1.0.0/87d6f6ef.js">
+<link rel="modulepreload" href="./_npm/d3-dsv@3.0.1/9cffc2bd.js">
+<link rel="modulepreload" href="./_npm/d3-array@3.2.4/e93ca09f.js">
+<link rel="modulepreload" href="./_npm/d3-axis@3.0.0/0f2de24d.js">
+<link rel="modulepreload" href="./_npm/d3-brush@3.0.0/65eb105b.js">
+<link rel="modulepreload" href="./_npm/d3-chord@3.0.1/7ef8fb2e.js">
+<link rel="modulepreload" href="./_npm/d3-color@3.1.0/aeb57b94.js">
+<link rel="modulepreload" href="./_npm/d3-contour@4.0.2/1d2aed74.js">
+<link rel="modulepreload" href="./_npm/d3-delaunay@6.0.4/87adea64.js">
+<link rel="modulepreload" href="./_npm/d3-dispatch@3.0.1/9ba9c7f3.js">
+<link rel="modulepreload" href="./_npm/d3-drag@3.0.0/4202580c.js">
+<link rel="modulepreload" href="./_npm/d3-ease@3.0.1/cdd7e898.js">
+<link rel="modulepreload" href="./_npm/d3-fetch@3.0.1/b4e2ad9a.js">
+<link rel="modulepreload" href="./_npm/d3-force@3.0.0/5e804d15.js">
+<link rel="modulepreload" href="./_npm/d3-format@3.1.2/3785bf2d.js">
+<link rel="modulepreload" href="./_npm/d3-geo@3.1.1/40599fb3.js">
+<link rel="modulepreload" href="./_npm/d3-hierarchy@3.1.2/e49e792c.js">
+<link rel="modulepreload" href="./_npm/d3-interpolate@3.0.1/8d1e5425.js">
+<link rel="modulepreload" href="./_npm/d3-path@3.1.0/20d3f133.js">
+<link rel="modulepreload" href="./_npm/d3-polygon@3.0.1/7553081f.js">
+<link rel="modulepreload" href="./_npm/d3-quadtree@3.0.1/0dfd751c.js">
+<link rel="modulepreload" href="./_npm/d3-random@3.0.1/3c90ee06.js">
+<link rel="modulepreload" href="./_npm/d3-scale@4.0.2/720b7f0a.js">
+<link rel="modulepreload" href="./_npm/d3-scale-chromatic@3.1.0/ba24c2e7.js">
+<link rel="modulepreload" href="./_npm/d3-selection@3.0.0/4d94e5b7.js">
+<link rel="modulepreload" href="./_npm/d3-shape@3.2.0/6d3a6726.js">
+<link rel="modulepreload" href="./_npm/d3-time@3.1.0/9f03c579.js">
+<link rel="modulepreload" href="./_npm/d3-time-format@4.1.0/07c9626f.js">
+<link rel="modulepreload" href="./_npm/d3-timer@3.0.1/b58a267d.js">
+<link rel="modulepreload" href="./_npm/d3-transition@3.0.1/004da2ac.js">
+<link rel="modulepreload" href="./_npm/d3-zoom@3.0.0/b5786b3f.js">
+<link rel="modulepreload" href="./_npm/isoformat@0.2.1/18cbf477.js">
+<link rel="modulepreload" href="./_npm/interval-tree-1d@1.0.4/53fe8176.js">
+<link rel="modulepreload" href="./_npm/internmap@2.0.3/e08981d9.js">
+<link rel="modulepreload" href="./_npm/delaunator@5.1.0/d4ec0aa1.js">
+<link rel="modulepreload" href="./_npm/binary-search-bounds@2.0.5/cbf6ba23.js">
+<link rel="modulepreload" href="./_npm/robust-predicates@3.0.3/42820bfa.js">
+<link rel="icon" href="./_file/observable.1af93621.png" type="image/png" sizes="32x32">
+<script type="module">
+
+import {define} from "./_observablehq/client.1774e20a.js";
+import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
+
+registerFile("./data/ps-fad-set-hour-classification.csv", {"name":"./data/ps-fad-set-hour-classification.csv","mimeType":"text/csv","path":"./_file/data/ps-fad-set-hour-classification.3461078e.csv","lastModified":1781673571692,"size":13498811});
+
+define({id: "0d1e3cff", inputs: ["FileAttachment"], outputs: ["d3","Plot","raw","INSTANCE_NAMES","instanceName","SUNRISE","SUNSET","data","assoc","unassoc"], body: async (FileAttachment) => {
+const [d3, Plot] = await Promise.all([import("./_npm/d3@7.9.0/66d82917.js"), import("./_npm/@observablehq/plot@0.6.17/a96a6bbb.js")]);
+
+const raw = await FileAttachment("./data/ps-fad-set-hour-classification.csv").csv({ typed: true });
+
+// TufmanInstance enum values → short name
+const INSTANCE_NAMES = new Map([
+  [1,        "INDUSTRY"],
+  [2,        "OFP"],
+  [4,        "MH"],
+  [8,        "FM"],
+  [16,       "CK"],
+  [32,       "UST"],
+  [128,      "KI"],
+  [256,      "TO"],
+  [512,      "WS"],
+  [1024,     "PF"],
+  [2048,     "NR"],
+  [4096,     "NU"],
+  [8192,     "PG"],
+  [16384,    "TV"],
+  [32768,    "VU"],
+  [65536,    "PW"],
+  [131072,   "TK"],
+  [262144,   "SB"],
+  [524288,   "FJ"],
+  [1048576,  "VN"],
+  [2097152,  "PH"],
+  [4194304,  "WCPFC"],
+  [16777216, "WF"],
+  [33554432, "DWFN"],
+]);
+
+const instanceName = v => INSTANCE_NAMES.get(v) ?? String(v);
+
+// Sunrise / sunset thresholds — good approximations for tropical Pacific year-round
+const SUNRISE = 6;
+const SUNSET  = 18;
+
+// Enrich each row with the nautical-adjusted hour and pre-computed flags
+const data = raw.map(d => {
+  const adj = ((d.set_hour + d.nautical_offset) % 24 + 24) % 24;
+  return {
+    ...d,
+    set_hour_adjusted:    adj,
+    before_sunrise_recorded: d.set_hour < SUNRISE,
+    before_sunrise_adjusted: adj < SUNRISE,
+    in_daylight_recorded:    d.set_hour >= SUNRISE && d.set_hour < SUNSET,
+    in_daylight_adjusted:    adj >= SUNRISE && adj < SUNSET,
+  };
+});
+
+const assoc   = data.filter(d => d.school_type === "associated group");
+const unassoc = data.filter(d => d.school_type === "unassociated group");
+return {d3,Plot,raw,INSTANCE_NAMES,instanceName,SUNRISE,SUNSET,data,assoc,unassoc};
+}});
+
+define({id: "037ea082", inputs: ["d3","Plot","width","SUNRISE","SUNSET","instanceName","html"], outputs: ["hourCounts","sharedX","sharedY","hourChart","instanceClassification"], body: (d3,Plot,width,SUNRISE,SUNSET,instanceName,html) => {
+// Build hourly counts for both interpretations
+function hourCounts(rows, hourKey) {
+  const counts = d3.rollup(rows, v => v.length, d => d[hourKey]);
+  const total  = rows.length;
+  return d3.range(0, 24).map(h => ({
+    hour:  h,
+    count: counts.get(h) ?? 0,
+    pct:   Math.round(((counts.get(h) ?? 0) / total) * 1000) / 10,
+  }));
+}
+
+const sharedX = {
+  label: "Hour of day",
+  domain: d3.range(0, 24),
+  tickFormat: h => `${String(h).padStart(2, "0")}:00`,
+};
+const sharedY = { label: "Sets (%)", grid: true, tickFormat: v => `${v}%` };
+
+function hourChart(countsData, {title, fill}) {
+  const yMax = Math.max(...countsData.map(d => d.pct));
+  return Plot.plot({
+    title,
+    width,
+    height: 300,
+    marginLeft: 55,
+    marginBottom: 48,
+    x: sharedX,
+    y: sharedY,
+    marks: [
+      Plot.rectY(countsData, { x1: d => d.hour, x2: d => d.hour + 1, y: "pct", fill, tip: true,
+        title: d => `${String(d.hour).padStart(2,"0")}:00 — ${d3.format(",")(d.count)} sets (${d.pct}%)` }),
+      Plot.ruleX([SUNRISE], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
+      Plot.text([{ hour: SUNRISE, label: "sunrise" }], {
+        x: "hour", y: () => yMax * 0.9,
+        text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start"
+      }),
+      Plot.ruleX([SUNSET], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
+      Plot.text([{ hour: SUNSET, label: "sunset" }], {
+        x: "hour", y: () => yMax * 0.9,
+        text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start"
+      }),
+      Plot.ruleY([0]),
+    ],
+  });
+}
+
+// Per-instance classification bar chart + table
+function instanceClassification(rows, {metricRecorded, metricAdjusted, metricLabel, title}) {
+  const byInstance = d3.rollup(rows, v => {
+    const total   = v.length;
+    const recOk   = v.filter(d => d[metricRecorded]).length;
+    const adjOk   = v.filter(d => d[metricAdjusted]).length;
+    return {
+      instance_name:  instanceName(v[0].instance_source),
+      total_sets:     total,
+      pct_rec:  Math.round(recOk / total * 1000) / 10,
+      pct_adj:  Math.round(adjOk / total * 1000) / 10,
+      verdict:  (adjOk / total) > 0.5 && (adjOk / total) > (recOk / total) * 1.5
+                ? "UTC entered"
+                : "Unclear"
+    };
+  }, d => d.instance_source);
+
+  const iRows = [...byInstance.values()].sort((a, b) => b.total_sets - a.total_sets);
+
+  const barData = iRows.flatMap(r => [
+    { instance: r.instance_name, interpretation: "As recorded",       pct: r.pct_rec },
+    { instance: r.instance_name, interpretation: "Nautical-adjusted", pct: r.pct_adj },
+  ]);
+
+  const verdictColor = v =>
+    v === "UTC entered"   ? "#dcfce7" :
+    v === "Local entered" ? "#fef9c3" : "#f3f4f6";
+
+  const barChart = Plot.plot({
+    title,
+    width,
+    height: 40 + iRows.length * 28,
+    marginLeft: 80,
+    marginRight: 10,
+    x: { label: `% ${metricLabel}`, grid: true, tickFormat: v => `${v}%` },
+    y: { label: null },
+    color: { legend: true, domain: ["As recorded", "Nautical-adjusted"], range: ["#f59e0b", "#34d399"] },
+    marks: [
+      Plot.barX(barData, Plot.groupY({ x: "sum" }, {
+        x: "pct", y: "instance", fill: "interpretation",
+        tip: true, title: d => `${d.instance} — ${d.interpretation}: ${d.pct}%`,
+      })),
+      Plot.ruleX([50], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
+      Plot.ruleX([0]),
+    ],
+  });
+
+  const table = html`<table style="border-collapse:collapse;width:100%;font-size:0.9rem;margin-top:1rem">
+    <thead>
+      <tr style="border-bottom:2px solid #e5e7eb">
+        <th style="text-align:left;padding:6px 10px">Instance</th>
+        <th style="text-align:right;padding:6px 10px">Sets</th>
+        <th style="text-align:right;padding:6px 10px">% ${metricLabel} (recorded)</th>
+        <th style="text-align:right;padding:6px 10px">% ${metricLabel} (nautical-adjusted)</th>
+        <th style="text-align:center;padding:6px 10px">Verdict</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${iRows.map(r => html`<tr style="border-bottom:1px solid #f3f4f6">
+        <td style="padding:5px 10px;font-weight:600">${r.instance_name}</td>
+        <td style="text-align:right;padding:5px 10px">${d3.format(",")(r.total_sets)}</td>
+        <td style="text-align:right;padding:5px 10px">${r.pct_rec}%</td>
+        <td style="text-align:right;padding:5px 10px">${r.pct_adj}%</td>
+        <td style="text-align:center;padding:5px 10px;background:${verdictColor(r.verdict)};border-radius:4px">${r.verdict}</td>
+      </tr>`)}
+    </tbody>
+  </table>`;
+
+  return html`<div>${barChart}${table}</div>`;
+}
+return {hourCounts,sharedX,sharedY,hourChart,instanceClassification};
+}});
+
+define({id: "b50f06d5", mode: "inline", inputs: ["d3","assoc","display"], body: async (d3,assoc,display) => {
+display(await(
+d3.format(",")(assoc.length)
+))
+}});
+
+define({id: "b4e81a59", inputs: ["hourCounts","assoc","d3","SUNRISE"], outputs: ["assocRecorded","assocAdjusted","pctAssocRecorded","pctAssocAdjusted"], body: (hourCounts,assoc,d3,SUNRISE) => {
+const assocRecorded = hourCounts(assoc, "set_hour");
+const assocAdjusted = hourCounts(assoc, "set_hour_adjusted");
+
+const pctAssocRecorded = d3.format(".1%")(d3.sum(assocRecorded.filter(d => d.hour < SUNRISE), d => d.count) / assoc.length);
+const pctAssocAdjusted = d3.format(".1%")(d3.sum(assocAdjusted.filter(d => d.hour < SUNRISE), d => d.count) / assoc.length);
+return {assocRecorded,assocAdjusted,pctAssocRecorded,pctAssocAdjusted};
+}});
+
+define({id: "8fe8894e", inputs: ["display","html","pctAssocRecorded","pctAssocAdjusted","hourChart","assocRecorded","assocAdjusted"], body: (display,html,pctAssocRecorded,pctAssocAdjusted,hourChart,assocRecorded,assocAdjusted) => {
+display(html`<p>Before 06:00 — <strong>as-recorded: ${pctAssocRecorded}</strong> &nbsp;|&nbsp; <strong>nautical-adjusted: ${pctAssocAdjusted}</strong></p>`);
+display(html`<div style="display:flex;gap:1.5rem;flex-wrap:wrap">
+  ${hourChart(assocRecorded, { title: "Associated group — as recorded", fill: "#f59e0b" })}
+  ${hourChart(assocAdjusted, { title: "Associated group — nautical-adjusted", fill: "#34d399" })}
+</div>`);
+}});
+
+define({id: "5c3f4d66", inputs: ["display","instanceClassification","assoc"], body: (display,instanceClassification,assoc) => {
+display(instanceClassification(assoc, {
+  metricRecorded: "before_sunrise_recorded",
+  metricAdjusted: "before_sunrise_adjusted",
+  metricLabel:    "before sunrise",
+  title:          "Associated group — % before 06:00 by instance",
+}));
+}});
+
+define({id: "78ee0fe4", mode: "inline", inputs: ["d3","unassoc","display"], body: async (d3,unassoc,display) => {
+display(await(
+d3.format(",")(unassoc.length)
+))
+}});
+
+define({id: "1e3bbeb8", inputs: ["hourCounts","unassoc","d3","SUNRISE","SUNSET"], outputs: ["unassocRecorded","unassocAdjusted","pctUnassocRecorded","pctUnassocAdjusted"], body: (hourCounts,unassoc,d3,SUNRISE,SUNSET) => {
+const unassocRecorded = hourCounts(unassoc, "set_hour");
+const unassocAdjusted = hourCounts(unassoc, "set_hour_adjusted");
+
+const pctUnassocRecorded = d3.format(".1%")(d3.sum(unassocRecorded.filter(d => d.hour >= SUNRISE && d.hour < SUNSET), d => d.count) / unassoc.length);
+const pctUnassocAdjusted = d3.format(".1%")(d3.sum(unassocAdjusted.filter(d => d.hour >= SUNRISE && d.hour < SUNSET), d => d.count) / unassoc.length);
+return {unassocRecorded,unassocAdjusted,pctUnassocRecorded,pctUnassocAdjusted};
+}});
+
+define({id: "90fa8153", inputs: ["display","html","pctUnassocRecorded","pctUnassocAdjusted","hourChart","unassocRecorded","unassocAdjusted"], body: (display,html,pctUnassocRecorded,pctUnassocAdjusted,hourChart,unassocRecorded,unassocAdjusted) => {
+display(html`<p>In daylight (06:00–18:00) — <strong>as-recorded: ${pctUnassocRecorded}</strong> &nbsp;|&nbsp; <strong>nautical-adjusted: ${pctUnassocAdjusted}</strong></p>`);
+display(html`<div style="display:flex;gap:1.5rem;flex-wrap:wrap">
+  ${hourChart(unassocRecorded, { title: "Unassociated group — as recorded", fill: "#60a5fa" })}
+  ${hourChart(unassocAdjusted, { title: "Unassociated group — nautical-adjusted", fill: "#818cf8" })}
+</div>`);
+}});
+
+define({id: "97133ee0", inputs: ["display","instanceClassification","unassoc"], body: (display,instanceClassification,unassoc) => {
+display(instanceClassification(unassoc, {
+  metricRecorded: "in_daylight_recorded",
+  metricAdjusted: "in_daylight_adjusted",
+  metricLabel:    "in daylight",
+  title:          "Unassociated group — % in daylight (06:00–18:00) by instance",
+}));
+}});
+
+</script>
+</head>
+<body>
+<input id="observablehq-sidebar-toggle" type="checkbox" title="Toggle sidebar">
+<label id="observablehq-sidebar-backdrop" for="observablehq-sidebar-toggle"></label>
+<nav id="observablehq-sidebar">
+  <ol>
+    <label id="observablehq-sidebar-close" for="observablehq-sidebar-toggle"></label>
+    <li class="observablehq-link"><a href="./">Logsheet UTC Analysis</a></li>
+  </ol>
+  <ol>
+    <li class="observablehq-link"><a href="./">Summary</a></li>
+    <li class="observablehq-link"><a href="./ll-set-time-distribution">Longline set time distribution</a></li>
+    <li class="observablehq-link observablehq-link-active"><a href="./ps-set-time-distribution">Purseseine set time distribution?</a></li>
+    <li class="observablehq-link"><a href="./entities-to-migrate">Entities to migrate</a></li>
+    <li class="observablehq-link"><a href="./observer-offsets">Observer offsets by vessel flag</a></li>
+    <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity IANA timezone offset by vessel flag</a></li>
+    <li class="observablehq-link"><a href="./logsheet-nautical-offsets">Logsheet activity Nautical timezone offset by vessel flag</a></li>
+    <li class="observablehq-link"><a href="./observer-offset-per-eez">Observer offset distribution by EEZ</a></li>
+    <li class="observablehq-link"><a href="./observer-offset-per-flag">Observer offset distribution by vessel flag</a></li>
+    <li class="observablehq-link"><a href="./observer-offset-per-logsheet">Observer offset per instance source</a></li>
+    <li class="observablehq-link"><a href="./eez-list-per-trip">EEZ combinations per trip</a></li>
+    <li class="observablehq-link"><a href="./utc-offset-predictions">UTC offset predictions</a></li>
+    <li class="observablehq-link"><a href="./bayesian-estimator-explained">Bayesian estimator — how it works</a></li>
+  </ol>
+</nav>
+<script>{const e=document.querySelector("#observablehq-sidebar"),o=document.querySelector("#observablehq-sidebar-toggle"),r=sessionStorage.getItem("observablehq-sidebar");r?o.checked=r==="true":o.indeterminate=!0;for(const t of document.querySelectorAll("#observablehq-sidebar summary")){const s=t.parentElement;switch(sessionStorage.getItem(`observablehq-sidebar:${t.textContent}`)){case"true":s.open=!0;break;case"false":s.classList.contains("observablehq-section-active")||(s.open=!1);break}}addEventListener("beforeunload",()=>sessionStorage.setItem("observablehq-sidebar-scrolly",`${e.scrollTop}`));const a=sessionStorage.getItem("observablehq-sidebar-scrolly");a!=null&&(e.style.cssText="overflow: hidden;",e.scrollTop=+a,e.style.cssText="");}</script>
+<div id="observablehq-center">
+<main id="observablehq-main" class="observablehq">
+<h1 id="purseseine-set-time-utc-or-local" tabindex="-1"><a class="observablehq-header-anchor" href="#purseseine-set-time-utc-or-local">Purseseine set_time: UTC or local?</a></h1>
+<p>According to the paper <a href="https://meetings.wcpfc.int/node/6808" target="_blank" rel="noopener noreferrer"><em>Analysis of Purse Seine Set Times for Different School Associations: A Further Tool to Assist in Compliance with FAD Closures?</em></a>:</p>
+<blockquote>
+<p>We found that 94% of sets on FADs occurred prior to local sunrise, while only 3% of unassociated school sets occurred before sunrise, with the remainder occurring at consistent rates during daylight hours.</p>
+</blockquote>
+<p>If <code>log.sets_ps.set_time</code> is stored as <strong>local time</strong>:</p>
+<ul>
+<li><strong>Associated group</strong> (<code>school_id</code> 3–5): sets should cluster <strong>before 06:00</strong></li>
+<li><strong>Unassociated group</strong> (<code>school_id</code> 1–2): sets should cluster <strong>between 06:00 and 18:00</strong></li>
+</ul>
+<p>If <code>set_time</code> is stored as <strong>UTC</strong>, both distributions will appear shifted by the UTC offset. For example, a 04:00 local set in UTC+11 waters would be recorded as 17:00.</p>
+<p>The UTC offset for each set is approximated using the <strong>nautical timezone formula</strong>: <code>ROUND(lond / 15.0, 0)</code>. This covers all PS sets with a recorded longitude — not just observer-linked trips.</p>
+<div class="observablehq observablehq--block"><!--:0d1e3cff:--></div>
+<div class="observablehq observablehq--block"><!--:037ea082:--></div>
+<hr>
+<h2 id="associated-group-school-id-3-5" tabindex="-1"><a class="observablehq-header-anchor" href="#associated-group-school-id-3-5">Associated group (<code>school_id</code> 3–5)</a></h2>
+<p><strong><observablehq-loading></observablehq-loading><!--:b50f06d5:--> sets.</strong> Expected pattern: before sunrise (06:00 local).</p>
+<div class="observablehq observablehq--block"><!--:b4e81a59:--></div>
+<div class="observablehq observablehq--block"><!--:8fe8894e:--></div>
+<blockquote>
+<p>The chart that shows ~94% of sets <strong>before the sunrise line</strong> is the correct interpretation.</p>
+</blockquote>
+<div class="observablehq observablehq--block"><!--:5c3f4d66:--></div>
+<hr>
+<h2 id="unassociated-group-school-id-1-2" tabindex="-1"><a class="observablehq-header-anchor" href="#unassociated-group-school-id-1-2">Unassociated group (<code>school_id</code> 1–2)</a></h2>
+<p><strong><observablehq-loading></observablehq-loading><!--:78ee0fe4:--> sets.</strong> Expected pattern: in daylight (06:00–18:00 local).</p>
+<div class="observablehq observablehq--block"><!--:1e3bbeb8:--></div>
+<div class="observablehq observablehq--block"><!--:90fa8153:--></div>
+<blockquote>
+<p>The chart that shows ~97% of sets <strong>between the sunrise and sunset lines</strong> is the correct interpretation.</p>
+</blockquote>
+<div class="observablehq observablehq--block"><!--:97133ee0:--></div>
+</main>
+<footer id="observablehq-footer">
+<nav><a rel="prev" href="./ll-set-time-distribution"><span>Longline set time distribution</span></a><a rel="next" href="./entities-to-migrate"><span>Entities to migrate</span></a></nav>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-17T16:08:34">Jun 17, 2026</a>.</div>
+</footer>
+</div>
+</body>
+</html>
