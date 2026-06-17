@@ -55,7 +55,7 @@
 import {define} from "./_observablehq/client.1774e20a.js";
 import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
 
-registerFile("./data/observer-fishing-activities-offset-per-instance.csv", {"name":"./data/observer-fishing-activities-offset-per-instance.csv","mimeType":"text/csv","path":"./_file/data/observer-fishing-activities-offset-per-instance.0b7db339.csv","lastModified":1781648792132,"size":10158});
+registerFile("./data/observer-fishing-activities-offset-per-instance.csv", {"name":"./data/observer-fishing-activities-offset-per-instance.csv","mimeType":"text/csv","path":"./_file/data/observer-fishing-activities-offset-per-instance.d233ab9f.csv","lastModified":1781673559022,"size":10158});
 
 define({id: "49b82b8c", inputs: ["FileAttachment"], outputs: ["d3","rankedList","offsetGrid","offsetCard","TYPE_LABEL","INSTANCE_NAMES","instanceLabel","raw","byInstanceType","allInstances"], body: async (FileAttachment) => {
 const [d3, {rankedList, offsetGrid, offsetCard, TYPE_LABEL}] = await Promise.all([import("./_npm/d3@7.9.0/66d82917.js"), import("./_import/components/offset-charts.092ca3bf.js")]);
@@ -125,7 +125,8 @@ display(offsetGrid(allInstances, instance => {
   </ol>
   <ol>
     <li class="observablehq-link"><a href="./">Summary</a></li>
-    <li class="observablehq-link"><a href="./set-time-distribution">Set time distribution</a></li>
+    <li class="observablehq-link"><a href="./ll-set-time-distribution">Longline set time distribution</a></li>
+    <li class="observablehq-link"><a href="./ps-set-time-distribution">Purseseine set time distribution?</a></li>
     <li class="observablehq-link"><a href="./entities-to-migrate">Entities to migrate</a></li>
     <li class="observablehq-link"><a href="./observer-offsets">Observer offsets by vessel flag</a></li>
     <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity IANA timezone offset by vessel flag</a></li>
@@ -153,7 +154,7 @@ Each pair of charts shows the distribution of <strong>UTC offsets</strong> deriv
 </main>
 <footer id="observablehq-footer">
 <nav><a rel="prev" href="./observer-offset-per-flag"><span>Observer offset distribution by vessel flag</span></a><a rel="next" href="./eez-list-per-trip"><span>EEZ combinations per trip</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-17T10:09:32">Jun 17, 2026</a>.</div>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-17T16:08:34">Jun 17, 2026</a>.</div>
 </footer>
 </div>
 </body>

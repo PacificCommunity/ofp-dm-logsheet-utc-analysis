@@ -21,8 +21,8 @@
 import {define} from "./_observablehq/client.1774e20a.js";
 import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
 
-registerFile("./data/entities-system-source.csv", {"name":"./data/entities-system-source.csv","mimeType":"text/csv","path":"./_file/data/entities-system-source.eac9a7ea.csv","lastModified":1781644192541,"size":906});
-registerFile("./data/entities-to-migrate.csv", {"name":"./data/entities-to-migrate.csv","mimeType":"text/csv","path":"./_file/data/entities-to-migrate.2a5b41af.csv","lastModified":1781644192045,"size":943});
+registerFile("./data/entities-system-source.csv", {"name":"./data/entities-system-source.csv","mimeType":"text/csv","path":"./_file/data/entities-system-source.149f4061.csv","lastModified":1781672935456,"size":906});
+registerFile("./data/entities-to-migrate.csv", {"name":"./data/entities-to-migrate.csv","mimeType":"text/csv","path":"./_file/data/entities-to-migrate.e78a20a4.csv","lastModified":1781672934446,"size":943});
 
 define({id: "fa042fe0", inputs: ["FileAttachment"], outputs: ["data","total"], body: async (FileAttachment) => {
 const data = await FileAttachment("./data/entities-to-migrate.csv").csv({ typed: true });
@@ -195,7 +195,8 @@ return {ssByEntity,sourceTotal,sources,entityMeta,entities,pivot,colCount,hdr2,c
   </ol>
   <ol>
     <li class="observablehq-link"><a href="./">Summary</a></li>
-    <li class="observablehq-link"><a href="./set-time-distribution">Set time distribution</a></li>
+    <li class="observablehq-link"><a href="./ll-set-time-distribution">Longline set time distribution</a></li>
+    <li class="observablehq-link"><a href="./ps-set-time-distribution">Purseseine set time distribution?</a></li>
     <li class="observablehq-link observablehq-link-active"><a href="./entities-to-migrate">Entities to migrate</a></li>
     <li class="observablehq-link"><a href="./observer-offsets">Observer offsets by vessel flag</a></li>
     <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity IANA timezone offset by vessel flag</a></li>
@@ -224,8 +225,8 @@ Properties inherited from abstract base classes are included.</p>
 <div class="observablehq observablehq--block"><!--:bbd29042:--></div>
 </main>
 <footer id="observablehq-footer">
-<nav><a rel="prev" href="./set-time-distribution"><span>Set time distribution</span></a><a rel="next" href="./observer-offsets"><span>Observer offsets by vessel flag</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-17T10:09:32">Jun 17, 2026</a>.</div>
+<nav><a rel="prev" href="./ps-set-time-distribution"><span>Purseseine set time distribution?</span></a><a rel="next" href="./observer-offsets"><span>Observer offsets by vessel flag</span></a></nav>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-17T16:08:34">Jun 17, 2026</a>.</div>
 </footer>
 </div>
 </body>

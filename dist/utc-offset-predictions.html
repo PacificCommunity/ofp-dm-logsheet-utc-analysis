@@ -55,10 +55,10 @@
 import {define} from "./_observablehq/client.1774e20a.js";
 import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
 
-registerFile("./data/ll-trip-prediction-targets.csv", {"name":"./data/ll-trip-prediction-targets.csv","mimeType":"text/csv","path":"./_file/data/ll-trip-prediction-targets.c9ff4c67.csv","lastModified":1781648841537,"size":1778879});
-registerFile("./data/ll-trip-training-features.csv", {"name":"./data/ll-trip-training-features.csv","mimeType":"text/csv","path":"./_file/data/ll-trip-training-features.d3f013f9.csv","lastModified":1781648806181,"size":122330});
-registerFile("./data/ps-trip-prediction-targets.csv", {"name":"./data/ps-trip-prediction-targets.csv","mimeType":"text/csv","path":"./_file/data/ps-trip-prediction-targets.917842f6.csv","lastModified":1781648844683,"size":402762});
-registerFile("./data/ps-trip-training-features.csv", {"name":"./data/ps-trip-training-features.csv","mimeType":"text/csv","path":"./_file/data/ps-trip-training-features.1aeae053.csv","lastModified":1781648835479,"size":525004});
+registerFile("./data/ll-trip-prediction-targets.csv", {"name":"./data/ll-trip-prediction-targets.csv","mimeType":"text/csv","path":"./_file/data/ll-trip-prediction-targets.dc776562.csv","lastModified":1781673600143,"size":1778787});
+registerFile("./data/ll-trip-training-features.csv", {"name":"./data/ll-trip-training-features.csv","mimeType":"text/csv","path":"./_file/data/ll-trip-training-features.d3f013f9.csv","lastModified":1781673576173,"size":122330});
+registerFile("./data/ps-trip-prediction-targets.csv", {"name":"./data/ps-trip-prediction-targets.csv","mimeType":"text/csv","path":"./_file/data/ps-trip-prediction-targets.e671bea9.csv","lastModified":1781673603375,"size":402762});
+registerFile("./data/ps-trip-training-features.csv", {"name":"./data/ps-trip-training-features.csv","mimeType":"text/csv","path":"./_file/data/ps-trip-training-features.422001c0.csv","lastModified":1781673597083,"size":524908});
 
 define({id: "4d487f30", inputs: ["FileAttachment"], outputs: ["d3","rankedList","offsetGrid","offsetCard","TYPE_LABEL","llRaw","psRaw","llTargets","psTargets"], body: async (FileAttachment) => {
 const [d3, {rankedList, offsetGrid, offsetCard, TYPE_LABEL}] = await Promise.all([import("./_npm/d3@7.9.0/66d82917.js"), import("./_import/components/offset-charts.092ca3bf.js")]);
@@ -176,7 +176,8 @@ display(offsetGrid(psAllFlags, flag => {
   </ol>
   <ol>
     <li class="observablehq-link"><a href="./">Summary</a></li>
-    <li class="observablehq-link"><a href="./set-time-distribution">Set time distribution</a></li>
+    <li class="observablehq-link"><a href="./ll-set-time-distribution">Longline set time distribution</a></li>
+    <li class="observablehq-link"><a href="./ps-set-time-distribution">Purseseine set time distribution?</a></li>
     <li class="observablehq-link"><a href="./entities-to-migrate">Entities to migrate</a></li>
     <li class="observablehq-link"><a href="./observer-offsets">Observer offsets by vessel flag</a></li>
     <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity IANA timezone offset by vessel flag</a></li>
@@ -224,7 +225,7 @@ python bayesian_offset_estimator.py
 </main>
 <footer id="observablehq-footer">
 <nav><a rel="prev" href="./eez-list-per-trip"><span>EEZ combinations per trip</span></a><a rel="next" href="./bayesian-estimator-explained"><span>Bayesian estimator — how it works</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-17T10:09:32">Jun 17, 2026</a>.</div>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-17T16:08:34">Jun 17, 2026</a>.</div>
 </footer>
 </div>
 </body>

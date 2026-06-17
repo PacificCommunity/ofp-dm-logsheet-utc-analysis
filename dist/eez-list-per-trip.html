@@ -55,8 +55,8 @@
 import {define} from "./_observablehq/client.1774e20a.js";
 import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
 
-registerFile("./data/ll-eez-list-per-trip.csv", {"name":"./data/ll-eez-list-per-trip.csv","mimeType":"text/csv","path":"./_file/data/ll-eez-list-per-trip.9e7a8688.csv","lastModified":1781644190056,"size":14214});
-registerFile("./data/ps-eez-list-per-trip.csv", {"name":"./data/ps-eez-list-per-trip.csv","mimeType":"text/csv","path":"./_file/data/ps-eez-list-per-trip.46a5228d.csv","lastModified":1781644190987,"size":29927});
+registerFile("./data/ll-eez-list-per-trip.csv", {"name":"./data/ll-eez-list-per-trip.csv","mimeType":"text/csv","path":"./_file/data/ll-eez-list-per-trip.b22fa623.csv","lastModified":1781672927208,"size":14214});
+registerFile("./data/ps-eez-list-per-trip.csv", {"name":"./data/ps-eez-list-per-trip.csv","mimeType":"text/csv","path":"./_file/data/ps-eez-list-per-trip.a79f9bf1.csv","lastModified":1781672928873,"size":29927});
 
 define({id: "93ed646d", inputs: ["FileAttachment"], outputs: ["d3","rankedList","llEezList","psEezList"], body: async (FileAttachment) => {
 const [d3, {rankedList}] = await Promise.all([import("./_npm/d3@7.9.0/66d82917.js"), import("./_import/components/offset-charts.092ca3bf.js")]);
@@ -85,7 +85,8 @@ display(html`<div style="display:flex;gap:2.5rem;flex-wrap:wrap;align-items:flex
   </ol>
   <ol>
     <li class="observablehq-link"><a href="./">Summary</a></li>
-    <li class="observablehq-link"><a href="./set-time-distribution">Set time distribution</a></li>
+    <li class="observablehq-link"><a href="./ll-set-time-distribution">Longline set time distribution</a></li>
+    <li class="observablehq-link"><a href="./ps-set-time-distribution">Purseseine set time distribution?</a></li>
     <li class="observablehq-link"><a href="./entities-to-migrate">Entities to migrate</a></li>
     <li class="observablehq-link"><a href="./observer-offsets">Observer offsets by vessel flag</a></li>
     <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity IANA timezone offset by vessel flag</a></li>
@@ -115,7 +116,7 @@ distribution of unique sorted EEZ combinations.</p>
 </main>
 <footer id="observablehq-footer">
 <nav><a rel="prev" href="./observer-offset-per-logsheet"><span>Observer offset per instance source</span></a><a rel="next" href="./utc-offset-predictions"><span>UTC offset predictions</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-17T10:09:32">Jun 17, 2026</a>.</div>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-17T16:08:34">Jun 17, 2026</a>.</div>
 </footer>
 </div>
 </body>

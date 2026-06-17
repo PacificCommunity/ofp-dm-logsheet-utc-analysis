@@ -26,7 +26,12 @@ const totalPS = totalPsFree + totalPsFad;
 ```
 
 ```js
+
+const SETTING_START_WINDOW_BEGIN = 4;
+const SETTING_START_WINDOW_END  = 8;
+
 function hourChart(data, {title, fill}) {
+    const yMax = Math.max(...data.map(d => d.pct));
   return Plot.plot({
     title,
     width,
@@ -44,7 +49,7 @@ function hourChart(data, {title, fill}) {
       tickFormat: v => `${v}%`
     },
     marks: [
-      Plot.barY(data, {
+        Plot.barY(data, {
         x: "hour",
         y: "pct",
         fill,
@@ -60,7 +65,17 @@ function hourChart(data, {title, fill}) {
         fontWeight: "600",
         fill: "#374151"
       }),
-      Plot.ruleY([0])
+      Plot.ruleY([0]), 
+        Plot.ruleX([SETTING_START_WINDOW_BEGIN], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
+        Plot.text([{ hour: SETTING_START_WINDOW_BEGIN, label: "sunrise" }], {
+            x: "hour", y: () => yMax * 0.9,
+            text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start"
+        }),
+        Plot.ruleX([SETTING_START_WINDOW_END], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
+        Plot.text([{ hour: SETTING_START_WINDOW_END, label: "sunset" }], {
+            x: "hour", y: () => yMax * 0.9,
+            text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start"
+        }),
     ]
   });
 }
@@ -72,44 +87,12 @@ Fishing set start times across **${d3.format(",")(totalLL)} sets** (`log.sets_ll
 
 This time distribution is consistent with the [Horizontal Longline Fishing Manual for Fishermen](https://www.pirfo.org/index.php/resources/downloads/category/33-manuals?download=115:horizontal-longline-fishing-manual-for-fishermen).
 
+> In general, when fishing for tuna, the line is set in the morning sometime around first light (0400 to 0800 hours), and
+hauled starting in the afternoon or early evening (1400 to 1800 hours)
+
 ```js
 hourChart(ll, {
   title: "Longline set start time distribution",
   fill: "#60a5fa"
-})
-```
-
-## Purseseine logsheet
-
-Fishing set start times across **${d3.format(",")(totalPS)} sets** (`log.sets_ps` where `s_activity_id = 1`)
-
-According to the paper [Analysis of Purse Seine Set Times for Different School Associations: A Further Tool to Assist in Compliance with FAD Closures?](https://meetings.wcpfc.int/node/6808)
-
-
-> We found that 94% of sets on FADs occurred prior to local sunrise, while only 3% of unassociated school sets
-occurred before sunrise, with the remainder occurring at consistent rates during daylight hours.
-
-### Free school 
-(`school_id` 1–2) - ${d3.format(",")(totalPsFree)} sets
-
-The time distribution here shows a high distribution before sunrise, and after sunset, confirming most of the data is entered as UTC.
-
-```js
-hourChart(psFree, {
-  title: "Free school set start time distribution",
-  fill: "#34d399"
-})
-```
-
-### Floating object / FAD-associated
-
-(`school_id` 3–5) ${d3.format(",")(totalPsFad)} sets
-
-The time distribution here shows a peak at the end of the day, confirming most of the data is entered as UTC.
-
-```js
-hourChart(psFad, {
-  title: "FAD-associated set start time distribution",
-  fill: "#f59e0b"
 })
 ```

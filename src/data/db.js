@@ -1,6 +1,6 @@
 export const CONNECTION_STRING =
   "Driver={ODBC Driver 17 for SQL Server};" +
-  "Server=nouesql6.spc.external;" +
+  "Server=.;" +
   "Database=tufman2;" +
   "Trusted_Connection=yes;" +
   "TrustServerCertificate=yes;" +
