@@ -10,7 +10,7 @@
 <link rel="preload" as="style" href="./_observablehq/theme-air.d5b7fcbe.css">
 <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
 <link rel="stylesheet" type="text/css" href="./_observablehq/theme-air.d5b7fcbe.css">
-<link rel="modulepreload" href="./_observablehq/client.40783518.js">
+<link rel="modulepreload" href="./_observablehq/client.0e2531ba.js">
 <link rel="modulepreload" href="./_observablehq/runtime.607a8173.js">
 <link rel="modulepreload" href="./_observablehq/stdlib.277aeab8.js">
 <link rel="modulepreload" href="./_npm/d3@7.9.0/66d82917.js">
@@ -51,14 +51,14 @@
 <link rel="icon" href="./_file/observable.1af93621.png" type="image/png" sizes="32x32">
 <script type="module">
 
-import {define} from "./_observablehq/client.40783518.js";
+import {define} from "./_observablehq/client.0e2531ba.js";
 import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
 
-registerFile("./data/ll-logsheet-time-quality.csv", {"name":"./data/ll-logsheet-time-quality.csv","mimeType":"text/csv","path":"./_file/data/ll-logsheet-time-quality.9caf6acb.csv","lastModified":1781673159073,"size":309});
-registerFile("./data/ll-observer-coordinate-match.csv", {"name":"./data/ll-observer-coordinate-match.csv","mimeType":"text/csv","path":"./_file/data/ll-observer-coordinate-match.4a05ae98.csv","lastModified":1781673088974,"size":1458});
-registerFile("./data/ll-trip-offset-count-per-eez.csv", {"name":"./data/ll-trip-offset-count-per-eez.csv","mimeType":"text/csv","path":"./_file/data/ll-trip-offset-count-per-eez.4d7087fb.csv","lastModified":1781672960112,"size":704});
-registerFile("./data/ps-observer-coordinate-match.csv", {"name":"./data/ps-observer-coordinate-match.csv","mimeType":"text/csv","path":"./_file/data/ps-observer-coordinate-match.3c1355c2.csv","lastModified":1781673145369,"size":404});
-registerFile("./data/ps-trip-offset-count-per-eez.csv", {"name":"./data/ps-trip-offset-count-per-eez.csv","mimeType":"text/csv","path":"./_file/data/ps-trip-offset-count-per-eez.5dff3afb.csv","lastModified":1781673077970,"size":936});
+registerFile("./data/ll-logsheet-time-quality.csv", {"name":"./data/ll-logsheet-time-quality.csv","mimeType":"text/csv","path":"./_file/data/ll-logsheet-time-quality.9caf6acb.csv","lastModified":1781758133970,"size":309});
+registerFile("./data/ll-observer-coordinate-match.csv", {"name":"./data/ll-observer-coordinate-match.csv","mimeType":"text/csv","path":"./_file/data/ll-observer-coordinate-match.4a05ae98.csv","lastModified":1781758041131,"size":1458});
+registerFile("./data/ll-trip-offset-count-per-eez.csv", {"name":"./data/ll-trip-offset-count-per-eez.csv","mimeType":"text/csv","path":"./_file/data/ll-trip-offset-count-per-eez.4d7087fb.csv","lastModified":1781757884591,"size":704});
+registerFile("./data/ps-observer-coordinate-match.csv", {"name":"./data/ps-observer-coordinate-match.csv","mimeType":"text/csv","path":"./_file/data/ps-observer-coordinate-match.3c1355c2.csv","lastModified":1781758112607,"size":404});
+registerFile("./data/ps-trip-offset-count-per-eez.csv", {"name":"./data/ps-trip-offset-count-per-eez.csv","mimeType":"text/csv","path":"./_file/data/ps-trip-offset-count-per-eez.5dff3afb.csv","lastModified":1781758025312,"size":936});
 
 define({id: "58a0f606", inputs: ["FileAttachment"], outputs: ["llCount","psCount","llMatch","psMatch","allFlags1","psMap1","llByFlag","coordRows","llTimeMatch","timeRows"], body: async (FileAttachment) => {
 // ── Chapter 1: Trip offset count distribution per EEZ ────────────────────────
@@ -252,8 +252,8 @@ display(html`<table style="width:100%;border-collapse:collapse;font-size:0.9rem"
   <ol>
     <li class="observablehq-link observablehq-link-active"><a href="./">Summary</a></li>
     <li class="observablehq-link"><a href="./ll-set-time-distribution">Longline set time distribution</a></li>
-    <li class="observablehq-link"><a href="./ps-set-time-distribution">Purseseine set time — UTC or local?</a></li>
-    <li class="observablehq-link"><a href="./ps-set-time-sunrise-relative">Purseseine set time — sunrise-relative</a></li>
+    <li class="observablehq-link"><a href="./ps-set-time-distribution">Purseseine set time distribution</a></li>
+    <li class="observablehq-link"><a href="./ps-set-time-sunrise-relative">Purseseine set time distribution - sunrise relative</a></li>
     <li class="observablehq-link"><a href="./entities-to-migrate">Entities to migrate</a></li>
     <li class="observablehq-link"><a href="./observer-offsets">Observer offsets by vessel flag</a></li>
     <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity IANA timezone offset by vessel flag</a></li>
@@ -310,7 +310,7 @@ are NULL for 83 % of fishing rows, making this comparison unreliable for PS.</p>
 </main>
 <footer id="observablehq-footer">
 <nav><a rel="next" href="./ll-set-time-distribution"><span>Longline set time distribution</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-18T15:32:35">Jun 18, 2026</a>.</div>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-18T15:42:22">Jun 18, 2026</a>.</div>
 </footer>
 </div>
 </body>

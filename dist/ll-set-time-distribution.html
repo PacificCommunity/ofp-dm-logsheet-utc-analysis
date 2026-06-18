@@ -10,7 +10,7 @@
 <link rel="preload" as="style" href="./_observablehq/theme-air.d5b7fcbe.css">
 <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
 <link rel="stylesheet" type="text/css" href="./_observablehq/theme-air.d5b7fcbe.css">
-<link rel="modulepreload" href="./_observablehq/client.40783518.js">
+<link rel="modulepreload" href="./_observablehq/client.0e2531ba.js">
 <link rel="modulepreload" href="./_observablehq/runtime.607a8173.js">
 <link rel="modulepreload" href="./_observablehq/stdlib.277aeab8.js">
 <link rel="modulepreload" href="./_npm/@observablehq/plot@0.6.17/a96a6bbb.js">
@@ -54,10 +54,10 @@
 <link rel="icon" href="./_file/observable.1af93621.png" type="image/png" sizes="32x32">
 <script type="module">
 
-import {define} from "./_observablehq/client.40783518.js";
+import {define} from "./_observablehq/client.0e2531ba.js";
 import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
 
-registerFile("./data/set-time-distribution.csv", {"name":"./data/set-time-distribution.csv","mimeType":"text/csv","path":"./_file/data/set-time-distribution.48b06f19.csv","lastModified":1781673161129,"size":778});
+registerFile("./data/set-time-distribution.csv", {"name":"./data/set-time-distribution.csv","mimeType":"text/csv","path":"./_file/data/set-time-distribution.48b06f19.csv","lastModified":1781758136291,"size":778});
 
 define({id: "c104fa42", inputs: ["FileAttachment"], outputs: ["Plot","d3","sets","byType","ll","ps","totalLL","psBySchool","psFree","psFad","totalPsFree","totalPsFad","totalPS"], body: async (FileAttachment) => {
 const [Plot, d3] = await Promise.all([import("./_npm/@observablehq/plot@0.6.17/a96a6bbb.js"), import("./_npm/d3@7.9.0/66d82917.js")]);
@@ -174,8 +174,8 @@ hourChart(ll, {
   <ol>
     <li class="observablehq-link"><a href="./">Summary</a></li>
     <li class="observablehq-link observablehq-link-active"><a href="./ll-set-time-distribution">Longline set time distribution</a></li>
-    <li class="observablehq-link"><a href="./ps-set-time-distribution">Purseseine set time — UTC or local?</a></li>
-    <li class="observablehq-link"><a href="./ps-set-time-sunrise-relative">Purseseine set time — sunrise-relative</a></li>
+    <li class="observablehq-link"><a href="./ps-set-time-distribution">Purseseine set time distribution</a></li>
+    <li class="observablehq-link"><a href="./ps-set-time-sunrise-relative">Purseseine set time distribution - sunrise relative</a></li>
     <li class="observablehq-link"><a href="./entities-to-migrate">Entities to migrate</a></li>
     <li class="observablehq-link"><a href="./observer-offsets">Observer offsets by vessel flag</a></li>
     <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity IANA timezone offset by vessel flag</a></li>
@@ -208,8 +208,8 @@ the line is set starting in the evening (1800 to 2000 hours)</p>
 <div class="observablehq observablehq--block"><observablehq-loading></observablehq-loading><!--:0fff2706:--></div>
 </main>
 <footer id="observablehq-footer">
-<nav><a rel="prev" href="./"><span>Logsheet UTC Analysis</span></a><a rel="next" href="./ps-set-time-distribution"><span>Purseseine set time — UTC or local?</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-18T15:32:35">Jun 18, 2026</a>.</div>
+<nav><a rel="prev" href="./"><span>Logsheet UTC Analysis</span></a><a rel="next" href="./ps-set-time-distribution"><span>Purseseine set time distribution</span></a></nav>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-18T15:42:22">Jun 18, 2026</a>.</div>
 </footer>
 </div>
 </body>

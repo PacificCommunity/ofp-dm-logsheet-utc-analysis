@@ -10,7 +10,7 @@ According to the paper [*Analysis of Purse Seine Set Times for Different School 
 
 > We found that 94% of sets on FADs occurred prior to local sunrise, while only 3% of unassociated school sets occurred before sunrise, with the remainder occurring at consistent rates during daylight hours.
 
-This page presents set times **relative to sunrise** (t=0), matching the WCPFC paper format. Sunrise is calculated precisely for each set's location and date using the Ed Williams algorithm, accounting for latitude, solar declination, and the equation of time.
+This page presents set times **relative to sunrise** (t=0), matching the WCPFC paper format. Sunrise is calculated precisely for each set's location and date using the [Ed Williams algorithm](https://edwilliams.org/sunrise_sunset_algorithm.htm), accounting for latitude, solar declination, and the equation of time.
 
 Time is binned into **15-minute intervals** for finer detail than the hourly distribution.
 
