@@ -10,7 +10,7 @@
 <link rel="preload" as="style" href="./_observablehq/theme-air.d5b7fcbe.css">
 <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
 <link rel="stylesheet" type="text/css" href="./_observablehq/theme-air.d5b7fcbe.css">
-<link rel="modulepreload" href="./_observablehq/client.1774e20a.js">
+<link rel="modulepreload" href="./_observablehq/client.40783518.js">
 <link rel="modulepreload" href="./_observablehq/runtime.607a8173.js">
 <link rel="modulepreload" href="./_observablehq/stdlib.277aeab8.js">
 <link rel="modulepreload" href="./_npm/@observablehq/plot@0.6.17/a96a6bbb.js">
@@ -54,7 +54,7 @@
 <link rel="icon" href="./_file/observable.1af93621.png" type="image/png" sizes="32x32">
 <script type="module">
 
-import {define} from "./_observablehq/client.1774e20a.js";
+import {define} from "./_observablehq/client.40783518.js";
 import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
 
 registerFile("./data/set-time-distribution.csv", {"name":"./data/set-time-distribution.csv","mimeType":"text/csv","path":"./_file/data/set-time-distribution.48b06f19.csv","lastModified":1781673161129,"size":778});
@@ -78,9 +78,11 @@ const totalPS = totalPsFree + totalPsFad;
 return {Plot,d3,sets,byType,ll,ps,totalLL,psBySchool,psFree,psFad,totalPsFree,totalPsFad,totalPS};
 }});
 
-define({id: "9ed7c6d4", inputs: ["Plot","width","d3"], outputs: ["SETTING_START_WINDOW_BEGIN","SETTING_START_WINDOW_END","hourChart"], body: (Plot,width,d3) => {
-const SETTING_START_WINDOW_BEGIN = 4;
-const SETTING_START_WINDOW_END  = 8;
+define({id: "c1f6a34a", inputs: ["Plot","width","d3"], outputs: ["TUNA_START","TUNA_END","SWORDFISH_START","SWORDFISH_END","hourChart"], body: (Plot,width,d3) => {
+const TUNA_START = 4;
+const TUNA_END  = 8;
+const SWORDFISH_START = 18;
+const SWORDFISH_END  = 21;
 
 function hourChart(data, {title, fill}) {
     const yMax = Math.max(...data.map(d => d.pct));
@@ -118,20 +120,30 @@ function hourChart(data, {title, fill}) {
         fill: "#374151"
       }),
       Plot.ruleY([0]), 
-        Plot.ruleX([SETTING_START_WINDOW_BEGIN], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
-        Plot.text([{ hour: SETTING_START_WINDOW_BEGIN, label: "sunrise" }], {
+        Plot.ruleX([TUNA_START], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
+        Plot.text([{ hour: TUNA_START, label: "tuna" }], {
             x: "hour", y: () => yMax * 0.9,
             text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start"
         }),
-        Plot.ruleX([SETTING_START_WINDOW_END], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
-        Plot.text([{ hour: SETTING_START_WINDOW_END, label: "sunset" }], {
+        Plot.ruleX([TUNA_END], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
+        Plot.text([{ hour: TUNA_END, label: "tuna" }], {
+            x: "hour", y: () => yMax * 0.9,
+            text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start"
+        }),
+        Plot.ruleX([SWORDFISH_START], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
+        Plot.text([{ hour: SWORDFISH_START, label: "swordfish" }], {
+            x: "hour", y: () => yMax * 0.9,
+            text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start"
+        }),
+        Plot.ruleX([SWORDFISH_END], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
+        Plot.text([{ hour: SWORDFISH_END, label: "swordfish" }], {
             x: "hour", y: () => yMax * 0.9,
             text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start"
         }),
     ]
   });
 }
-return {SETTING_START_WINDOW_BEGIN,SETTING_START_WINDOW_END,hourChart};
+return {TUNA_START,TUNA_END,SWORDFISH_START,SWORDFISH_END,hourChart};
 }});
 
 define({id: "c715a025", mode: "inline", inputs: ["d3","totalLL","display"], body: async (d3,totalLL,display) => {
@@ -162,7 +174,8 @@ hourChart(ll, {
   <ol>
     <li class="observablehq-link"><a href="./">Summary</a></li>
     <li class="observablehq-link observablehq-link-active"><a href="./ll-set-time-distribution">Longline set time distribution</a></li>
-    <li class="observablehq-link"><a href="./ps-set-time-distribution">Purseseine set time distribution?</a></li>
+    <li class="observablehq-link"><a href="./ps-set-time-distribution">Purseseine set time — UTC or local?</a></li>
+    <li class="observablehq-link"><a href="./ps-set-time-sunrise-relative">Purseseine set time — sunrise-relative</a></li>
     <li class="observablehq-link"><a href="./entities-to-migrate">Entities to migrate</a></li>
     <li class="observablehq-link"><a href="./observer-offsets">Observer offsets by vessel flag</a></li>
     <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity IANA timezone offset by vessel flag</a></li>
@@ -180,7 +193,7 @@ hourChart(ll, {
 <main id="observablehq-main" class="observablehq">
 <h1 id="set-time-distribution" tabindex="-1"><a class="observablehq-header-anchor" href="#set-time-distribution">Set time distribution</a></h1>
 <div class="observablehq observablehq--block"><!--:c104fa42:--></div>
-<div class="observablehq observablehq--block"><!--:9ed7c6d4:--></div>
+<div class="observablehq observablehq--block"><!--:c1f6a34a:--></div>
 <h2 id="longline-logsheet" tabindex="-1"><a class="observablehq-header-anchor" href="#longline-logsheet">Longline logsheet</a></h2>
 <p>Fishing set start times across <strong><observablehq-loading></observablehq-loading><!--:c715a025:--> sets</strong> (<code>log.sets_ll</code> where <code>l_activity_id = 1</code>).</p>
 <p>This time distribution is consistent with the <a href="https://www.pirfo.org/index.php/resources/downloads/category/33-manuals?download=115:horizontal-longline-fishing-manual-for-fishermen" target="_blank" rel="noopener noreferrer">Horizontal Longline Fishing Manual for Fishermen</a>.</p>
@@ -188,11 +201,15 @@ hourChart(ll, {
 <p>In general, when fishing for tuna, the line is set in the morning sometime around first light (0400 to 0800 hours), and
 hauled starting in the afternoon or early evening (1400 to 1800 hours)</p>
 </blockquote>
+<blockquote>
+<p>When targeting swordfish, which are mainly night feeders,
+the line is set starting in the evening (1800 to 2000 hours)</p>
+</blockquote>
 <div class="observablehq observablehq--block"><observablehq-loading></observablehq-loading><!--:0fff2706:--></div>
 </main>
 <footer id="observablehq-footer">
-<nav><a rel="prev" href="./"><span>Logsheet UTC Analysis</span></a><a rel="next" href="./ps-set-time-distribution"><span>Purseseine set time distribution?</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-17T16:08:34">Jun 17, 2026</a>.</div>
+<nav><a rel="prev" href="./"><span>Logsheet UTC Analysis</span></a><a rel="next" href="./ps-set-time-distribution"><span>Purseseine set time — UTC or local?</span></a></nav>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-18T15:32:35">Jun 18, 2026</a>.</div>
 </footer>
 </div>
 </body>

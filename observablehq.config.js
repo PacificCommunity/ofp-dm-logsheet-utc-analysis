@@ -6,7 +6,8 @@ export default {
   pages: [
     {name: "Summary", path: "/"},
     {name: "Longline set time distribution", path: "/ll-set-time-distribution"},
-    {name: "Purseseine set time distribution?", path: "/ps-set-time-distribution"},
+    {name: "Purseseine set time — UTC or local?", path: "/ps-set-time-distribution"},
+    {name: "Purseseine set time — sunrise-relative", path: "/ps-set-time-sunrise-relative"},
     {name: "Entities to migrate", path: "/entities-to-migrate"},
     {name: "Observer offsets by vessel flag", path: "/observer-offsets"},
     {name: "Logsheet activity IANA timezone offset by vessel flag", path: "/logsheet-offsets"},

@@ -8,19 +8,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
 <link rel="preload" as="style" href="./_observablehq/theme-air.d5b7fcbe.css">
-<link rel="preload" as="style" href="./_observablehq/stdlib/inputs.f7bf0e12.css">
 <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
 <link rel="stylesheet" type="text/css" href="./_observablehq/theme-air.d5b7fcbe.css">
-<link rel="stylesheet" type="text/css" href="./_observablehq/stdlib/inputs.f7bf0e12.css">
 <link rel="modulepreload" href="./_observablehq/client.40783518.js">
 <link rel="modulepreload" href="./_observablehq/runtime.607a8173.js">
 <link rel="modulepreload" href="./_observablehq/stdlib.277aeab8.js">
 <link rel="modulepreload" href="./_npm/d3@7.9.0/66d82917.js">
 <link rel="modulepreload" href="./_npm/@observablehq/plot@0.6.17/a96a6bbb.js">
-<link rel="modulepreload" href="./_observablehq/stdlib/inputs.3feeafb9.js">
 <link rel="modulepreload" href="./_npm/d3-dsv@3.0.1/9cffc2bd.js">
-<link rel="modulepreload" href="./_npm/htl@1.0.0/87d6f6ef.js">
-<link rel="modulepreload" href="./_npm/isoformat@0.2.1/18cbf477.js">
 <link rel="modulepreload" href="./_npm/d3-array@3.2.4/e93ca09f.js">
 <link rel="modulepreload" href="./_npm/d3-axis@3.0.0/0f2de24d.js">
 <link rel="modulepreload" href="./_npm/d3-brush@3.0.0/65eb105b.js">
@@ -50,6 +45,7 @@
 <link rel="modulepreload" href="./_npm/d3-timer@3.0.1/b58a267d.js">
 <link rel="modulepreload" href="./_npm/d3-transition@3.0.1/004da2ac.js">
 <link rel="modulepreload" href="./_npm/d3-zoom@3.0.0/b5786b3f.js">
+<link rel="modulepreload" href="./_npm/isoformat@0.2.1/18cbf477.js">
 <link rel="modulepreload" href="./_npm/interval-tree-1d@1.0.4/53fe8176.js">
 <link rel="modulepreload" href="./_npm/internmap@2.0.3/e08981d9.js">
 <link rel="modulepreload" href="./_npm/delaunator@5.1.0/d4ec0aa1.js">
@@ -236,100 +232,6 @@ sunriseRelativeChart(unassocBins, {
 ))
 }});
 
-define({id: "51517cee", inputs: ["d3","raw","binCounts","instanceName"], outputs: ["topInstances","instanceData"], body: (d3,raw,binCounts,instanceName) => {
-const topInstances = d3.rollups(
-  raw,
-  v => v.length,
-  d => d.instance_source
-)
-  .sort((a, b) => b[1] - a[1])
-  .slice(0, 10)
-  .map(d => d[0]);
-
-const instanceData = topInstances.flatMap(inst => {
-  const instSets = raw.filter(d => d.instance_source === inst);
-  const instBins = binCounts(instSets);
-  return instBins.map(b => ({
-    ...b,
-    instance: instanceName(inst),
-    instance_id: inst,
-  }));
-});
-return {topInstances,instanceData};
-}});
-
-define({id: "f1c81306", inputs: ["Plot","width","formatRelativeTime","instanceData","display"], body: async (Plot,width,formatRelativeTime,instanceData,display) => {
-display(await(
-Plot.plot({
-  title: "Set Time Distribution by Instance (Top 10)",
-  width,
-  height: 600,
-  marginLeft: 80,
-  marginBottom: 60,
-  x: {
-    label: "Time relative to sunrise (minutes)",
-    grid: true,
-    tickFormat: formatRelativeTime,
-  },
-  y: {
-    label: null,
-  },
-  fy: {
-    label: null,
-  },
-  color: {
-    legend: true,
-    domain: ["Before sunrise", "After sunrise"],
-    range: ["#3b82f6", "#fbbf24"],
-  },
-  marks: [
-    Plot.rectY(instanceData, {
-      x1: d => d.minutes,
-      x2: d => d.minutes + 15,
-      y: "pct",
-      fy: "instance",
-      fill: d => d.minutes < 0 ? "Before sunrise" : "After sunrise",
-      tip: true,
-      title: d => `${d.instance} ${formatRelativeTime(d.minutes)}: ${d.pct}%`,
-    }),
-    Plot.ruleX([0], { stroke: "#ef4444", strokeWidth: 1.5, strokeDasharray: "4,3" }),
-    Plot.ruleY([0]),
-  ],
-})
-))
-}});
-
-define({id: "40659df5", inputs: ["d3","raw","display","Inputs","formatRelativeTime"], outputs: ["sample"], body: (d3,raw,display,Inputs,formatRelativeTime) => {
-// Take a sample of 20 sets across different locations
-const sample = d3.shuffle(raw.slice()).slice(0, 20);
-
-display(Inputs.table(sample.map(d => ({
-  "Trip ID": d.log_trip_id.substring(0, 8) + "...",
-  "Date": d.logdate,
-  "Lat": d.latd.toFixed(2) + "°",
-  "Lon": d.lond.toFixed(2) + "°",
-  "Set Time (UTC)": d.set_time_utc.substring(11, 16),
-  "Sunrise (UTC)": d.sunrise_utc.substring(11, 16),
-  "Δ from Sunrise": formatRelativeTime(d.minutes_from_sunrise),
-  "School Type": d.school_type,
-})), {
-  layout: "auto",
-}));
-return {sample};
-}});
-
-define({id: "cfc049ad-1", mode: "inline", inputs: ["assocPctBeforeSunrise","display"], body: async (assocPctBeforeSunrise,display) => {
-display(await(
-assocPctBeforeSunrise
-))
-}});
-
-define({id: "3eb16288-1", mode: "inline", inputs: ["unassocPctAfterSunrise","display"], body: async (unassocPctAfterSunrise,display) => {
-display(await(
-unassocPctAfterSunrise
-))
-}});
-
 </script>
 </head>
 <body>
@@ -393,26 +295,10 @@ unassocPctAfterSunrise
 <blockquote>
 <p>Activity is distributed throughout daylight hours, with peak around <strong>+180 to +300 minutes</strong> (3–5 hours after sunrise).</p>
 </blockquote>
-<hr>
-<h2 id="per-instance-breakdown" tabindex="-1"><a class="observablehq-header-anchor" href="#per-instance-breakdown">Per-Instance Breakdown</a></h2>
-<p>Distribution by instance_source for the top 10 instances (by set count).</p>
-<div class="observablehq observablehq--block"><!--:51517cee:--></div>
-<div class="observablehq observablehq--block"><observablehq-loading></observablehq-loading><!--:f1c81306:--></div>
-<hr>
-<h2 id="validation-sample" tabindex="-1"><a class="observablehq-header-anchor" href="#validation-sample">Validation Sample</a></h2>
-<p>Sample of calculated sunrise times to verify algorithm accuracy:</p>
-<div class="observablehq observablehq--block"><!--:40659df5:--></div>
-<h2 id="summary" tabindex="-1"><a class="observablehq-header-anchor" href="#summary">Summary</a></h2>
-<ul>
-<li><strong>Associated group (FAD)</strong>: <observablehq-loading></observablehq-loading><!--:cfc049ad-1:--> before sunrise — confirms local time entry</li>
-<li><strong>Unassociated group (Free school)</strong>: <observablehq-loading></observablehq-loading><!--:3eb16288-1:--> after sunrise — confirms local time entry</li>
-<li>15-minute granularity reveals detailed activity patterns</li>
-<li>Precise sunrise calculation accounts for latitude and date variations</li>
-</ul>
 </main>
 <footer id="observablehq-footer">
 <nav><a rel="prev" href="./ps-set-time-distribution"><span>Purseseine set time — UTC or local?</span></a><a rel="next" href="./entities-to-migrate"><span>Entities to migrate</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-18T13:34:45">Jun 18, 2026</a>.</div>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-18T15:32:35">Jun 18, 2026</a>.</div>
 </footer>
 </div>
 </body>
