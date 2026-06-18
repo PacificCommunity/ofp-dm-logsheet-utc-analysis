@@ -27,8 +27,10 @@ const totalPS = totalPsFree + totalPsFad;
 
 ```js
 
-const SETTING_START_WINDOW_BEGIN = 4;
-const SETTING_START_WINDOW_END  = 8;
+const TUNA_START = 4;
+const TUNA_END  = 8;
+const SWORDFISH_START = 18;
+const SWORDFISH_END  = 21;
 
 function hourChart(data, {title, fill}) {
     const yMax = Math.max(...data.map(d => d.pct));
@@ -66,13 +68,23 @@ function hourChart(data, {title, fill}) {
         fill: "#374151"
       }),
       Plot.ruleY([0]), 
-        Plot.ruleX([SETTING_START_WINDOW_BEGIN], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
-        Plot.text([{ hour: SETTING_START_WINDOW_BEGIN, label: "sunrise" }], {
+        Plot.ruleX([TUNA_START], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
+        Plot.text([{ hour: TUNA_START, label: "tuna" }], {
             x: "hour", y: () => yMax * 0.9,
             text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start"
         }),
-        Plot.ruleX([SETTING_START_WINDOW_END], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
-        Plot.text([{ hour: SETTING_START_WINDOW_END, label: "sunset" }], {
+        Plot.ruleX([TUNA_END], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
+        Plot.text([{ hour: TUNA_END, label: "tuna" }], {
+            x: "hour", y: () => yMax * 0.9,
+            text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start"
+        }),
+        Plot.ruleX([SWORDFISH_START], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
+        Plot.text([{ hour: SWORDFISH_START, label: "swordfish" }], {
+            x: "hour", y: () => yMax * 0.9,
+            text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start"
+        }),
+        Plot.ruleX([SWORDFISH_END], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
+        Plot.text([{ hour: SWORDFISH_END, label: "swordfish" }], {
             x: "hour", y: () => yMax * 0.9,
             text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start"
         }),
@@ -89,6 +101,9 @@ This time distribution is consistent with the [Horizontal Longline Fishing Manua
 
 > In general, when fishing for tuna, the line is set in the morning sometime around first light (0400 to 0800 hours), and
 hauled starting in the afternoon or early evening (1400 to 1800 hours)
+
+> When targeting swordfish, which are mainly night feeders,
+the line is set starting in the evening (1800 to 2000 hours)
 
 ```js
 hourChart(ll, {
