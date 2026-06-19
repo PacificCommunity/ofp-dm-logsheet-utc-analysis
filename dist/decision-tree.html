@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="generator" content="Observable Framework v1.13.4">
+<title>UTC offset decision tree | Logsheet UTC Analysis</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
+<link rel="preload" as="style" href="./_observablehq/theme-air.d5b7fcbe.css">
+<link rel="preload" as="style" href="./_observablehq/stdlib/inputs.f7bf0e12.css">
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
+<link rel="stylesheet" type="text/css" href="./_observablehq/theme-air.d5b7fcbe.css">
+<link rel="stylesheet" type="text/css" href="./_observablehq/stdlib/inputs.f7bf0e12.css">
+<link rel="modulepreload" href="./_observablehq/client.49091e0e.js">
+<link rel="modulepreload" href="./_observablehq/runtime.607a8173.js">
+<link rel="modulepreload" href="./_observablehq/stdlib.277aeab8.js">
+<link rel="modulepreload" href="./_import/components/decision-tree.74b00218.js">
+<link rel="modulepreload" href="./_npm/htl@1.0.0/87d6f6ef.js">
+<link rel="modulepreload" href="./_observablehq/stdlib/inputs.3feeafb9.js">
+<link rel="modulepreload" href="./_npm/d3@7.9.0/66d82917.js">
+<link rel="modulepreload" href="./_npm/d3-dsv@3.0.1/9cffc2bd.js">
+<link rel="modulepreload" href="./_npm/isoformat@0.2.1/18cbf477.js">
+<link rel="modulepreload" href="./_npm/d3-array@3.2.4/e93ca09f.js">
+<link rel="modulepreload" href="./_npm/d3-axis@3.0.0/0f2de24d.js">
+<link rel="modulepreload" href="./_npm/d3-brush@3.0.0/65eb105b.js">
+<link rel="modulepreload" href="./_npm/d3-chord@3.0.1/7ef8fb2e.js">
+<link rel="modulepreload" href="./_npm/d3-color@3.1.0/aeb57b94.js">
+<link rel="modulepreload" href="./_npm/d3-contour@4.0.2/1d2aed74.js">
+<link rel="modulepreload" href="./_npm/d3-delaunay@6.0.4/87adea64.js">
+<link rel="modulepreload" href="./_npm/d3-dispatch@3.0.1/9ba9c7f3.js">
+<link rel="modulepreload" href="./_npm/d3-drag@3.0.0/4202580c.js">
+<link rel="modulepreload" href="./_npm/d3-ease@3.0.1/cdd7e898.js">
+<link rel="modulepreload" href="./_npm/d3-fetch@3.0.1/b4e2ad9a.js">
+<link rel="modulepreload" href="./_npm/d3-force@3.0.0/5e804d15.js">
+<link rel="modulepreload" href="./_npm/d3-format@3.1.2/3785bf2d.js">
+<link rel="modulepreload" href="./_npm/d3-geo@3.1.1/40599fb3.js">
+<link rel="modulepreload" href="./_npm/d3-hierarchy@3.1.2/e49e792c.js">
+<link rel="modulepreload" href="./_npm/d3-interpolate@3.0.1/8d1e5425.js">
+<link rel="modulepreload" href="./_npm/d3-path@3.1.0/20d3f133.js">
+<link rel="modulepreload" href="./_npm/d3-polygon@3.0.1/7553081f.js">
+<link rel="modulepreload" href="./_npm/d3-quadtree@3.0.1/0dfd751c.js">
+<link rel="modulepreload" href="./_npm/d3-random@3.0.1/3c90ee06.js">
+<link rel="modulepreload" href="./_npm/d3-scale@4.0.2/720b7f0a.js">
+<link rel="modulepreload" href="./_npm/d3-scale-chromatic@3.1.0/ba24c2e7.js">
+<link rel="modulepreload" href="./_npm/d3-selection@3.0.0/4d94e5b7.js">
+<link rel="modulepreload" href="./_npm/d3-shape@3.2.0/6d3a6726.js">
+<link rel="modulepreload" href="./_npm/d3-time@3.1.0/9f03c579.js">
+<link rel="modulepreload" href="./_npm/d3-time-format@4.1.0/07c9626f.js">
+<link rel="modulepreload" href="./_npm/d3-timer@3.0.1/b58a267d.js">
+<link rel="modulepreload" href="./_npm/d3-transition@3.0.1/004da2ac.js">
+<link rel="modulepreload" href="./_npm/d3-zoom@3.0.0/b5786b3f.js">
+<link rel="modulepreload" href="./_npm/internmap@2.0.3/e08981d9.js">
+<link rel="modulepreload" href="./_npm/delaunator@5.1.0/d4ec0aa1.js">
+<link rel="modulepreload" href="./_npm/robust-predicates@3.0.3/42820bfa.js">
+<link rel="icon" href="./_file/observable.1af93621.png" type="image/png" sizes="32x32">
+<script type="module">
+
+import {define} from "./_observablehq/client.49091e0e.js";
+import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
+
+registerFile("./data/ll-decision-tree-features.csv", {"name":"./data/ll-decision-tree-features.csv","mimeType":"text/csv","path":"./_file/data/ll-decision-tree-features.2d589ad5.csv","lastModified":1781846097368,"size":129996});
+
+define({id: "47e95d81", inputs: ["FileAttachment"], outputs: ["buildDecisionTree","renderTreeRules","renderRulesTable","renderCoverage","rulesToCSV","trips"], body: async (FileAttachment) => {
+const {buildDecisionTree, renderTreeRules, renderRulesTable, renderCoverage, rulesToCSV} = await import("./_import/components/decision-tree.74b00218.js");
+
+const trips = await FileAttachment("./data/ll-decision-tree-features.csv").csv({ typed: true });
+return {buildDecisionTree,renderTreeRules,renderRulesTable,renderCoverage,rulesToCSV,trips};
+}});
+
+define({id: "93674d7d", inputs: ["view","Inputs"], outputs: ["purity"], body: (view,Inputs) => {
+const purity = view(Inputs.range([0.5, 1], { value: 0.9, step: 0.05, label: "Purity threshold" }));
+return {purity};
+}});
+
+define({id: "24b83f1e", inputs: ["view","Inputs"], outputs: ["minSupport"], body: (view,Inputs) => {
+const minSupport = view(Inputs.range([1, 50], { value: 5, step: 1, label: "Min trips per node" }));
+return {minSupport};
+}});
+
+define({id: "730d48d4", inputs: ["buildDecisionTree","trips","purity","minSupport"], outputs: ["tree"], body: (buildDecisionTree,trips,purity,minSupport) => {
+const tree = buildDecisionTree(trips, { purity, minSupport, alpha: 0.5 });
+return {tree};
+}});
+
+define({id: "89fa8c27", inputs: ["display","renderCoverage","tree"], body: (display,renderCoverage,tree) => {
+display(renderCoverage(tree));
+}});
+
+define({id: "eddf2974", inputs: ["display","renderTreeRules","tree"], body: (display,renderTreeRules,tree) => {
+display(renderTreeRules(tree));
+}});
+
+define({id: "7f6cc077", inputs: ["display","renderRulesTable","tree"], body: (display,renderRulesTable,tree) => {
+display(renderRulesTable(tree));
+}});
+
+define({id: "e392c183", inputs: ["rulesToCSV","tree","display","html"], body: (rulesToCSV,tree,display,html) => {
+{
+  const csv = rulesToCSV(tree);
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  display(html`<a href=${url} download="ll-utc-offset-rules.csv"
+    style="display:inline-block;background:#2563eb;color:white;padding:0.5rem 1rem;border-radius:6px;text-decoration:none;font-weight:600">
+    ⬇ Download rules CSV (${tree.rules.length} rules)</a>`);
+}
+}});
+
+</script>
+</head>
+<body>
+<input id="observablehq-sidebar-toggle" type="checkbox" title="Toggle sidebar">
+<label id="observablehq-sidebar-backdrop" for="observablehq-sidebar-toggle"></label>
+<nav id="observablehq-sidebar">
+  <ol>
+    <label id="observablehq-sidebar-close" for="observablehq-sidebar-toggle"></label>
+    <li class="observablehq-link"><a href="./">Logsheet UTC Analysis</a></li>
+  </ol>
+  <ol>
+    <li class="observablehq-link"><a href="./">Summary</a></li>
+    <li class="observablehq-link"><a href="./ps-set-time-distribution">Purseseine set time</a></li>
+    <li class="observablehq-link"><a href="./ll-set-time-distribution">Longline set time distribution</a></li>
+    <li class="observablehq-link"><a href="./observer-offset-per-flag">Longline offset complexity per flag</a></li>
+    <li class="observablehq-link"><a href="./eez-list-per-trip">EEZ combinations per trip</a></li>
+    <li class="observablehq-link"><a href="./observer-offsets">Observer offset by vessel flag</a></li>
+    <li class="observablehq-link"><a href="./observer-offset-per-eez">Observer offset by EEZ</a></li>
+    <li class="observablehq-link observablehq-link-active"><a href="./decision-tree">Decision tree</a></li>
+  </ol>
+</nav>
+<script>{const e=document.querySelector("#observablehq-sidebar"),o=document.querySelector("#observablehq-sidebar-toggle"),r=sessionStorage.getItem("observablehq-sidebar");r?o.checked=r==="true":o.indeterminate=!0;for(const t of document.querySelectorAll("#observablehq-sidebar summary")){const s=t.parentElement;switch(sessionStorage.getItem(`observablehq-sidebar:${t.textContent}`)){case"true":s.open=!0;break;case"false":s.classList.contains("observablehq-section-active")||(s.open=!1);break}}addEventListener("beforeunload",()=>sessionStorage.setItem("observablehq-sidebar-scrolly",`${e.scrollTop}`));const a=sessionStorage.getItem("observablehq-sidebar-scrolly");a!=null&&(e.style.cssText="overflow: hidden;",e.scrollTop=+a,e.style.cssText="");}</script>
+<div id="observablehq-center">
+<main id="observablehq-main" class="observablehq">
+<h1 id="longline-utc-offset-decision-tree" tabindex="-1"><a class="observablehq-header-anchor" href="#longline-utc-offset-decision-tree">Longline UTC offset — decision tree</a></h1>
+<p>The decision tree estimates a UTC offset for every <strong>Longline</strong> logsheet datetime from observer
+evidence (the source of truth). It is built <strong>in-page</strong> from one row per observer-linked Longline
+trip: <code>vessel_flag</code>, <code>primary_eez_code</code>, <code>instance_source</code>, and the trip's <strong>modal observer offset</strong>.</p>
+<p><strong>How it is built</strong> — group trips by <code>vessel_flag</code>. If the dominant offset covers ≥ the purity
+threshold (and the node has enough trips), emit a simple <code>flag → offset</code> rule. Otherwise split by
+<code>primary_eez_code</code>, then by <code>instance_source</code>, only going deeper where purity is not yet reached.
+Confidence is a Laplace-smoothed probability of the dominant offset (the "Bayesian" flavour).</p>
+<div class="observablehq observablehq--block"><!--:47e95d81:--></div>
+<div class="observablehq observablehq--block"><!--:93674d7d:--></div>
+<div class="observablehq observablehq--block"><!--:24b83f1e:--></div>
+<div class="observablehq observablehq--block"><!--:730d48d4:--></div>
+<h2 id="coverage" tabindex="-1"><a class="observablehq-header-anchor" href="#coverage">Coverage</a></h2>
+<div class="observablehq observablehq--block"><!--:89fa8c27:--></div>
+<p><code>Resubstitution accuracy</code> is the share of observer trips whose modal offset is correctly predicted
+by the tree's own rules — an upper bound on real-world accuracy.</p>
+<h2 id="decision-tree" tabindex="-1"><a class="observablehq-header-anchor" href="#decision-tree">Decision tree</a></h2>
+<div class="observablehq observablehq--block"><!--:eddf2974:--></div>
+<div style="margin:0.5rem 0">
+  <span style="background:#dcfce7;padding:1px 7px;border-radius:4px;font-family:monospace">+11</span> confident leaf &nbsp;
+  <span style="background:#fef9c3;padding:1px 7px;border-radius:4px;font-family:monospace">−10</span> low-confidence fallback
+</div>
+<h2 id="rules-table" tabindex="-1"><a class="observablehq-header-anchor" href="#rules-table">Rules table</a></h2>
+<div class="observablehq observablehq--block"><!--:7f6cc077:--></div>
+<h2 id="download" tabindex="-1"><a class="observablehq-header-anchor" href="#download">Download</a></h2>
+<div class="observablehq observablehq--block"><!--:e392c183:--></div>
+<hr>
+<blockquote>
+<p><strong>Purse-seine</strong> logsheets are not in this tree: their datetimes are already UTC, so every
+purse-seine offset is <strong>0</strong> (see the Purseseine set time page).</p>
+</blockquote>
+</main>
+<footer id="observablehq-footer">
+<nav><a rel="prev" href="./observer-offset-per-eez"><span>Observer offset by EEZ</span></a></nav>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-19T16:15:13">Jun 19, 2026</a>.</div>
+</footer>
+</div>
+</body>
+</html>
