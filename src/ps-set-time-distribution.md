@@ -1,22 +1,33 @@
 ---
 theme: air
-title: Purseseine set time — UTC or local?
+title: Purseseine set time — entered as UTC
 toc: false
 ---
 
-# Purseseine set_time: UTC or local?
+# Purseseine set time — entered as UTC → offset = 0
 
 According to the paper [*Analysis of Purse Seine Set Times for Different School Associations: A Further Tool to Assist in Compliance with FAD Closures?*](https://meetings.wcpfc.int/node/6808):
 
 > We found that 94% of sets on FADs occurred prior to local sunrise, while only 3% of unassociated school sets occurred before sunrise, with the remainder occurring at consistent rates during daylight hours.
 
-If `log.sets_ps.set_time` is stored as **local time**:
-- **Associated group** (`school_id` 3–5): sets should cluster **before 06:00**
-- **Unassociated group** (`school_id` 1–2): sets should cluster **between 06:00 and 18:00**
+We use this known biological/operational signal as a **clock check**. If `log.sets_ps.set_time`
+were stored as **local time**, the as-recorded hours would already match the paper. If instead it
+is stored as **UTC**, we must shift by the local offset to recover the paper's pattern.
 
-If `set_time` is stored as **UTC**, both distributions will appear shifted by the UTC offset. For example, a 04:00 local set in UTC+11 waters would be recorded as 17:00.
+Two independent views below both show the same result: **the recorded purse-seine set times are UTC.**
 
-The UTC offset for each set is approximated using the **nautical timezone formula**: `ROUND(lond / 15.0, 0)`. This covers all PS sets with a recorded longitude — not just observer-linked trips.
+<div style="background:#dcfce7;padding:1rem 1.25rem;border-radius:8px;margin:1.5rem 0;border:1px solid #86efac">
+  <strong>Decision:</strong> Purse-seine logsheet datetimes are entered as UTC. No estimation is
+  needed — <strong>all purse-seine logsheet UTC offsets = 0</strong>.
+</div>
+
+---
+
+## View 1 — Hour of day: as-recorded vs nautical-adjusted
+
+The UTC offset for each set is approximated using the **nautical timezone formula**
+`ROUND(lond / 15.0, 0)`, which covers every PS set with a recorded longitude (not just
+observer-linked trips). "Nautical-adjusted" = recorded hour **+ nautical offset** (UTC → local).
 
 ```js
 import * as d3 from "npm:d3";
@@ -24,41 +35,10 @@ import * as Plot from "npm:@observablehq/plot";
 
 const raw = await FileAttachment("data/ps-fad-set-hour-classification.csv").csv({ typed: true });
 
-// TufmanInstance enum values → short name
-const INSTANCE_NAMES = new Map([
-  [1,        "INDUSTRY"],
-  [2,        "OFP"],
-  [4,        "MH"],
-  [8,        "FM"],
-  [16,       "CK"],
-  [32,       "UST"],
-  [128,      "KI"],
-  [256,      "TO"],
-  [512,      "WS"],
-  [1024,     "PF"],
-  [2048,     "NR"],
-  [4096,     "NU"],
-  [8192,     "PG"],
-  [16384,    "TV"],
-  [32768,    "VU"],
-  [65536,    "PW"],
-  [131072,   "TK"],
-  [262144,   "SB"],
-  [524288,   "FJ"],
-  [1048576,  "VN"],
-  [2097152,  "PH"],
-  [4194304,  "WCPFC"],
-  [16777216, "WF"],
-  [33554432, "DWFN"],
-]);
-
-const instanceName = v => INSTANCE_NAMES.get(v) ?? String(v);
-
 // Sunrise / sunset thresholds — good approximations for tropical Pacific year-round
 const SUNRISE = 6;
 const SUNSET  = 18;
 
-// Enrich each row with the nautical-adjusted hour and pre-computed flags
 const data = raw.map(d => {
   const adj = ((d.set_hour + d.nautical_offset) % 24 + 24) % 24;
   return {
@@ -76,7 +56,6 @@ const unassoc = data.filter(d => d.school_type === "unassociated group");
 ```
 
 ```js
-// Build hourly counts for both interpretations
 function hourCounts(rows, hourKey) {
   const counts = d3.rollup(rows, v => v.length, d => d[hourKey]);
   const total  = rows.length;
@@ -97,166 +76,137 @@ const sharedY = { label: "Sets (%)", grid: true, tickFormat: v => `${v}%` };
 function hourChart(countsData, {title, fill}) {
   const yMax = Math.max(...countsData.map(d => d.pct));
   return Plot.plot({
-    title,
-    width,
-    height: 300,
-    marginLeft: 55,
-    marginBottom: 48,
-    x: sharedX,
-    y: sharedY,
+    title, width, height: 300, marginLeft: 55, marginBottom: 48,
+    x: sharedX, y: sharedY,
     marks: [
       Plot.rectY(countsData, { x1: d => d.hour, x2: d => d.hour + 1, y: "pct", fill, tip: true,
         title: d => `${String(d.hour).padStart(2,"0")}:00 — ${d3.format(",")(d.count)} sets (${d.pct}%)` }),
       Plot.ruleX([SUNRISE], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
-      Plot.text([{ hour: SUNRISE, label: "sunrise" }], {
-        x: "hour", y: () => yMax * 0.9,
-        text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start"
-      }),
+      Plot.text([{ hour: SUNRISE, label: "sunrise" }], { x: "hour", y: () => yMax * 0.9, text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start" }),
       Plot.ruleX([SUNSET], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
-      Plot.text([{ hour: SUNSET, label: "sunset" }], {
-        x: "hour", y: () => yMax * 0.9,
-        text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start"
-      }),
+      Plot.text([{ hour: SUNSET, label: "sunset" }], { x: "hour", y: () => yMax * 0.9, text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start" }),
       Plot.ruleY([0]),
     ],
   });
 }
-
-// Per-instance classification bar chart + table
-function instanceClassification(rows, {metricRecorded, metricAdjusted, metricLabel, title}) {
-  const byInstance = d3.rollup(rows, v => {
-    const total   = v.length;
-    const recOk   = v.filter(d => d[metricRecorded]).length;
-    const adjOk   = v.filter(d => d[metricAdjusted]).length;
-    return {
-      instance_name:  instanceName(v[0].instance_source),
-      total_sets:     total,
-      pct_rec:  Math.round(recOk / total * 1000) / 10,
-      pct_adj:  Math.round(adjOk / total * 1000) / 10,
-      verdict:  (adjOk / total) > 0.5 && (adjOk / total) > (recOk / total) * 1.5
-                ? "UTC entered"
-                : "Unclear"
-    };
-  }, d => d.instance_source);
-
-  const iRows = [...byInstance.values()].sort((a, b) => b.total_sets - a.total_sets);
-
-  const barData = iRows.flatMap(r => [
-    { instance: r.instance_name, interpretation: "As recorded",       pct: r.pct_rec },
-    { instance: r.instance_name, interpretation: "Nautical-adjusted", pct: r.pct_adj },
-  ]);
-
-  const verdictColor = v =>
-    v === "UTC entered"   ? "#dcfce7" :
-    v === "Local entered" ? "#fef9c3" : "#f3f4f6";
-
-  const barChart = Plot.plot({
-    title,
-    width,
-    height: 40 + iRows.length * 28,
-    marginLeft: 80,
-    marginRight: 10,
-    x: { label: `% ${metricLabel}`, grid: true, tickFormat: v => `${v}%` },
-    y: { label: null },
-    color: { legend: true, domain: ["As recorded", "Nautical-adjusted"], range: ["#f59e0b", "#34d399"] },
-    marks: [
-      Plot.barX(barData, Plot.groupY({ x: "sum" }, {
-        x: "pct", y: "instance", fill: "interpretation",
-        tip: true, title: d => `${d.instance} — ${d.interpretation}: ${d.pct}%`,
-      })),
-      Plot.ruleX([50], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
-      Plot.ruleX([0]),
-    ],
-  });
-
-  const table = html`<table style="border-collapse:collapse;width:100%;font-size:0.9rem;margin-top:1rem">
-    <thead>
-      <tr style="border-bottom:2px solid #e5e7eb">
-        <th style="text-align:left;padding:6px 10px">Instance</th>
-        <th style="text-align:right;padding:6px 10px">Sets</th>
-        <th style="text-align:right;padding:6px 10px">% ${metricLabel} (recorded)</th>
-        <th style="text-align:right;padding:6px 10px">% ${metricLabel} (nautical-adjusted)</th>
-        <th style="text-align:center;padding:6px 10px">Verdict</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${iRows.map(r => html`<tr style="border-bottom:1px solid #f3f4f6">
-        <td style="padding:5px 10px;font-weight:600">${r.instance_name}</td>
-        <td style="text-align:right;padding:5px 10px">${d3.format(",")(r.total_sets)}</td>
-        <td style="text-align:right;padding:5px 10px">${r.pct_rec}%</td>
-        <td style="text-align:right;padding:5px 10px">${r.pct_adj}%</td>
-        <td style="text-align:center;padding:5px 10px;background:${verdictColor(r.verdict)};border-radius:4px">${r.verdict}</td>
-      </tr>`)}
-    </tbody>
-  </table>`;
-
-  return html`<div>${barChart}${table}</div>`;
-}
 ```
 
----
-
-## Associated group (`school_id` 3–5)
-
-**${d3.format(",")(assoc.length)} sets.** Expected pattern: before sunrise (06:00 local).
+### Associated group (`school_id` 3–5) — expected before sunrise
 
 ```js
 const assocRecorded = hourCounts(assoc, "set_hour");
 const assocAdjusted = hourCounts(assoc, "set_hour_adjusted");
-
 const pctAssocRecorded = d3.format(".1%")(d3.sum(assocRecorded.filter(d => d.hour < SUNRISE), d => d.count) / assoc.length);
 const pctAssocAdjusted = d3.format(".1%")(d3.sum(assocAdjusted.filter(d => d.hour < SUNRISE), d => d.count) / assoc.length);
 ```
 
 ```js
-display(html`<p>Before 06:00 — <strong>as-recorded: ${pctAssocRecorded}</strong> &nbsp;|&nbsp; <strong>nautical-adjusted: ${pctAssocAdjusted}</strong></p>`);
+display(html`<p><strong>${d3.format(",")(assoc.length)} sets.</strong> Before 06:00 — as-recorded: <strong>${pctAssocRecorded}</strong> &nbsp;|&nbsp; nautical-adjusted: <strong>${pctAssocAdjusted}</strong></p>`);
 display(html`<div style="display:flex;gap:1.5rem;flex-wrap:wrap">
   ${hourChart(assocRecorded, { title: "Associated group — as recorded", fill: "#f59e0b" })}
-  ${hourChart(assocAdjusted, { title: "Associated group — nautical-adjusted", fill: "#34d399" })}
+  ${hourChart(assocAdjusted, { title: "Associated group — nautical-adjusted (UTC→local)", fill: "#34d399" })}
 </div>`);
 ```
 
-> The chart that shows ~94% of sets **before the sunrise line** is the correct interpretation.
+> The **nautical-adjusted** chart matches the paper (~94% before sunrise). The as-recorded chart
+> does not. Recorded times must therefore be **UTC**.
 
-```js
-display(instanceClassification(assoc, {
-  metricRecorded: "before_sunrise_recorded",
-  metricAdjusted: "before_sunrise_adjusted",
-  metricLabel:    "before sunrise",
-  title:          "Associated group — % before 06:00 by instance",
-}));
-```
-
----
-
-## Unassociated group (`school_id` 1–2)
-
-**${d3.format(",")(unassoc.length)} sets.** Expected pattern: in daylight (06:00–18:00 local).
+### Unassociated group (`school_id` 1–2) — expected in daylight
 
 ```js
 const unassocRecorded = hourCounts(unassoc, "set_hour");
 const unassocAdjusted = hourCounts(unassoc, "set_hour_adjusted");
-
 const pctUnassocRecorded = d3.format(".1%")(d3.sum(unassocRecorded.filter(d => d.hour >= SUNRISE && d.hour < SUNSET), d => d.count) / unassoc.length);
 const pctUnassocAdjusted = d3.format(".1%")(d3.sum(unassocAdjusted.filter(d => d.hour >= SUNRISE && d.hour < SUNSET), d => d.count) / unassoc.length);
 ```
 
 ```js
-display(html`<p>In daylight (06:00–18:00) — <strong>as-recorded: ${pctUnassocRecorded}</strong> &nbsp;|&nbsp; <strong>nautical-adjusted: ${pctUnassocAdjusted}</strong></p>`);
+display(html`<p><strong>${d3.format(",")(unassoc.length)} sets.</strong> In daylight (06:00–18:00) — as-recorded: <strong>${pctUnassocRecorded}</strong> &nbsp;|&nbsp; nautical-adjusted: <strong>${pctUnassocAdjusted}</strong></p>`);
 display(html`<div style="display:flex;gap:1.5rem;flex-wrap:wrap">
   ${hourChart(unassocRecorded, { title: "Unassociated group — as recorded", fill: "#60a5fa" })}
-  ${hourChart(unassocAdjusted, { title: "Unassociated group — nautical-adjusted", fill: "#818cf8" })}
+  ${hourChart(unassocAdjusted, { title: "Unassociated group — nautical-adjusted (UTC→local)", fill: "#818cf8" })}
 </div>`);
 ```
 
-> The chart that shows ~97% of sets **between the sunrise and sunset lines** is the correct interpretation.
+---
+
+## View 2 — Sunrise-relative distribution (15-min bins)
+
+This view presents set times **relative to sunrise** (t=0), matching the WCPFC paper format.
+Sunrise is computed precisely for each set's location and date using the
+[Ed Williams algorithm](https://edwilliams.org/sunrise_sunset_algorithm.htm). The calculator works
+in **UTC**, so this view treats the recorded set time as UTC directly — if that assumption is
+correct, the paper's pattern emerges with no further adjustment.
 
 ```js
-display(instanceClassification(unassoc, {
-  metricRecorded: "in_daylight_recorded",
-  metricAdjusted: "in_daylight_adjusted",
-  metricLabel:    "in daylight",
-  title:          "Unassociated group — % in daylight (06:00–18:00) by instance",
-}));
+const sunriseRaw = await FileAttachment("data/ps-set-time-sunrise-relative.csv").csv({ typed: true });
+const assocSr   = sunriseRaw.filter(d => d.school_type === "associated group");
+const unassocSr = sunriseRaw.filter(d => d.school_type === "unassociated group");
+
+function binCounts(rows) {
+  const counts = d3.rollup(rows, v => v.length, d => d.minutes_from_sunrise);
+  const total = rows.length;
+  const bins = [];
+  for (let min = -360; min <= 720; min += 15) {
+    const count = counts.get(min) ?? 0;
+    bins.push({ minutes: min, count, pct: Math.round((count / total) * 1000) / 10 });
+  }
+  return bins;
+}
+
+function formatRelativeTime(minutes) {
+  const sign = minutes >= 0 ? "+" : "-";
+  const absMin = Math.abs(minutes);
+  return `${sign}${Math.floor(absMin / 60)}h${String(absMin % 60).padStart(2, "0")}`;
+}
+
+function sunriseRelativeChart(binData, {title}) {
+  return Plot.plot({
+    title, width, height: 400, marginLeft: 60, marginBottom: 60,
+    x: { label: "Time relative to sunrise", grid: true, tickFormat: formatRelativeTime },
+    y: { label: "Sets (%)", grid: true, tickFormat: v => `${v}%` },
+    color: { legend: true, domain: ["Before sunrise", "After sunrise"], range: ["#3b82f6", "#fbbf24"] },
+    marks: [
+      Plot.rectY(binData, { x1: d => d.minutes, x2: d => d.minutes + 15, y: "pct",
+        fill: d => d.minutes < 0 ? "Before sunrise" : "After sunrise", tip: true,
+        title: d => `${formatRelativeTime(d.minutes)}: ${d3.format(",")(d.count)} sets (${d.pct}%)` }),
+      Plot.ruleX([0], { stroke: "#ef4444", strokeWidth: 2, strokeDasharray: "6,4" }),
+      Plot.text([{ x: 0, label: "SUNRISE" }], { x: "x", y: () => d3.max(binData, d => d.pct) * 0.95, text: "label", fill: "#ef4444", fontSize: 12, fontWeight: "bold", dy: -5 }),
+      Plot.ruleY([0]),
+    ],
+  });
+}
+
+const assocBins = binCounts(assocSr);
+const unassocBins = binCounts(unassocSr);
+const assocPctBefore = d3.format(".1%")(d3.sum(assocBins.filter(d => d.minutes < 0), d => d.count) / assocSr.length);
+const unassocPctAfter = d3.format(".1%")(d3.sum(unassocBins.filter(d => d.minutes >= 0), d => d.count) / unassocSr.length);
 ```
 
+<div style="display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0">
+  <div style="background:#dcfce7;padding:1rem;border-radius:8px;flex:1;min-width:240px">
+    Associated group: <strong>${assocPctBefore}</strong> of sets occur <strong>before sunrise</strong> (paper: 94%).
+  </div>
+  <div style="background:#fef9c3;padding:1rem;border-radius:8px;flex:1;min-width:240px">
+    Unassociated group: <strong>${unassocPctAfter}</strong> of sets occur <strong>after sunrise</strong> (paper: ~97%).
+  </div>
+</div>
+
+```js
+display(html`<div style="display:flex;gap:1.5rem;flex-wrap:wrap">
+  ${sunriseRelativeChart(assocBins, { title: "Associated group — relative to sunrise (UTC clock)" })}
+  ${sunriseRelativeChart(unassocBins, { title: "Unassociated group — relative to sunrise (UTC clock)" })}
+</div>`);
+```
+
+---
+
+## Conclusion
+
+Both views agree with the WCPFC paper **only when the recorded set time is read as UTC**:
+
+- Associated (FAD) sets cluster **before sunrise** on the UTC clock.
+- Unassociated (free-school) sets fall **in daylight** on the UTC clock.
+
+Therefore purse-seine logsheet datetimes are **already UTC**, and the migration sets
+**every purse-seine logsheet UTC offset to 0** — no estimation required.

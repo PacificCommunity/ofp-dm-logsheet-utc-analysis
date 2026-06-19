@@ -1,14 +1,15 @@
 /**
- * Data loader: ll-trip-training-features.csv.js
+ * Data loader: ll-decision-tree-features.csv.js
  *
- * For each observer-linked Longline logsheet trip, extracts the features
- * used to train the Bayesian UTC offset estimator, plus the known modal offset.
+ * For each observer-linked Longline logsheet trip, extracts the features used to
+ * build the in-page UTC offset decision tree, plus the known modal observer offset
+ * (the source of truth).
  *
  * Output columns:
  *   log_trip_id      — logsheet trip identifier
  *   vessel_flag      — most-recent flag from ref.vessel_instances
  *   primary_eez_code — EEZ with the most fishing sets in this trip
- *   departure_month  — MONTH(depart_date), 1–12, NULL if unknown
+ *   instance_source  — bigint matching TufmanInstance enum (e.g. 512 = WS)
  *   modal_offset     — most frequent normalised observer offset for this trip
  */
 
@@ -111,7 +112,7 @@ SELECT DISTINCT
     tl.log_trip_id,
     vf.flag_id              AS vessel_flag,
     pe.primary_eez_code,
-    MONTH(tl.depart_date)   AS departure_month,
+    tl.instance_source,
     mo.modal_offset
 FROM log.trips_ll tl
 INNER JOIN LLWithObserver lo    ON lo.log_trip_id = tl.log_trip_id
@@ -129,6 +130,6 @@ process.stdout.write(csvFormat(rows.map(r => ({
   log_trip_id:      String(r.log_trip_id).trim(),
   vessel_flag:      String(r.vessel_flag).trim(),
   primary_eez_code: r.primary_eez_code != null ? String(r.primary_eez_code).trim() : "",
-  departure_month:  r.departure_month != null ? Number(r.departure_month) : "",
+  instance_source:  r.instance_source != null ? Number(r.instance_source) : "",
   modal_offset:     Number(r.modal_offset),
 }))));

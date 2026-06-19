@@ -5,19 +5,13 @@ export default {
 
   pages: [
     {name: "Summary", path: "/"},
+    {name: "Purseseine set time", path: "/ps-set-time-distribution"},
     {name: "Longline set time distribution", path: "/ll-set-time-distribution"},
-    {name: "Purseseine set time distribution", path: "/ps-set-time-distribution"},
-    {name: "Purseseine set time distribution - sunrise relative", path: "/ps-set-time-sunrise-relative"},
-    {name: "Entities to migrate", path: "/entities-to-migrate"},
-    {name: "Observer offsets by vessel flag", path: "/observer-offsets"},
-    {name: "Logsheet activity IANA timezone offset by vessel flag", path: "/logsheet-offsets"},
-    {name: "Logsheet activity Nautical timezone offset by vessel flag", path: "/logsheet-nautical-offsets"},
-    {name: "Observer offset distribution by EEZ", path: "/observer-offset-per-eez"},
-    {name: "Observer offset distribution by vessel flag", path: "/observer-offset-per-flag"},
-    {name: "Observer offset per instance source", path: "/observer-offset-per-logsheet"},
+    {name: "Longline offset complexity per flag", path: "/observer-offset-per-flag"},
     {name: "EEZ combinations per trip", path: "/eez-list-per-trip"},
-    {name: "UTC offset predictions", path: "/utc-offset-predictions"},
-    {name: "Bayesian estimator — how it works", path: "/bayesian-estimator-explained"},
+    {name: "Observer offset by vessel flag", path: "/observer-offsets"},
+    {name: "Observer offset by EEZ", path: "/observer-offset-per-eez"},
+    {name: "Decision tree", path: "/decision-tree"},
   ],
 
   // Content to add to the head of the page, e.g. for a favicon:
