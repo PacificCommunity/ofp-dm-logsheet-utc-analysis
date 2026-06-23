@@ -4,19 +4,48 @@ Trains a scikit-learn DecisionTreeClassifier on observer Longline activities to
 map (vessel_flag, eez_code) -> UTC offset, then emits the resolved decision-tree
 rules as CSV.
 
-Why a decision tree: it is a well-known, fully interpretable model whose splits
-read directly as `vessel_flag (x eez_code) -> offset`, which is exactly the
-artefact we want to ship. We train on individual observer *activities* (each
-fishing set is one training example) using the observer offset as the label.
-EEZ and flag are the only features (logsheet instance dropped). The observer
-offset is treated as the ground truth.
+== Why a decision tree? ==
+A DecisionTreeClassifier is a well-known, fully interpretable model. It recursively
+partitions the feature space into rectangular regions and assigns each region a
+single majority class — here, the UTC offset. Because we one-hot-encode the two
+categorical features (vessel_flag, eez_code), each leaf effectively represents a
+specific (flag, eez) combination, so the final artefact reads as an auditable
+`flag × eez → offset` lookup table.
+
+== What confidence means ==
+`confidence` is NOT a tree-internal probability. It is the share of the raw
+observer activities at that (flag, eez) pair whose measured offset equals the
+tree's prediction:
+
+    confidence = (# activities with predicted offset) / (total activities)
+
+A value of 100% means every single observer set in those waters recorded the
+same offset — the offset is perfectly consistent. A lower value (e.g., 72%)
+means the tree predicts the most common offset, but ~28% of activities showed a
+different one. This reflects genuine operational variation (e.g., a fleet that
+sometimes keeps departure-port time and sometimes uses local EEZ time) or
+occasional data-entry errors — it is a property of the DATA, not the algorithm.
+
+Example from the data:
+  JP × FM  — 100% confidence, n=41  → every JP-flagged set in FM waters used
+              the same clock. The tree is certain.
+  JP × PG  —  72% confidence, n=57  → 57 sets, majority use one offset, but
+              ~28% used a different one. The tree predicts the majority.
+
+== Minimum-support floor and fallback ==
+Setting min_samples_leaf on the tree prevents creating overfit leaves for tiny
+groups. Additionally, any (flag, eez) combination with fewer than MIN_SAMPLES
+observer activities is replaced by the flag-level dominant offset (majority
+across all EEZs for that flag). These rows are labelled rule_level="flag_fallback"
+in the output so downstream users can distinguish them.
 
 Output columns:
-  vessel_flag    -- vessel flag
-  eez_code       -- EEZ code
-  offset         -- predicted UTC offset (whole/half hours)
-  support        -- number of observer activities behind this flag x eez
-  confidence     -- share of those activities whose observed offset == prediction
+  vessel_flag  -- vessel flag
+  eez_code     -- EEZ code
+  offset       -- predicted UTC offset (whole/half hours)
+  support      -- number of observer activities behind this flag x eez
+  confidence   -- share of those activities whose observed offset == prediction
+  rule_level   -- "activity" (direct) | "flag_fallback" (sparse, coarsened)
 """
 
 import sys
@@ -26,6 +55,10 @@ import pyodbc
 from sklearn.tree import DecisionTreeClassifier
 
 from db import ANALYSIS_START_DATE, CONNECTION_STRING
+
+# Flag×eez cells with fewer than this many activities fall back to the
+# flag-level dominant offset. This prevents noisy rules from sparse data.
+MIN_SAMPLES = 30
 
 SQL = f"""
 WITH
@@ -86,6 +119,11 @@ WHERE ABS(observer_offset) <= 14
 """
 
 
+def majority_offset(series: "pd.Series") -> float:
+    """Return the most frequent value in a series."""
+    return series.value_counts().idxmax()
+
+
 def main() -> None:
     conn = pyodbc.connect(CONNECTION_STRING)
     df = pd.read_sql(SQL, conn)
@@ -99,14 +137,20 @@ def main() -> None:
 
     print(f"Training on {len(df):,} observer activities", file=sys.stderr)
 
-    # One-hot encode the two categorical features.
+    # ── One-hot encode categorical features ────────────────────────────────────
     features = pd.get_dummies(df[["vessel_flag", "eez_code"]])
     target = df["offset_units"]
 
-    clf = DecisionTreeClassifier(criterion="gini", random_state=0)
+    # min_samples_leaf prevents the tree from creating unstable leaves for tiny
+    # flag×eez groups during training.
+    clf = DecisionTreeClassifier(
+        criterion="gini",
+        min_samples_leaf=MIN_SAMPLES,
+        random_state=0,
+    )
     clf.fit(features, target)
 
-    # Enumerate every observed (flag, eez) combination and predict its offset.
+    # ── Enumerate every observed (flag, eez) combination ──────────────────────
     combos = (
         df.groupby(["vessel_flag", "eez_code"])
         .agg(support=("offset", "size"))
@@ -115,21 +159,41 @@ def main() -> None:
     combo_features = pd.get_dummies(combos[["vessel_flag", "eez_code"]])
     combo_features = combo_features.reindex(columns=features.columns, fill_value=0)
     combos["offset"] = clf.predict(combo_features) / 2.0
+    combos["rule_level"] = "activity"
 
-    # Confidence = share of activities at this flag x eez whose observed offset
-    # equals the predicted offset.
+    # ── Flag-level dominant offset (fallback for sparse cells) ────────────────
+    flag_dominant: dict[str, float] = (
+        df.groupby("vessel_flag")["offset"].agg(majority_offset).to_dict()
+    )
+
+    sparse_mask = combos["support"] < MIN_SAMPLES
+    for flag, dom_offset in flag_dominant.items():
+        flag_sparse = sparse_mask & (combos["vessel_flag"] == flag)
+        combos.loc[flag_sparse, "offset"] = dom_offset
+        combos.loc[flag_sparse, "rule_level"] = "flag_fallback"
+
+    n_sparse = sparse_mask.sum()
+    print(
+        f"Applied flag fallback to {n_sparse} sparse flag×eez cells "
+        f"(support < {MIN_SAMPLES})",
+        file=sys.stderr,
+    )
+
+    # ── Confidence (empirical match rate on raw training data) ────────────────
     actual = df.groupby(["vessel_flag", "eez_code", "offset"]).size().rename("n").reset_index()
     merged = combos.merge(actual, on=["vessel_flag", "eez_code", "offset"], how="left")
     merged["n"] = merged["n"].fillna(0)
     merged["confidence"] = merged["n"] / merged["support"]
 
-    out = merged[["vessel_flag", "eez_code", "offset", "support", "confidence"]].copy()
+    out = merged[["vessel_flag", "eez_code", "offset", "support", "confidence", "rule_level"]].copy()
     out["offset"] = out["offset"].astype(float)
     out = out.sort_values(["support"], ascending=False)
 
+    n_fallback = (out["rule_level"] == "flag_fallback").sum()
     print(
-        f"Produced {len(out):,} flag x eez rules, "
-        f"mean confidence {out['confidence'].mean():.1%}",
+        f"Produced {len(out):,} rules "
+        f"({len(out) - n_fallback} direct · {n_fallback} flag-fallback), "
+        f"weighted confidence {(out['confidence'] * out['support']).sum() / out['support'].sum():.1%}",
         file=sys.stderr,
     )
 

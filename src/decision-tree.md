@@ -24,6 +24,42 @@ interpretable model whose splits read directly as `vessel_flag (× EEZ) → offs
 The model is built by the `decision-tree-rules.csv.py` data loader; this page only renders and
 exports its output. There are no tunable parameters.
 
+## How the classifier works
+
+`DecisionTreeClassifier` is essentially a binary-split flowchart. It asks successive yes/no
+questions about the input features and routes each training example to a *leaf* — an endpoint that
+predicts a single offset value (the majority class in that bucket).
+
+**How the features are encoded.** `vessel_flag` and `eez_code` are categorical values. scikit-learn
+cannot work with raw strings, so they are first *one-hot encoded*: a column `flag_JP = 1 / 0`,
+`flag_TW = 1 / 0`, `eez_FM = 1 / 0`, and so on. Each split in the tree is therefore a simple
+binary question like *"is vessel_flag_JP = 1?"* or *"is eez_code_FM = 1?"*. Because exactly one
+flag column and one EEZ column equal 1 for every training example, the tree converges to one
+rule per observed `(flag, eez)` combination — which is exactly what we want.
+
+**How confidence is computed.** `confidence` is *not* an internal probability from the tree. It is
+computed empirically on the raw training data after the rules are produced:
+
+> **confidence** = (# observer activities where measured offset = predicted offset) ÷ (total activities for that flag × EEZ)
+
+A value of 100 % means every single observer set recorded the same clock — the rule is
+rock-solid. A lower value means the tree predicts the *majority* offset, but some sets used a
+different one. This is a property of the **data**, not the algorithm.
+
+**Two concrete examples from the data:**
+
+| Combination | Confidence | n | Interpretation |
+|-------------|-----------|---|----------------|
+| JP × FM | 100 % | 41 | All 41 Japanese observer sets in Federated States of Micronesia waters recorded the same UTC offset. The leaf is pure — the tree is certain. |
+| JP × PG | 72 % | 57 | 57 sets, but ~28 % used a different clock. The tree predicts the most common offset, but one in four sets disagreed. The mixing reflects genuine operational variation (e.g., different captains keeping departure-port time vs. local time), not a model artefact. |
+
+**Minimum-support floor.** Any `(flag, eez)` combination with fewer than 30 observer activities
+(the `MIN_SAMPLES` constant in the Python loader) is considered too sparse to trust. These cells
+fall back to the **flag-level dominant offset** — the most common offset across all EEZs for that
+flag. They are labelled `flag_fallback` in the `rule_level` column and shown with a dashed
+border below. Flags with no observer data at all are not represented in this table; for those,
+use the [nautical (longitude/15) baseline](./nautical-offsets) as a fallback.
+
 ```js
 import * as d3 from "npm:d3";
 
@@ -31,6 +67,7 @@ const rules = await FileAttachment("data/decision-tree-rules.csv").csv({ typed: 
 
 const totalSupport = d3.sum(rules, d => d.support);
 const weightedConf = d3.sum(rules, d => d.confidence * d.support) / totalSupport;
+const nFallback = rules.filter(r => r.rule_level === "flag_fallback").length;
 const byFlag = d3.group(rules, d => d.vessel_flag);
 const flagTotals = new Map([...byFlag].map(([k, v]) => [k, d3.sum(v, d => d.support)]));
 const flags = [...byFlag.keys()].sort((a, b) => flagTotals.get(b) - flagTotals.get(a));
@@ -48,16 +85,18 @@ display(html`<div style="display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0">
   ${card("flag × EEZ rules", d3.format(",")(rules.length))}
   ${card("Training activities", d3.format(",")(totalSupport))}
   ${card("Weighted confidence", d3.format(".1%")(weightedConf), "share of activities matching prediction")}
+  ${card("Flag-fallback rules", nFallback, "sparse cells coarsened to flag level")}
 </div>`);
 ```
 
 ## Tree (flag → EEZ → offset)
 
 ```js
-const offsetBadge = (v, conf) => html`<span style="
+const offsetBadge = (v, conf, level) => html`<span style="
   display:inline-block;font-family:monospace;font-weight:700;
   background:${conf >= 0.9 ? "#dcfce7" : conf >= 0.7 ? "#fef9c3" : "#fee2e2"};color:#166534;
-  padding:1px 7px;border-radius:4px">${fmtOffset(v)}</span>`;
+  padding:1px 7px;border-radius:4px;
+  ${level === "flag_fallback" ? "border:1px dashed #9ca3af;" : ""}">${fmtOffset(v)}</span>`;
 
 display(html`<div style="font-size:0.9rem">
   ${flags.map(flag => {
@@ -70,7 +109,7 @@ display(html`<div style="font-size:0.9rem">
       <div style="margin-top:0.35rem;padding-left:1rem;border-left:2px solid #f3f4f6;display:flex;flex-wrap:wrap;gap:0.35rem 1rem">
         ${eezRules.map(r => html`<span style="white-space:nowrap">
           <span style="font-family:monospace;color:#374151">${r.eez_code}</span>
-          → ${offsetBadge(r.offset, r.confidence)}
+          → ${offsetBadge(r.offset, r.confidence, r.rule_level)}
           <span style="color:#9ca3af;font-size:0.8em">${(r.confidence * 100).toFixed(0)}% · n=${d3.format(",")(r.support)}</span>
         </span>`)}
       </div>
@@ -82,7 +121,8 @@ display(html`<div style="font-size:0.9rem">
 <div style="margin:0.5rem 0">
   <span style="background:#dcfce7;padding:1px 7px;border-radius:4px;font-family:monospace">+11</span> ≥90% confidence &nbsp;
   <span style="background:#fef9c3;padding:1px 7px;border-radius:4px;font-family:monospace">+11</span> 70–90% &nbsp;
-  <span style="background:#fee2e2;padding:1px 7px;border-radius:4px;font-family:monospace">+11</span> &lt;70%
+  <span style="background:#fee2e2;padding:1px 7px;border-radius:4px;font-family:monospace">+11</span> &lt;70% &nbsp;
+  <span style="background:#fef9c3;border:1px dashed #9ca3af;padding:1px 7px;border-radius:4px;font-family:monospace">+11</span> flag-level fallback (sparse, n&lt;30)
 </div>
 
 ## Rules table
@@ -98,15 +138,17 @@ display(html`<div style="font-size:0.9rem">
         <th style="padding:5px 10px;text-align:right">Offset</th>
         <th style="padding:5px 10px;text-align:right">Confidence</th>
         <th style="padding:5px 10px;text-align:right">Activities</th>
+        <th style="padding:5px 10px">Level</th>
       </tr>
     </thead>
     <tbody>
-      ${sorted.map((r, i) => html`<tr style="background:${i % 2 ? "#f9fafb" : "transparent"};border-bottom:1px solid #f3f4f6">
+      ${sorted.map((r, i) => html`<tr style="background:${r.rule_level === "flag_fallback" ? "#fafaf0" : i % 2 ? "#f9fafb" : "transparent"};border-bottom:1px solid #f3f4f6">
         <td style="padding:4px 10px;font-weight:600">${r.vessel_flag}</td>
         <td style="padding:4px 10px;font-family:monospace">${r.eez_code}</td>
         <td style="padding:4px 10px;text-align:right;font-family:monospace">${fmtOffset(r.offset)}</td>
         <td style="padding:4px 10px;text-align:right">${(r.confidence * 100).toFixed(0)}%</td>
         <td style="padding:4px 10px;text-align:right">${d3.format(",")(r.support)}</td>
+        <td style="padding:4px 10px;font-size:0.8em;color:${r.rule_level === "flag_fallback" ? "#b45309" : "#9ca3af"}">${r.rule_level === "flag_fallback" ? "⚠ flag fallback" : "activity"}</td>
       </tr>`)}
     </tbody>
   </table>`);
@@ -117,10 +159,10 @@ display(html`<div style="font-size:0.9rem">
 
 ```js
 {
-  const header = ["vessel_flag", "eez_code", "offset", "support", "confidence"];
+  const header = ["vessel_flag", "eez_code", "offset", "support", "confidence", "rule_level"];
   const lines = [header.join(",")];
   for (const r of [...rules].sort((a, b) => b.support - a.support)) {
-    lines.push([r.vessel_flag, r.eez_code, r.offset, r.support, r.confidence.toFixed(4)].join(","));
+    lines.push([r.vessel_flag, r.eez_code, r.offset, r.support, r.confidence.toFixed(4), r.rule_level].join(","));
   }
   const blob = new Blob([lines.join("\n")], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
