@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="generator" content="Observable Framework v1.13.4">
-<title>Purseseine set time — UTC or local? | Logsheet UTC Analysis</title>
+<title>Purseseine set time — entered as UTC | Logsheet UTC Analysis</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
 <link rel="preload" as="style" href="./_observablehq/theme-air.d5b7fcbe.css">
@@ -58,48 +58,18 @@
 import {define} from "./_observablehq/client.0e2531ba.js";
 import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
 
-registerFile("./data/ps-fad-set-hour-classification.csv", {"name":"./data/ps-fad-set-hour-classification.csv","mimeType":"text/csv","path":"./_file/data/ps-fad-set-hour-classification.3461078e.csv","lastModified":1781758596515,"size":13498811});
+registerFile("./data/ps-fad-set-hour-classification.csv", {"name":"./data/ps-fad-set-hour-classification.csv","mimeType":"text/csv","path":"./_file/data/ps-fad-set-hour-classification.3461078e.csv","lastModified":1782191403150,"size":13498811});
+registerFile("./data/ps-set-time-sunrise-relative.csv", {"name":"./data/ps-set-time-sunrise-relative.csv","mimeType":"text/csv","path":"./_file/data/ps-set-time-sunrise-relative.00079c4d.csv","lastModified":1782191415168,"size":30521748});
 
-define({id: "0d1e3cff", inputs: ["FileAttachment"], outputs: ["d3","Plot","raw","INSTANCE_NAMES","instanceName","SUNRISE","SUNSET","data","assoc","unassoc"], body: async (FileAttachment) => {
+define({id: "ff2b5b1d", inputs: ["FileAttachment"], outputs: ["d3","Plot","raw","SUNRISE","SUNSET","data","assoc","unassoc"], body: async (FileAttachment) => {
 const [d3, Plot] = await Promise.all([import("./_npm/d3@7.9.0/66d82917.js"), import("./_npm/@observablehq/plot@0.6.17/a96a6bbb.js")]);
 
 const raw = await FileAttachment("./data/ps-fad-set-hour-classification.csv").csv({ typed: true });
-
-// TufmanInstance enum values → short name
-const INSTANCE_NAMES = new Map([
-  [1,        "INDUSTRY"],
-  [2,        "OFP"],
-  [4,        "MH"],
-  [8,        "FM"],
-  [16,       "CK"],
-  [32,       "UST"],
-  [128,      "KI"],
-  [256,      "TO"],
-  [512,      "WS"],
-  [1024,     "PF"],
-  [2048,     "NR"],
-  [4096,     "NU"],
-  [8192,     "PG"],
-  [16384,    "TV"],
-  [32768,    "VU"],
-  [65536,    "PW"],
-  [131072,   "TK"],
-  [262144,   "SB"],
-  [524288,   "FJ"],
-  [1048576,  "VN"],
-  [2097152,  "PH"],
-  [4194304,  "WCPFC"],
-  [16777216, "WF"],
-  [33554432, "DWFN"],
-]);
-
-const instanceName = v => INSTANCE_NAMES.get(v) ?? String(v);
 
 // Sunrise / sunset thresholds — good approximations for tropical Pacific year-round
 const SUNRISE = 6;
 const SUNSET  = 18;
 
-// Enrich each row with the nautical-adjusted hour and pre-computed flags
 const data = raw.map(d => {
   const adj = ((d.set_hour + d.nautical_offset) % 24 + 24) % 24;
   return {
@@ -114,11 +84,10 @@ const data = raw.map(d => {
 
 const assoc   = data.filter(d => d.school_type === "associated group");
 const unassoc = data.filter(d => d.school_type === "unassociated group");
-return {d3,Plot,raw,INSTANCE_NAMES,instanceName,SUNRISE,SUNSET,data,assoc,unassoc};
+return {d3,Plot,raw,SUNRISE,SUNSET,data,assoc,unassoc};
 }});
 
-define({id: "037ea082", inputs: ["d3","Plot","width","SUNRISE","SUNSET","instanceName","html"], outputs: ["hourCounts","sharedX","sharedY","hourChart","instanceClassification"], body: (d3,Plot,width,SUNRISE,SUNSET,instanceName,html) => {
-// Build hourly counts for both interpretations
+define({id: "ee24a21a", inputs: ["d3","Plot","width","SUNRISE","SUNSET"], outputs: ["hourCounts","sharedX","sharedY","hourChart"], body: (d3,Plot,width,SUNRISE,SUNSET) => {
 function hourCounts(rows, hourKey) {
   const counts = d3.rollup(rows, v => v.length, d => d[hourKey]);
   const total  = rows.length;
@@ -139,166 +108,117 @@ const sharedY = { label: "Sets (%)", grid: true, tickFormat: v => `${v}%` };
 function hourChart(countsData, {title, fill}) {
   const yMax = Math.max(...countsData.map(d => d.pct));
   return Plot.plot({
-    title,
-    width,
-    height: 300,
-    marginLeft: 55,
-    marginBottom: 48,
-    x: sharedX,
-    y: sharedY,
+    title, width, height: 300, marginLeft: 55, marginBottom: 48,
+    x: sharedX, y: sharedY,
     marks: [
       Plot.rectY(countsData, { x1: d => d.hour, x2: d => d.hour + 1, y: "pct", fill, tip: true,
         title: d => `${String(d.hour).padStart(2,"0")}:00 — ${d3.format(",")(d.count)} sets (${d.pct}%)` }),
       Plot.ruleX([SUNRISE], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
-      Plot.text([{ hour: SUNRISE, label: "sunrise" }], {
-        x: "hour", y: () => yMax * 0.9,
-        text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start"
-      }),
+      Plot.text([{ hour: SUNRISE, label: "sunrise" }], { x: "hour", y: () => yMax * 0.9, text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start" }),
       Plot.ruleX([SUNSET], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
-      Plot.text([{ hour: SUNSET, label: "sunset" }], {
-        x: "hour", y: () => yMax * 0.9,
-        text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start"
-      }),
+      Plot.text([{ hour: SUNSET, label: "sunset" }], { x: "hour", y: () => yMax * 0.9, text: "label", dx: 4, fontSize: 11, fill: "#ef4444", textAnchor: "start" }),
       Plot.ruleY([0]),
     ],
   });
 }
-
-// Per-instance classification bar chart + table
-function instanceClassification(rows, {metricRecorded, metricAdjusted, metricLabel, title}) {
-  const byInstance = d3.rollup(rows, v => {
-    const total   = v.length;
-    const recOk   = v.filter(d => d[metricRecorded]).length;
-    const adjOk   = v.filter(d => d[metricAdjusted]).length;
-    return {
-      instance_name:  instanceName(v[0].instance_source),
-      total_sets:     total,
-      pct_rec:  Math.round(recOk / total * 1000) / 10,
-      pct_adj:  Math.round(adjOk / total * 1000) / 10,
-      verdict:  (adjOk / total) > 0.5 && (adjOk / total) > (recOk / total) * 1.5
-                ? "UTC entered"
-                : "Unclear"
-    };
-  }, d => d.instance_source);
-
-  const iRows = [...byInstance.values()].sort((a, b) => b.total_sets - a.total_sets);
-
-  const barData = iRows.flatMap(r => [
-    { instance: r.instance_name, interpretation: "As recorded",       pct: r.pct_rec },
-    { instance: r.instance_name, interpretation: "Nautical-adjusted", pct: r.pct_adj },
-  ]);
-
-  const verdictColor = v =>
-    v === "UTC entered"   ? "#dcfce7" :
-    v === "Local entered" ? "#fef9c3" : "#f3f4f6";
-
-  const barChart = Plot.plot({
-    title,
-    width,
-    height: 40 + iRows.length * 28,
-    marginLeft: 80,
-    marginRight: 10,
-    x: { label: `% ${metricLabel}`, grid: true, tickFormat: v => `${v}%` },
-    y: { label: null },
-    color: { legend: true, domain: ["As recorded", "Nautical-adjusted"], range: ["#f59e0b", "#34d399"] },
-    marks: [
-      Plot.barX(barData, Plot.groupY({ x: "sum" }, {
-        x: "pct", y: "instance", fill: "interpretation",
-        tip: true, title: d => `${d.instance} — ${d.interpretation}: ${d.pct}%`,
-      })),
-      Plot.ruleX([50], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
-      Plot.ruleX([0]),
-    ],
-  });
-
-  const table = html`<table style="border-collapse:collapse;width:100%;font-size:0.9rem;margin-top:1rem">
-    <thead>
-      <tr style="border-bottom:2px solid #e5e7eb">
-        <th style="text-align:left;padding:6px 10px">Instance</th>
-        <th style="text-align:right;padding:6px 10px">Sets</th>
-        <th style="text-align:right;padding:6px 10px">% ${metricLabel} (recorded)</th>
-        <th style="text-align:right;padding:6px 10px">% ${metricLabel} (nautical-adjusted)</th>
-        <th style="text-align:center;padding:6px 10px">Verdict</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${iRows.map(r => html`<tr style="border-bottom:1px solid #f3f4f6">
-        <td style="padding:5px 10px;font-weight:600">${r.instance_name}</td>
-        <td style="text-align:right;padding:5px 10px">${d3.format(",")(r.total_sets)}</td>
-        <td style="text-align:right;padding:5px 10px">${r.pct_rec}%</td>
-        <td style="text-align:right;padding:5px 10px">${r.pct_adj}%</td>
-        <td style="text-align:center;padding:5px 10px;background:${verdictColor(r.verdict)};border-radius:4px">${r.verdict}</td>
-      </tr>`)}
-    </tbody>
-  </table>`;
-
-  return html`<div>${barChart}${table}</div>`;
-}
-return {hourCounts,sharedX,sharedY,hourChart,instanceClassification};
+return {hourCounts,sharedX,sharedY,hourChart};
 }});
 
-define({id: "b50f06d5", mode: "inline", inputs: ["d3","assoc","display"], body: async (d3,assoc,display) => {
-display(await(
-d3.format(",")(assoc.length)
-))
-}});
-
-define({id: "b4e81a59", inputs: ["hourCounts","assoc","d3","SUNRISE"], outputs: ["assocRecorded","assocAdjusted","pctAssocRecorded","pctAssocAdjusted"], body: (hourCounts,assoc,d3,SUNRISE) => {
+define({id: "c43a7ece", inputs: ["hourCounts","assoc","d3","SUNRISE"], outputs: ["assocRecorded","assocAdjusted","pctAssocRecorded","pctAssocAdjusted"], body: (hourCounts,assoc,d3,SUNRISE) => {
 const assocRecorded = hourCounts(assoc, "set_hour");
 const assocAdjusted = hourCounts(assoc, "set_hour_adjusted");
-
 const pctAssocRecorded = d3.format(".1%")(d3.sum(assocRecorded.filter(d => d.hour < SUNRISE), d => d.count) / assoc.length);
 const pctAssocAdjusted = d3.format(".1%")(d3.sum(assocAdjusted.filter(d => d.hour < SUNRISE), d => d.count) / assoc.length);
 return {assocRecorded,assocAdjusted,pctAssocRecorded,pctAssocAdjusted};
 }});
 
-define({id: "8fe8894e", inputs: ["display","html","pctAssocRecorded","pctAssocAdjusted","hourChart","assocRecorded","assocAdjusted"], body: (display,html,pctAssocRecorded,pctAssocAdjusted,hourChart,assocRecorded,assocAdjusted) => {
-display(html`<p>Before 06:00 — <strong>as-recorded: ${pctAssocRecorded}</strong> &nbsp;|&nbsp; <strong>nautical-adjusted: ${pctAssocAdjusted}</strong></p>`);
+define({id: "2d375911", inputs: ["display","html","d3","assoc","pctAssocRecorded","pctAssocAdjusted","hourChart","assocRecorded","assocAdjusted"], body: (display,html,d3,assoc,pctAssocRecorded,pctAssocAdjusted,hourChart,assocRecorded,assocAdjusted) => {
+display(html`<p><strong>${d3.format(",")(assoc.length)} sets.</strong> Before 06:00 — as-recorded: <strong>${pctAssocRecorded}</strong> &nbsp;|&nbsp; nautical-adjusted: <strong>${pctAssocAdjusted}</strong></p>`);
 display(html`<div style="display:flex;gap:1.5rem;flex-wrap:wrap">
   ${hourChart(assocRecorded, { title: "Associated group — as recorded", fill: "#f59e0b" })}
-  ${hourChart(assocAdjusted, { title: "Associated group — nautical-adjusted", fill: "#34d399" })}
+  ${hourChart(assocAdjusted, { title: "Associated group — nautical-adjusted (UTC→local)", fill: "#34d399" })}
 </div>`);
 }});
 
-define({id: "5c3f4d66", inputs: ["display","instanceClassification","assoc"], body: (display,instanceClassification,assoc) => {
-display(instanceClassification(assoc, {
-  metricRecorded: "before_sunrise_recorded",
-  metricAdjusted: "before_sunrise_adjusted",
-  metricLabel:    "before sunrise",
-  title:          "Associated group — % before 06:00 by instance",
-}));
-}});
-
-define({id: "78ee0fe4", mode: "inline", inputs: ["d3","unassoc","display"], body: async (d3,unassoc,display) => {
-display(await(
-d3.format(",")(unassoc.length)
-))
-}});
-
-define({id: "1e3bbeb8", inputs: ["hourCounts","unassoc","d3","SUNRISE","SUNSET"], outputs: ["unassocRecorded","unassocAdjusted","pctUnassocRecorded","pctUnassocAdjusted"], body: (hourCounts,unassoc,d3,SUNRISE,SUNSET) => {
+define({id: "d9078e58", inputs: ["hourCounts","unassoc","d3","SUNRISE","SUNSET"], outputs: ["unassocRecorded","unassocAdjusted","pctUnassocRecorded","pctUnassocAdjusted"], body: (hourCounts,unassoc,d3,SUNRISE,SUNSET) => {
 const unassocRecorded = hourCounts(unassoc, "set_hour");
 const unassocAdjusted = hourCounts(unassoc, "set_hour_adjusted");
-
 const pctUnassocRecorded = d3.format(".1%")(d3.sum(unassocRecorded.filter(d => d.hour >= SUNRISE && d.hour < SUNSET), d => d.count) / unassoc.length);
 const pctUnassocAdjusted = d3.format(".1%")(d3.sum(unassocAdjusted.filter(d => d.hour >= SUNRISE && d.hour < SUNSET), d => d.count) / unassoc.length);
 return {unassocRecorded,unassocAdjusted,pctUnassocRecorded,pctUnassocAdjusted};
 }});
 
-define({id: "90fa8153", inputs: ["display","html","pctUnassocRecorded","pctUnassocAdjusted","hourChart","unassocRecorded","unassocAdjusted"], body: (display,html,pctUnassocRecorded,pctUnassocAdjusted,hourChart,unassocRecorded,unassocAdjusted) => {
-display(html`<p>In daylight (06:00–18:00) — <strong>as-recorded: ${pctUnassocRecorded}</strong> &nbsp;|&nbsp; <strong>nautical-adjusted: ${pctUnassocAdjusted}</strong></p>`);
+define({id: "206ba21d", inputs: ["display","html","d3","unassoc","pctUnassocRecorded","pctUnassocAdjusted","hourChart","unassocRecorded","unassocAdjusted"], body: (display,html,d3,unassoc,pctUnassocRecorded,pctUnassocAdjusted,hourChart,unassocRecorded,unassocAdjusted) => {
+display(html`<p><strong>${d3.format(",")(unassoc.length)} sets.</strong> In daylight (06:00–18:00) — as-recorded: <strong>${pctUnassocRecorded}</strong> &nbsp;|&nbsp; nautical-adjusted: <strong>${pctUnassocAdjusted}</strong></p>`);
 display(html`<div style="display:flex;gap:1.5rem;flex-wrap:wrap">
   ${hourChart(unassocRecorded, { title: "Unassociated group — as recorded", fill: "#60a5fa" })}
-  ${hourChart(unassocAdjusted, { title: "Unassociated group — nautical-adjusted", fill: "#818cf8" })}
+  ${hourChart(unassocAdjusted, { title: "Unassociated group — nautical-adjusted (UTC→local)", fill: "#818cf8" })}
 </div>`);
 }});
 
-define({id: "97133ee0", inputs: ["display","instanceClassification","unassoc"], body: (display,instanceClassification,unassoc) => {
-display(instanceClassification(unassoc, {
-  metricRecorded: "in_daylight_recorded",
-  metricAdjusted: "in_daylight_adjusted",
-  metricLabel:    "in daylight",
-  title:          "Unassociated group — % in daylight (06:00–18:00) by instance",
-}));
+define({id: "5c29a751", inputs: ["FileAttachment","d3","Plot","width"], outputs: ["sunriseRaw","assocSr","unassocSr","binCounts","formatRelativeTime","sunriseRelativeChart","assocBins","unassocBins","assocPctBefore","unassocPctAfter"], body: async (FileAttachment,d3,Plot,width) => {
+const sunriseRaw = await FileAttachment("./data/ps-set-time-sunrise-relative.csv").csv({ typed: true });
+const assocSr   = sunriseRaw.filter(d => d.school_type === "associated group");
+const unassocSr = sunriseRaw.filter(d => d.school_type === "unassociated group");
+
+function binCounts(rows) {
+  const counts = d3.rollup(rows, v => v.length, d => d.minutes_from_sunrise);
+  const total = rows.length;
+  const bins = [];
+  for (let min = -360; min <= 720; min += 15) {
+    const count = counts.get(min) ?? 0;
+    bins.push({ minutes: min, count, pct: Math.round((count / total) * 1000) / 10 });
+  }
+  return bins;
+}
+
+function formatRelativeTime(minutes) {
+  const sign = minutes >= 0 ? "+" : "-";
+  const absMin = Math.abs(minutes);
+  return `${sign}${Math.floor(absMin / 60)}h${String(absMin % 60).padStart(2, "0")}`;
+}
+
+function sunriseRelativeChart(binData, {title}) {
+  return Plot.plot({
+    title, width, height: 400, marginLeft: 60, marginBottom: 60,
+    x: { label: "Time relative to sunrise", grid: true, tickFormat: formatRelativeTime },
+    y: { label: "Sets (%)", grid: true, tickFormat: v => `${v}%` },
+    color: { legend: true, domain: ["Before sunrise", "After sunrise"], range: ["#3b82f6", "#fbbf24"] },
+    marks: [
+      Plot.rectY(binData, { x1: d => d.minutes, x2: d => d.minutes + 15, y: "pct",
+        fill: d => d.minutes < 0 ? "Before sunrise" : "After sunrise", tip: true,
+        title: d => `${formatRelativeTime(d.minutes)}: ${d3.format(",")(d.count)} sets (${d.pct}%)` }),
+      Plot.ruleX([0], { stroke: "#ef4444", strokeWidth: 2, strokeDasharray: "6,4" }),
+      Plot.text([{ x: 0, label: "SUNRISE" }], { x: "x", y: () => d3.max(binData, d => d.pct) * 0.95, text: "label", fill: "#ef4444", fontSize: 12, fontWeight: "bold", dy: -5 }),
+      Plot.ruleY([0]),
+    ],
+  });
+}
+
+const assocBins = binCounts(assocSr);
+const unassocBins = binCounts(unassocSr);
+const assocPctBefore = d3.format(".1%")(d3.sum(assocBins.filter(d => d.minutes < 0), d => d.count) / assocSr.length);
+const unassocPctAfter = d3.format(".1%")(d3.sum(unassocBins.filter(d => d.minutes >= 0), d => d.count) / unassocSr.length);
+return {sunriseRaw,assocSr,unassocSr,binCounts,formatRelativeTime,sunriseRelativeChart,assocBins,unassocBins,assocPctBefore,unassocPctAfter};
+}});
+
+define({id: "27a3e7a0", mode: "inline", inputs: ["assocPctBefore","display"], body: async (assocPctBefore,display) => {
+display(await(
+assocPctBefore
+))
+}});
+
+define({id: "868e1cce", mode: "inline", inputs: ["unassocPctAfter","display"], body: async (unassocPctAfter,display) => {
+display(await(
+unassocPctAfter
+))
+}});
+
+define({id: "abf7c481", inputs: ["display","html","sunriseRelativeChart","assocBins","unassocBins"], body: (display,html,sunriseRelativeChart,assocBins,unassocBins) => {
+display(html`<div style="display:flex;gap:1.5rem;flex-wrap:wrap">
+  ${sunriseRelativeChart(assocBins, { title: "Associated group — relative to sunrise (UTC clock)" })}
+  ${sunriseRelativeChart(unassocBins, { title: "Unassociated group — relative to sunrise (UTC clock)" })}
+</div>`);
 }});
 
 </script>
@@ -312,61 +232,73 @@ display(instanceClassification(unassoc, {
     <li class="observablehq-link"><a href="./">Logsheet UTC Analysis</a></li>
   </ol>
   <ol>
-    <li class="observablehq-link"><a href="./">Summary</a></li>
+    <li class="observablehq-link"><a href="./">Problem &amp; method</a></li>
+    <li class="observablehq-link observablehq-link-active"><a href="./ps-set-time-distribution">Purseseine set time</a></li>
     <li class="observablehq-link"><a href="./ll-set-time-distribution">Longline set time distribution</a></li>
-    <li class="observablehq-link observablehq-link-active"><a href="./ps-set-time-distribution">Purseseine set time distribution</a></li>
-    <li class="observablehq-link"><a href="./ps-set-time-sunrise-relative">Purseseine set time distribution - sunrise relative</a></li>
-    <li class="observablehq-link"><a href="./entities-to-migrate">Entities to migrate</a></li>
-    <li class="observablehq-link"><a href="./observer-offsets">Observer offsets by vessel flag</a></li>
-    <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity IANA timezone offset by vessel flag</a></li>
-    <li class="observablehq-link"><a href="./logsheet-nautical-offsets">Logsheet activity Nautical timezone offset by vessel flag</a></li>
-    <li class="observablehq-link"><a href="./observer-offset-per-eez">Observer offset distribution by EEZ</a></li>
-    <li class="observablehq-link"><a href="./observer-offset-per-flag">Observer offset distribution by vessel flag</a></li>
-    <li class="observablehq-link"><a href="./observer-offset-per-logsheet">Observer offset per instance source</a></li>
-    <li class="observablehq-link"><a href="./eez-list-per-trip">EEZ combinations per trip</a></li>
-    <li class="observablehq-link"><a href="./utc-offset-predictions">UTC offset predictions</a></li>
-    <li class="observablehq-link"><a href="./bayesian-estimator-explained">Bayesian estimator — how it works</a></li>
+    <li class="observablehq-link"><a href="./observer-coverage">Observer coverage</a></li>
+    <li class="observablehq-link"><a href="./observer-offsets">Observer offsets</a></li>
+    <li class="observablehq-link"><a href="./decision-tree">Decision tree</a></li>
   </ol>
 </nav>
 <script>{const e=document.querySelector("#observablehq-sidebar"),o=document.querySelector("#observablehq-sidebar-toggle"),r=sessionStorage.getItem("observablehq-sidebar");r?o.checked=r==="true":o.indeterminate=!0;for(const t of document.querySelectorAll("#observablehq-sidebar summary")){const s=t.parentElement;switch(sessionStorage.getItem(`observablehq-sidebar:${t.textContent}`)){case"true":s.open=!0;break;case"false":s.classList.contains("observablehq-section-active")||(s.open=!1);break}}addEventListener("beforeunload",()=>sessionStorage.setItem("observablehq-sidebar-scrolly",`${e.scrollTop}`));const a=sessionStorage.getItem("observablehq-sidebar-scrolly");a!=null&&(e.style.cssText="overflow: hidden;",e.scrollTop=+a,e.style.cssText="");}</script>
 <div id="observablehq-center">
 <main id="observablehq-main" class="observablehq">
-<h1 id="purseseine-set-time-utc-or-local" tabindex="-1"><a class="observablehq-header-anchor" href="#purseseine-set-time-utc-or-local">Purseseine set_time: UTC or local?</a></h1>
+<h1 id="purseseine-set-time-entered-as-utc-offset-0" tabindex="-1"><a class="observablehq-header-anchor" href="#purseseine-set-time-entered-as-utc-offset-0">Purseseine set time — entered as UTC → offset = 0</a></h1>
 <p>According to the paper <a href="https://meetings.wcpfc.int/node/6808" target="_blank" rel="noopener noreferrer"><em>Analysis of Purse Seine Set Times for Different School Associations: A Further Tool to Assist in Compliance with FAD Closures?</em></a>:</p>
 <blockquote>
 <p>We found that 94% of sets on FADs occurred prior to local sunrise, while only 3% of unassociated school sets occurred before sunrise, with the remainder occurring at consistent rates during daylight hours.</p>
 </blockquote>
-<p>If <code>log.sets_ps.set_time</code> is stored as <strong>local time</strong>:</p>
+<p>We use this known biological/operational signal as a <strong>clock check</strong>. If <code>log.sets_ps.set_time</code>
+were stored as <strong>local time</strong>, the as-recorded hours would already match the paper. If instead it
+is stored as <strong>UTC</strong>, we must shift by the local offset to recover the paper's pattern.</p>
+<p>Two independent views below both show the same result: <strong>the recorded purse-seine set times are UTC.</strong></p>
+<hr>
+<h2 id="view-1-hour-of-day-as-recorded-vs-nautical-adjusted" tabindex="-1"><a class="observablehq-header-anchor" href="#view-1-hour-of-day-as-recorded-vs-nautical-adjusted">View 1 — Hour of day: as-recorded vs nautical-adjusted</a></h2>
+<p>The UTC offset for each set is approximated using the <strong>nautical timezone formula</strong>
+<code>ROUND(lond / 15.0, 0)</code>, which covers every PS set with a recorded longitude (not just
+observer-linked trips). "Nautical-adjusted" = recorded hour <strong>+ nautical offset</strong> (UTC → local).</p>
+<div class="observablehq observablehq--block"><!--:ff2b5b1d:--></div>
+<div class="observablehq observablehq--block"><!--:ee24a21a:--></div>
+<h3 id="associated-group-school-id-3-5-expected-before-sunrise" tabindex="-1"><a class="observablehq-header-anchor" href="#associated-group-school-id-3-5-expected-before-sunrise">Associated group (<code>school_id</code> 3–5) — expected before sunrise</a></h3>
+<div class="observablehq observablehq--block"><!--:c43a7ece:--></div>
+<div class="observablehq observablehq--block"><!--:2d375911:--></div>
+<blockquote>
+<p>The <strong>nautical-adjusted</strong> chart matches the paper (~94% before sunrise). The as-recorded chart
+does not. Recorded times must therefore be <strong>UTC</strong>.</p>
+</blockquote>
+<h3 id="unassociated-group-school-id-1-2-expected-in-daylight" tabindex="-1"><a class="observablehq-header-anchor" href="#unassociated-group-school-id-1-2-expected-in-daylight">Unassociated group (<code>school_id</code> 1–2) — expected in daylight</a></h3>
+<div class="observablehq observablehq--block"><!--:d9078e58:--></div>
+<div class="observablehq observablehq--block"><!--:206ba21d:--></div>
+<hr>
+<h2 id="view-2-sunrise-relative-distribution-15-min-bins" tabindex="-1"><a class="observablehq-header-anchor" href="#view-2-sunrise-relative-distribution-15-min-bins">View 2 — Sunrise-relative distribution (15-min bins)</a></h2>
+<p>This view presents set times <strong>relative to sunrise</strong> (t=0), matching the WCPFC paper format.
+Sunrise is computed precisely for each set's location and date using the
+<a href="https://github.com/mourner/suncalc" target="_blank" rel="noopener noreferrer">SunCalc</a> library. SunCalc returns sunrise as an absolute
+<strong>UTC</strong> instant, so this view treats the recorded set time as UTC directly — if that assumption is
+correct, the paper's pattern emerges with no further adjustment.</p>
+<div class="observablehq observablehq--block"><!--:5c29a751:--></div>
+<div style="display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0">
+  <div style="background:#dcfce7;padding:1rem;border-radius:8px;flex:1;min-width:240px">
+    Associated group: <strong><observablehq-loading></observablehq-loading><!--:27a3e7a0:--></strong> of sets occur <strong>before sunrise</strong> (paper: 94%).
+  </div>
+  <div style="background:#fef9c3;padding:1rem;border-radius:8px;flex:1;min-width:240px">
+    Unassociated group: <strong><observablehq-loading></observablehq-loading><!--:868e1cce:--></strong> of sets occur <strong>after sunrise</strong> (paper: ~97%).
+  </div>
+</div>
+<div class="observablehq observablehq--block"><!--:abf7c481:--></div>
+<hr>
+<h2 id="conclusion" tabindex="-1"><a class="observablehq-header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>Both views agree with the WCPFC paper <strong>only when the recorded set time is read as UTC</strong>:</p>
 <ul>
-<li><strong>Associated group</strong> (<code>school_id</code> 3–5): sets should cluster <strong>before 06:00</strong></li>
-<li><strong>Unassociated group</strong> (<code>school_id</code> 1–2): sets should cluster <strong>between 06:00 and 18:00</strong></li>
+<li>Associated (FAD) sets cluster <strong>before sunrise</strong> on the UTC clock.</li>
+<li>Unassociated (free-school) sets fall <strong>in daylight</strong> on the UTC clock.</li>
 </ul>
-<p>If <code>set_time</code> is stored as <strong>UTC</strong>, both distributions will appear shifted by the UTC offset. For example, a 04:00 local set in UTC+11 waters would be recorded as 17:00.</p>
-<p>The UTC offset for each set is approximated using the <strong>nautical timezone formula</strong>: <code>ROUND(lond / 15.0, 0)</code>. This covers all PS sets with a recorded longitude — not just observer-linked trips.</p>
-<div class="observablehq observablehq--block"><!--:0d1e3cff:--></div>
-<div class="observablehq observablehq--block"><!--:037ea082:--></div>
-<hr>
-<h2 id="associated-group-school-id-3-5" tabindex="-1"><a class="observablehq-header-anchor" href="#associated-group-school-id-3-5">Associated group (<code>school_id</code> 3–5)</a></h2>
-<p><strong><observablehq-loading></observablehq-loading><!--:b50f06d5:--> sets.</strong> Expected pattern: before sunrise (06:00 local).</p>
-<div class="observablehq observablehq--block"><!--:b4e81a59:--></div>
-<div class="observablehq observablehq--block"><!--:8fe8894e:--></div>
-<blockquote>
-<p>The chart that shows ~94% of sets <strong>before the sunrise line</strong> is the correct interpretation.</p>
-</blockquote>
-<div class="observablehq observablehq--block"><!--:5c3f4d66:--></div>
-<hr>
-<h2 id="unassociated-group-school-id-1-2" tabindex="-1"><a class="observablehq-header-anchor" href="#unassociated-group-school-id-1-2">Unassociated group (<code>school_id</code> 1–2)</a></h2>
-<p><strong><observablehq-loading></observablehq-loading><!--:78ee0fe4:--> sets.</strong> Expected pattern: in daylight (06:00–18:00 local).</p>
-<div class="observablehq observablehq--block"><!--:1e3bbeb8:--></div>
-<div class="observablehq observablehq--block"><!--:90fa8153:--></div>
-<blockquote>
-<p>The chart that shows ~97% of sets <strong>between the sunrise and sunset lines</strong> is the correct interpretation.</p>
-</blockquote>
-<div class="observablehq observablehq--block"><!--:97133ee0:--></div>
+<p>Therefore purse-seine logsheet datetimes are <strong>already UTC</strong>, and the migration sets
+<strong>every purse-seine logsheet UTC offset to 0</strong> — no estimation required.</p>
 </main>
 <footer id="observablehq-footer">
-<nav><a rel="prev" href="./ll-set-time-distribution"><span>Longline set time distribution</span></a><a rel="next" href="./ps-set-time-sunrise-relative"><span>Purseseine set time distribution - sunrise relative</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-18T15:42:22">Jun 18, 2026</a>.</div>
+<nav><a rel="prev" href="./"><span>Logsheet UTC Analysis</span></a><a rel="next" href="./ll-set-time-distribution"><span>Longline set time distribution</span></a></nav>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-23T16:12:36">Jun 23, 2026</a>.</div>
 </footer>
 </div>
 </body>

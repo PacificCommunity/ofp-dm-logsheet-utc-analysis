@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="generator" content="Observable Framework v1.13.4">
-<title>Observer offset per vessel flag | Logsheet UTC Analysis</title>
+<title>Observer offsets | Logsheet UTC Analysis</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
 <link rel="preload" as="style" href="./_observablehq/theme-air.d5b7fcbe.css">
@@ -14,6 +14,7 @@
 <link rel="modulepreload" href="./_observablehq/runtime.607a8173.js">
 <link rel="modulepreload" href="./_observablehq/stdlib.277aeab8.js">
 <link rel="modulepreload" href="./_npm/d3@7.9.0/66d82917.js">
+<link rel="modulepreload" href="./_npm/@observablehq/plot@0.6.17/a96a6bbb.js">
 <link rel="modulepreload" href="./_import/components/offset-charts.092ca3bf.js">
 <link rel="modulepreload" href="./_npm/htl@1.0.0/87d6f6ef.js">
 <link rel="modulepreload" href="./_npm/d3-dsv@3.0.1/9cffc2bd.js">
@@ -46,8 +47,11 @@
 <link rel="modulepreload" href="./_npm/d3-timer@3.0.1/b58a267d.js">
 <link rel="modulepreload" href="./_npm/d3-transition@3.0.1/004da2ac.js">
 <link rel="modulepreload" href="./_npm/d3-zoom@3.0.0/b5786b3f.js">
+<link rel="modulepreload" href="./_npm/isoformat@0.2.1/18cbf477.js">
+<link rel="modulepreload" href="./_npm/interval-tree-1d@1.0.4/53fe8176.js">
 <link rel="modulepreload" href="./_npm/internmap@2.0.3/e08981d9.js">
 <link rel="modulepreload" href="./_npm/delaunator@5.1.0/d4ec0aa1.js">
+<link rel="modulepreload" href="./_npm/binary-search-bounds@2.0.5/cbf6ba23.js">
 <link rel="modulepreload" href="./_npm/robust-predicates@3.0.3/42820bfa.js">
 <link rel="icon" href="./_file/observable.1af93621.png" type="image/png" sizes="32x32">
 <script type="module">
@@ -55,27 +59,95 @@
 import {define} from "./_observablehq/client.0e2531ba.js";
 import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
 
-registerFile("./data/observer-fishing-activities-offset-per-vessel-flag.csv", {"name":"./data/observer-fishing-activities-offset-per-vessel-flag.csv","mimeType":"text/csv","path":"./_file/data/observer-fishing-activities-offset-per-vessel-flag.25948eed.csv","lastModified":1781758593773,"size":12784});
+registerFile("./data/ll-observer-activity-offsets.csv", {"name":"./data/ll-observer-activity-offsets.csv","mimeType":"text/csv","path":"./_file/data/ll-observer-activity-offsets.c7491fb6.csv","lastModified":1782191398422,"size":3430});
 
-define({id: "3fde4fe4", inputs: ["FileAttachment"], outputs: ["d3","rankedList","offsetGrid","offsetCard","groupByFlagType","TYPE_LABEL","raw","byFlagType","allFlags"], body: async (FileAttachment) => {
-const [d3, {rankedList, offsetGrid, offsetCard, groupByFlagType, TYPE_LABEL}] = await Promise.all([import("./_npm/d3@7.9.0/66d82917.js"), import("./_import/components/offset-charts.092ca3bf.js")]);
+define({id: "6ae2b2e7", inputs: ["FileAttachment"], outputs: ["d3","Plot","rankedList","offsetGrid","offsetCard","raw","fmtOffset","offsetRows","byFlag","byEez","flagTotals","eezTotals","flags","eezs"], body: async (FileAttachment) => {
+const [d3, Plot, {rankedList, offsetGrid, offsetCard}] = await Promise.all([import("./_npm/d3@7.9.0/66d82917.js"), import("./_npm/@observablehq/plot@0.6.17/a96a6bbb.js"), import("./_import/components/offset-charts.092ca3bf.js")]);
 
-const raw = await FileAttachment("./data/observer-fishing-activities-offset-per-vessel-flag.csv").csv({typed: true});
-const { byFlagType, allFlags } = groupByFlagType(raw);
-return {d3,rankedList,offsetGrid,offsetCard,groupByFlagType,TYPE_LABEL,raw,byFlagType,allFlags};
+const raw = await FileAttachment("./data/ll-observer-activity-offsets.csv").csv({ typed: true });
+
+const fmtOffset = v => `${v >= 0 ? "+" : ""}${v} h`;
+
+// Aggregate offset counts within an arbitrary grouping key.
+function offsetRows(rows) {
+  return d3.rollups(rows, v => d3.sum(v, d => d.count), d => d.offset)
+    .map(([offset, count]) => ({ offset, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
+const byFlag = d3.group(raw, d => d.vessel_flag);
+const byEez  = d3.group(raw, d => d.eez_code);
+
+const flagTotals = new Map([...byFlag].map(([k, v]) => [k, d3.sum(v, d => d.count)]));
+const eezTotals  = new Map([...byEez].map(([k, v]) => [k, d3.sum(v, d => d.count)]));
+
+const flags = [...byFlag.keys()].sort((a, b) => flagTotals.get(b) - flagTotals.get(a));
+const eezs  = [...byEez.keys()].sort((a, b) => eezTotals.get(b) - eezTotals.get(a));
+return {d3,Plot,rankedList,offsetGrid,offsetCard,raw,fmtOffset,offsetRows,byFlag,byEez,flagTotals,eezTotals,flags,eezs};
 }});
 
-define({id: "aa8e45b4", inputs: ["display","offsetGrid","allFlags","byFlagType","offsetCard","rankedList","TYPE_LABEL","d3"], body: (display,offsetGrid,allFlags,byFlagType,offsetCard,rankedList,TYPE_LABEL,d3) => {
-display(offsetGrid(allFlags, flag => {
-  const byType = byFlagType.get(flag) ?? new Map();
-  const llRows = byType.get("LonglineLogsheet") ?? [];
-  const psRows = byType.get("PurseseineLogsheet") ?? [];
-  return offsetCard(
-    flag,
-    rankedList(llRows, { labelKey: "offset_bucket", countKey: "count", title: TYPE_LABEL.LonglineLogsheet,    subtitle: `${d3.format(",")(d3.sum(llRows, d => d.count))} sets`, labelFormat: v => `${v >= 0 ? "+" : ""}${v} h` }),
-    rankedList(psRows, { labelKey: "offset_bucket", countKey: "count", title: TYPE_LABEL.PurseseineLogsheet, subtitle: `${d3.format(",")(d3.sum(psRows, d => d.count))} sets`, labelFormat: v => `${v >= 0 ? "+" : ""}${v} h` }),
-  );
-}));
+define({id: "ae1af6d0", inputs: ["display","offsetGrid","flags","offsetCard","rankedList","offsetRows","byFlag","d3","flagTotals","fmtOffset","html"], body: (display,offsetGrid,flags,offsetCard,rankedList,offsetRows,byFlag,d3,flagTotals,fmtOffset,html) => {
+display(offsetGrid(flags, flag => offsetCard(
+  flag,
+  rankedList(offsetRows(byFlag.get(flag)), {
+    labelKey: "offset", countKey: "count", title: "Longline",
+    subtitle: `${d3.format(",")(flagTotals.get(flag))} activities`,
+    total: flagTotals.get(flag), labelFormat: fmtOffset,
+  }),
+  html``,
+)));
+}});
+
+define({id: "d7e8c241", inputs: ["display","offsetGrid","eezs","offsetCard","rankedList","offsetRows","byEez","d3","eezTotals","fmtOffset","html"], body: (display,offsetGrid,eezs,offsetCard,rankedList,offsetRows,byEez,d3,eezTotals,fmtOffset,html) => {
+display(offsetGrid(eezs, eez => offsetCard(
+  eez,
+  rankedList(offsetRows(byEez.get(eez)), {
+    labelKey: "offset", countKey: "count", title: "Longline",
+    subtitle: `${d3.format(",")(eezTotals.get(eez))} activities`,
+    total: eezTotals.get(eez), labelFormat: fmtOffset,
+  }),
+  html``,
+)));
+}});
+
+define({id: "4e7c4381", inputs: ["byFlag","d3","offsetRows","eezs","display","Plot","width","flags","fmtOffset","html"], body: (byFlag,d3,offsetRows,eezs,display,Plot,width,flags,fmtOffset,html) => {
+{
+  // Dominant offset + support per (flag, eez)
+  const cells = [];
+  for (const [flag, fv] of byFlag) {
+    const perEez = d3.group(fv, d => d.eez_code);
+    for (const [eez, ev] of perEez) {
+      const offs = offsetRows(ev);
+      cells.push({ flag, eez, modal: offs[0].offset, total: d3.sum(ev, d => d.count) });
+    }
+  }
+
+  // Keep the most-sampled EEZ columns so the grid stays readable.
+  const topEez = eezs.slice(0, 28);
+  const shown = cells.filter(c => topEez.includes(c.eez));
+
+  display(Plot.plot({
+    width: Math.max(width, 900),
+    height: 28 * flags.length + 90,
+    marginLeft: 50,
+    marginBottom: 70,
+    x: { domain: topEez, label: "EEZ", tickRotate: -45 },
+    y: { domain: flags, label: "Flag" },
+    color: {
+      type: "diverging", scheme: "BuRd", legend: true, label: "Dominant offset (h)",
+      domain: [-13, 13],
+    },
+    marks: [
+      Plot.cell(shown, { x: "eez", y: "flag", fill: "modal", inset: 0.5,
+        tip: true, title: d => `${d.flag} × ${d.eez}\n${fmtOffset(d.modal)} · ${d3.format(",")(d.total)} activities` }),
+      Plot.text(shown, { x: "eez", y: "flag", text: d => fmtOffset(d.modal),
+        fill: "black", fontSize: 9 }),
+    ],
+  }));
+  if (eezs.length > topEez.length) {
+    display(html`<p style="color:#9ca3af;font-size:0.85rem">Showing the ${topEez.length} most-sampled EEZ columns of ${eezs.length}.</p>`);
+  }
+}
 }});
 
 </script>
@@ -89,38 +161,41 @@ display(offsetGrid(allFlags, flag => {
     <li class="observablehq-link"><a href="./">Logsheet UTC Analysis</a></li>
   </ol>
   <ol>
-    <li class="observablehq-link"><a href="./">Summary</a></li>
+    <li class="observablehq-link"><a href="./">Problem &amp; method</a></li>
+    <li class="observablehq-link"><a href="./ps-set-time-distribution">Purseseine set time</a></li>
     <li class="observablehq-link"><a href="./ll-set-time-distribution">Longline set time distribution</a></li>
-    <li class="observablehq-link"><a href="./ps-set-time-distribution">Purseseine set time distribution</a></li>
-    <li class="observablehq-link"><a href="./ps-set-time-sunrise-relative">Purseseine set time distribution - sunrise relative</a></li>
-    <li class="observablehq-link"><a href="./entities-to-migrate">Entities to migrate</a></li>
-    <li class="observablehq-link observablehq-link-active"><a href="./observer-offsets">Observer offsets by vessel flag</a></li>
-    <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity IANA timezone offset by vessel flag</a></li>
-    <li class="observablehq-link"><a href="./logsheet-nautical-offsets">Logsheet activity Nautical timezone offset by vessel flag</a></li>
-    <li class="observablehq-link"><a href="./observer-offset-per-eez">Observer offset distribution by EEZ</a></li>
-    <li class="observablehq-link"><a href="./observer-offset-per-flag">Observer offset distribution by vessel flag</a></li>
-    <li class="observablehq-link"><a href="./observer-offset-per-logsheet">Observer offset per instance source</a></li>
-    <li class="observablehq-link"><a href="./eez-list-per-trip">EEZ combinations per trip</a></li>
-    <li class="observablehq-link"><a href="./utc-offset-predictions">UTC offset predictions</a></li>
-    <li class="observablehq-link"><a href="./bayesian-estimator-explained">Bayesian estimator — how it works</a></li>
+    <li class="observablehq-link"><a href="./observer-coverage">Observer coverage</a></li>
+    <li class="observablehq-link observablehq-link-active"><a href="./observer-offsets">Observer offsets</a></li>
+    <li class="observablehq-link"><a href="./decision-tree">Decision tree</a></li>
   </ol>
 </nav>
 <script>{const e=document.querySelector("#observablehq-sidebar"),o=document.querySelector("#observablehq-sidebar-toggle"),r=sessionStorage.getItem("observablehq-sidebar");r?o.checked=r==="true":o.indeterminate=!0;for(const t of document.querySelectorAll("#observablehq-sidebar summary")){const s=t.parentElement;switch(sessionStorage.getItem(`observablehq-sidebar:${t.textContent}`)){case"true":s.open=!0;break;case"false":s.classList.contains("observablehq-section-active")||(s.open=!1);break}}addEventListener("beforeunload",()=>sessionStorage.setItem("observablehq-sidebar-scrolly",`${e.scrollTop}`));const a=sessionStorage.getItem("observablehq-sidebar-scrolly");a!=null&&(e.style.cssText="overflow: hidden;",e.scrollTop=+a,e.style.cssText="");}</script>
 <div id="observablehq-center">
 <main id="observablehq-main" class="observablehq">
-<h1 id="observer-utc-offset-per-vessel-flag" tabindex="-1"><a class="observablehq-header-anchor" href="#observer-utc-offset-per-vessel-flag">Observer UTC offset per vessel flag</a></h1>
-<p>Observer trips linked to a logsheet, grouped by vessel flag.
-Each pair of charts shows the distribution of <strong>UTC offsets</strong> derived from the observer's own datetime data:</p>
+<h1 id="observer-utc-offsets-the-training-data" tabindex="-1"><a class="observablehq-header-anchor" href="#observer-utc-offsets-the-training-data">Observer UTC offsets — the training data</a></h1>
+<p>Every <strong>Longline</strong> observer fishing activity (set) carries a <strong>measured</strong> UTC offset:
+<code>vessel-time − UTC</code>. These are the examples the <a href="./decision-tree">decision tree</a> learns from. This
+page shows the offsets per <strong>vessel flag</strong> and per <strong>EEZ</strong>, and finally the combined
+<strong>flag × EEZ</strong> view — the exact grouping used for training.</p>
 <ul>
-<li><strong>Longline</strong> — <code>obsv.l_set.set_dtime − utc_set_dtime</code> (per fishing set)</li>
-<li><strong>Purseseine</strong> — <code>obsv.s_day.start_dtime − utc_start_dtime</code> (per fishing day)</li>
+<li>Source: <code>obsv.l_set</code> matched to longline logsheet sets (since 2017)</li>
+<li>Offset rounded to the nearest 0.5 h, dateline-folded (&gt;+12 h → −24), clipped to ±14 h</li>
+<li>Each value is weighted by the number of observer activities (<code>count</code>)</li>
 </ul>
-<div class="observablehq observablehq--block"><!--:3fde4fe4:--></div>
-<div class="observablehq observablehq--block"><!--:aa8e45b4:--></div>
+<div class="observablehq observablehq--block"><!--:6ae2b2e7:--></div>
+<h2 id="by-vessel-flag" tabindex="-1"><a class="observablehq-header-anchor" href="#by-vessel-flag">By vessel flag</a></h2>
+<div class="observablehq observablehq--block"><!--:ae1af6d0:--></div>
+<h2 id="by-eez" tabindex="-1"><a class="observablehq-header-anchor" href="#by-eez">By EEZ</a></h2>
+<div class="observablehq observablehq--block"><!--:d7e8c241:--></div>
+<h2 id="combined-flag-eez" tabindex="-1"><a class="observablehq-header-anchor" href="#combined-flag-eez">Combined: flag × EEZ</a></h2>
+<p>The cell colour is the <strong>dominant offset</strong> for that flag/EEZ combination; the number is how many
+observer activities support it. Empty cells have no observer data. This is the feature grid the
+decision tree partitions.</p>
+<div class="observablehq observablehq--block"><!--:4e7c4381:--></div>
 </main>
 <footer id="observablehq-footer">
-<nav><a rel="prev" href="./entities-to-migrate"><span>Entities to migrate</span></a><a rel="next" href="./logsheet-offsets"><span>Logsheet activity IANA timezone offset by vessel flag</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-18T15:42:22">Jun 18, 2026</a>.</div>
+<nav><a rel="prev" href="./observer-coverage"><span>Observer coverage</span></a><a rel="next" href="./decision-tree"><span>Decision tree</span></a></nav>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-23T16:12:36">Jun 23, 2026</a>.</div>
 </footer>
 </div>
 </body>

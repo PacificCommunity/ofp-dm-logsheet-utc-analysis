@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="generator" content="Observable Framework v1.13.4">
-<title>Set time distribution | Logsheet UTC Analysis</title>
+<title>Longline set time distribution | Logsheet UTC Analysis</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
 <link rel="preload" as="style" href="./_observablehq/theme-air.d5b7fcbe.css">
@@ -57,28 +57,19 @@
 import {define} from "./_observablehq/client.0e2531ba.js";
 import {registerFile} from "./_observablehq/stdlib.277aeab8.js";
 
-registerFile("./data/set-time-distribution.csv", {"name":"./data/set-time-distribution.csv","mimeType":"text/csv","path":"./_file/data/set-time-distribution.48b06f19.csv","lastModified":1781758136291,"size":778});
+registerFile("./data/set-time-distribution.csv", {"name":"./data/set-time-distribution.csv","mimeType":"text/csv","path":"./_file/data/set-time-distribution.48b06f19.csv","lastModified":1782191381971,"size":778});
 
-define({id: "c104fa42", inputs: ["FileAttachment"], outputs: ["Plot","d3","sets","byType","ll","ps","totalLL","psBySchool","psFree","psFad","totalPsFree","totalPsFad","totalPS"], body: async (FileAttachment) => {
+define({id: "7eadcd53", inputs: ["FileAttachment"], outputs: ["Plot","d3","sets","ll","totalLL"], body: async (FileAttachment) => {
 const [Plot, d3] = await Promise.all([import("./_npm/@observablehq/plot@0.6.17/a96a6bbb.js"), import("./_npm/d3@7.9.0/66d82917.js")]);
 
 const sets = await FileAttachment("./data/set-time-distribution.csv").csv({typed: true});
 
-const byType = d3.group(sets, d => d.type);
-const ll  = byType.get("LonglineLogsheet")   ?? [];
-const ps  = byType.get("PurseseineLogsheet") ?? [];
+const ll = sets.filter(d => d.type === "LonglineLogsheet");
 const totalLL = d3.sum(ll, d => d.count);
-
-const psBySchool = d3.group(ps, d => d.school_type);
-const psFree = psBySchool.get("Free school")    ?? [];
-const psFad  = psBySchool.get("FAD-associated") ?? [];
-const totalPsFree = d3.sum(psFree, d => d.count);
-const totalPsFad  = d3.sum(psFad,  d => d.count);
-const totalPS = totalPsFree + totalPsFad;
-return {Plot,d3,sets,byType,ll,ps,totalLL,psBySchool,psFree,psFad,totalPsFree,totalPsFad,totalPS};
+return {Plot,d3,sets,ll,totalLL};
 }});
 
-define({id: "c1f6a34a", inputs: ["Plot","width","d3"], outputs: ["TUNA_START","TUNA_END","SWORDFISH_START","SWORDFISH_END","hourChart"], body: (Plot,width,d3) => {
+define({id: "10642856", inputs: ["Plot","width","d3"], outputs: ["TUNA_START","TUNA_END","SWORDFISH_START","SWORDFISH_END","hourChart"], body: (Plot,width,d3) => {
 const TUNA_START = 4;
 const TUNA_END  = 8;
 const SWORDFISH_START = 18;
@@ -93,7 +84,7 @@ function hourChart(data, {title, fill}) {
     marginLeft: 55,
     marginBottom: 48,
     x: {
-      label: "Hour of day (local time)",
+      label: "Hour of day (as recorded)",
       domain: d3.range(0, 24),
       tickFormat: h => `${String(h).padStart(2, "0")}:00`
     },
@@ -119,7 +110,7 @@ function hourChart(data, {title, fill}) {
         fontWeight: "600",
         fill: "#374151"
       }),
-      Plot.ruleY([0]), 
+      Plot.ruleY([0]),
         Plot.ruleX([TUNA_START], { stroke: "#ef4444", strokeDasharray: "4,3", strokeWidth: 1.5 }),
         Plot.text([{ hour: TUNA_START, label: "tuna" }], {
             x: "hour", y: () => yMax * 0.9,
@@ -172,29 +163,20 @@ hourChart(ll, {
     <li class="observablehq-link"><a href="./">Logsheet UTC Analysis</a></li>
   </ol>
   <ol>
-    <li class="observablehq-link"><a href="./">Summary</a></li>
+    <li class="observablehq-link"><a href="./">Problem &amp; method</a></li>
+    <li class="observablehq-link"><a href="./ps-set-time-distribution">Purseseine set time</a></li>
     <li class="observablehq-link observablehq-link-active"><a href="./ll-set-time-distribution">Longline set time distribution</a></li>
-    <li class="observablehq-link"><a href="./ps-set-time-distribution">Purseseine set time distribution</a></li>
-    <li class="observablehq-link"><a href="./ps-set-time-sunrise-relative">Purseseine set time distribution - sunrise relative</a></li>
-    <li class="observablehq-link"><a href="./entities-to-migrate">Entities to migrate</a></li>
-    <li class="observablehq-link"><a href="./observer-offsets">Observer offsets by vessel flag</a></li>
-    <li class="observablehq-link"><a href="./logsheet-offsets">Logsheet activity IANA timezone offset by vessel flag</a></li>
-    <li class="observablehq-link"><a href="./logsheet-nautical-offsets">Logsheet activity Nautical timezone offset by vessel flag</a></li>
-    <li class="observablehq-link"><a href="./observer-offset-per-eez">Observer offset distribution by EEZ</a></li>
-    <li class="observablehq-link"><a href="./observer-offset-per-flag">Observer offset distribution by vessel flag</a></li>
-    <li class="observablehq-link"><a href="./observer-offset-per-logsheet">Observer offset per instance source</a></li>
-    <li class="observablehq-link"><a href="./eez-list-per-trip">EEZ combinations per trip</a></li>
-    <li class="observablehq-link"><a href="./utc-offset-predictions">UTC offset predictions</a></li>
-    <li class="observablehq-link"><a href="./bayesian-estimator-explained">Bayesian estimator — how it works</a></li>
+    <li class="observablehq-link"><a href="./observer-coverage">Observer coverage</a></li>
+    <li class="observablehq-link"><a href="./observer-offsets">Observer offsets</a></li>
+    <li class="observablehq-link"><a href="./decision-tree">Decision tree</a></li>
   </ol>
 </nav>
 <script>{const e=document.querySelector("#observablehq-sidebar"),o=document.querySelector("#observablehq-sidebar-toggle"),r=sessionStorage.getItem("observablehq-sidebar");r?o.checked=r==="true":o.indeterminate=!0;for(const t of document.querySelectorAll("#observablehq-sidebar summary")){const s=t.parentElement;switch(sessionStorage.getItem(`observablehq-sidebar:${t.textContent}`)){case"true":s.open=!0;break;case"false":s.classList.contains("observablehq-section-active")||(s.open=!1);break}}addEventListener("beforeunload",()=>sessionStorage.setItem("observablehq-sidebar-scrolly",`${e.scrollTop}`));const a=sessionStorage.getItem("observablehq-sidebar-scrolly");a!=null&&(e.style.cssText="overflow: hidden;",e.scrollTop=+a,e.style.cssText="");}</script>
 <div id="observablehq-center">
 <main id="observablehq-main" class="observablehq">
-<h1 id="set-time-distribution" tabindex="-1"><a class="observablehq-header-anchor" href="#set-time-distribution">Set time distribution</a></h1>
-<div class="observablehq observablehq--block"><!--:c104fa42:--></div>
-<div class="observablehq observablehq--block"><!--:c1f6a34a:--></div>
-<h2 id="longline-logsheet" tabindex="-1"><a class="observablehq-header-anchor" href="#longline-logsheet">Longline logsheet</a></h2>
+<h1 id="longline-set-time-distribution-local-time-must-compute-offset" tabindex="-1"><a class="observablehq-header-anchor" href="#longline-set-time-distribution-local-time-must-compute-offset">Longline set time distribution — local time → must compute offset</a></h1>
+<div class="observablehq observablehq--block"><!--:7eadcd53:--></div>
+<div class="observablehq observablehq--block"><!--:10642856:--></div>
 <p>Fishing set start times across <strong><observablehq-loading></observablehq-loading><!--:c715a025:--> sets</strong> (<code>log.sets_ll</code> where <code>l_activity_id = 1</code>).</p>
 <p>This time distribution is consistent with the <a href="https://www.pirfo.org/index.php/resources/downloads/category/33-manuals?download=115:horizontal-longline-fishing-manual-for-fishermen" target="_blank" rel="noopener noreferrer">Horizontal Longline Fishing Manual for Fishermen</a>.</p>
 <blockquote>
@@ -206,10 +188,17 @@ hauled starting in the afternoon or early evening (1400 to 1800 hours)</p>
 the line is set starting in the evening (1800 to 2000 hours)</p>
 </blockquote>
 <div class="observablehq observablehq--block"><observablehq-loading></observablehq-loading><!--:0fff2706:--></div>
+<hr>
+<h2 id="conclusion" tabindex="-1"><a class="observablehq-header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>The recorded longline set times <strong>already cluster at first light (04:00–08:00)</strong> — the expected
+<em>local-time</em> pattern from the fishing manual. Unlike purse-seine, this pattern appears <strong>without
+any UTC→local adjustment</strong>, which means longline set times are stored as <strong>local time</strong>, not UTC.</p>
+<p>Therefore longline logsheet datetimes <strong>must be converted</strong> to UTC. The remaining pages build the
+per-trip offset evidence and the resulting decision tree used to estimate that offset.</p>
 </main>
 <footer id="observablehq-footer">
-<nav><a rel="prev" href="./"><span>Logsheet UTC Analysis</span></a><a rel="next" href="./ps-set-time-distribution"><span>Purseseine set time distribution</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-18T15:42:22">Jun 18, 2026</a>.</div>
+<nav><a rel="prev" href="./ps-set-time-distribution"><span>Purseseine set time</span></a><a rel="next" href="./observer-coverage"><span>Observer coverage</span></a></nav>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-06-23T16:12:36">Jun 23, 2026</a>.</div>
 </footer>
 </div>
 </body>
