@@ -4,13 +4,11 @@ export default {
   title: "Logsheet UTC Analysis",
 
   pages: [
-    {name: "Summary", path: "/"},
+    {name: "Problem & method", path: "/"},
     {name: "Purseseine set time", path: "/ps-set-time-distribution"},
     {name: "Longline set time distribution", path: "/ll-set-time-distribution"},
-    {name: "Longline offset complexity per flag", path: "/observer-offset-per-flag"},
-    {name: "EEZ combinations per trip", path: "/eez-list-per-trip"},
-    {name: "Observer offset by vessel flag", path: "/observer-offsets"},
-    {name: "Observer offset by EEZ", path: "/observer-offset-per-eez"},
+    {name: "Observer coverage", path: "/observer-coverage"},
+    {name: "Observer offsets", path: "/observer-offsets"},
     {name: "Decision tree", path: "/decision-tree"},
   ],
 
@@ -19,4 +17,10 @@ export default {
 
   // The path to the source root.
   root: "src",
+
+  // Use the Python 3.12 interpreter that has pandas/pyodbc/scikit-learn installed
+  // (the default `python3` on this machine resolves to a different interpreter).
+  interpreters: {
+    ".py": ["python"],
+  },
 };

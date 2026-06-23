@@ -1,64 +1,73 @@
 ---
 theme: air
-title: UTC offset — summary
+title: Problem & method
 toc: false
 ---
 
 # Estimating the UTC offset of logsheet datetimes
 
-Every analysis in this app serves one goal: **estimate the UTC offset for each datetime** of all
-Longline (LL) and Purseseine (PS) logsheets, expressed as an **auditable decision tree** — not a
-trip-by-trip migration plan.
+## The problem
 
-<div style="display:flex;gap:1rem;flex-wrap:wrap;margin:1.5rem 0">
-  <div style="flex:1;min-width:280px;background:#dcfce7;border:1px solid #86efac;border-radius:10px;padding:1.25rem">
-    <div style="font-size:1.1rem;font-weight:700;margin-bottom:0.4rem">Purseseine → offset 0</div>
-    Set times are entered as <strong>UTC</strong>. Confirmed by the sunrise analysis: associated
-    (FAD) sets cluster before sunrise and free-school sets in daylight <em>only on the UTC clock</em>.
-    No estimation needed.
-    <div style="margin-top:0.5rem"><a href="./ps-set-time-distribution">See the evidence →</a></div>
-  </div>
-  <div style="flex:1;min-width:280px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:1.25rem">
-    <div style="font-size:1.1rem;font-weight:700;margin-bottom:0.4rem">Longline → decision tree</div>
-    Set times are entered as <strong>local time</strong> (they already cluster at first light).
-    We estimate the offset from observer evidence via a <strong>flag → EEZ → instance</strong>
-    decision tree.
-    <div style="margin-top:0.5rem"><a href="./decision-tree">Full decision tree →</a></div>
-  </div>
-</div>
+Logsheet datetimes are ambiguous: a recorded date and time may have been entered in **vessel
+(local) time** or in **UTC**, and the two cannot be told apart from the value alone. To analyse or
+migrate this data we must resolve that ambiguity in two steps:
 
-## Longline decision tree — headline
+1. **Decide the clock** — was the datetime entered in **vessel time** or **UTC**?
+2. **Estimate the UTC offset** — if it is already UTC the offset is `0`; if it is vessel time we
+   still have to estimate by how many hours it is offset from UTC.
 
-```js
-import { buildDecisionTree, renderTreeRules, renderCoverage } from "./components/decision-tree.js";
+> Per the logsheet manual, **all logsheet data is supposed to be entered as UTC**. Only observer
+> data is recorded in **both** vessel time and UTC — which makes observer records our reference for
+> the truth.
 
-const trips = await FileAttachment("data/ll-decision-tree-features.csv").csv({ typed: true });
-const tree = buildDecisionTree(trips, { purity: 0.9, minSupport: 5, alpha: 0.5 });
-```
+## Step 1 — Which clock?
 
-```js
-display(renderCoverage(tree));
-```
+We test the recorded times against a known operational signal (when fishing sets physically
+happen, relative to sunrise / first light):
 
-```js
-display(renderTreeRules(tree));
-```
+- **[Purseseine](./ps-set-time-distribution)** — set times only match the expected biological
+  pattern when read as **UTC**. Purse-seine datetimes are therefore already UTC → **offset = 0**,
+  no estimation needed.
+- **[Longline](./ll-set-time-distribution)** — set times already cluster at first light *without*
+  any adjustment, i.e. they are recorded in **vessel time**. Longline datetimes therefore need
+  their UTC offset estimated.
 
-The [decision tree page](./decision-tree) lets you tune the purity threshold, inspect the flat
-rules table, and download the rules as CSV.
+## Step 2 — Estimating the longline offset
 
-## How the evidence is built
+### What we already know
 
-| Page | Purpose |
+For longline logsheets that have **matched observer data**, the observer records the same activity
+in both vessel time and UTC. The difference gives a measured UTC offset per activity, which we
+treat as the truth (most observer-entered data is assumed correct). See
+[observer offsets](./observer-offsets).
+
+### Generalising to every logsheet
+
+Observer coverage is the catch: longline observer coverage averages only about **5%**
+(see [observer coverage](./observer-coverage)). So measured offsets only exist for a small fraction
+of logsheets, and we must generalise to the rest. Two approaches:
+
+- **Train a model on the observer data (preferred).** Use the observer activities — where the
+  offset is known — to learn a predictor for *every* logsheet. Candidate methods:
+  - a **decision tree** (`vessel_flag × EEZ → offset`) — interpretable and shippable as rules;
+  - **Bayesian inference** over the same features;
+  - a black-box ML model (e.g. TensorFlow).
+
+  This app uses a **scikit-learn `DecisionTreeClassifier`** trained on observer *activities*
+  (one example per fishing set), with **vessel flag** and **EEZ** as features. The result is an
+  auditable [decision tree](./decision-tree) you can download as `flag × eez → offset`.
+
+- **Nautical timezone from longitude** (fallback). Approximate the offset as
+  `round(longitude / 15)`. This is available for any activity with a position, but it can differ
+  from the observer truth — e.g. when a captain keeps the **departure-port** timezone as vessel
+  time regardless of where the vessel sails.
+
+## How the pages fit together
+
+| Page | Role |
 |---|---|
-| [Purseseine set time](./ps-set-time-distribution) | Proves PS times are UTC → offset 0 |
-| [Longline set time distribution](./ll-set-time-distribution) | Shows LL times are local → must compute offset |
-| [Longline offset complexity per flag](./observer-offset-per-flag) | Per-trip offsets; single vs multi-offset frequency |
-| [EEZ combinations per trip](./eez-list-per-trip) | How often LL trips span multiple EEZs |
-| [Observer offset by vessel flag](./observer-offsets) | Per-set observer offsets grouped by flag |
-| [Observer offset by EEZ](./observer-offset-per-eez) | Per-trip observer offsets grouped by EEZ |
-| [Decision tree](./decision-tree) | Final tree + Bayesian confidence + CSV export |
-
-> **Source of truth:** observer datetimes (`obsv.l_set`), not the nautical longitude/15 offset.
-> A trip can show several offsets, but most use a single one, so a single offset per branch is
-> acceptable.
+| [Purseseine set time](./ps-set-time-distribution) | Step 1 — proves PS times are UTC → offset 0 |
+| [Longline set time distribution](./ll-set-time-distribution) | Step 1 — proves LL times are vessel time |
+| [Observer coverage](./observer-coverage) | Step 2 — how much observer data we have to learn from |
+| [Observer offsets](./observer-offsets) | Step 2 — the measured offsets (the training data) |
+| [Decision tree](./decision-tree) | Step 2 — the trained `flag × eez → offset` model |

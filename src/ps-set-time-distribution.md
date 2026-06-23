@@ -16,11 +16,6 @@ is stored as **UTC**, we must shift by the local offset to recover the paper's p
 
 Two independent views below both show the same result: **the recorded purse-seine set times are UTC.**
 
-<div style="background:#dcfce7;padding:1rem 1.25rem;border-radius:8px;margin:1.5rem 0;border:1px solid #86efac">
-  <strong>Decision:</strong> Purse-seine logsheet datetimes are entered as UTC. No estimation is
-  needed — <strong>all purse-seine logsheet UTC offsets = 0</strong>.
-</div>
-
 ---
 
 ## View 1 — Hour of day: as-recorded vs nautical-adjusted
@@ -134,8 +129,8 @@ display(html`<div style="display:flex;gap:1.5rem;flex-wrap:wrap">
 
 This view presents set times **relative to sunrise** (t=0), matching the WCPFC paper format.
 Sunrise is computed precisely for each set's location and date using the
-[Ed Williams algorithm](https://edwilliams.org/sunrise_sunset_algorithm.htm). The calculator works
-in **UTC**, so this view treats the recorded set time as UTC directly — if that assumption is
+[SunCalc](https://github.com/mourner/suncalc) library. SunCalc returns sunrise as an absolute
+**UTC** instant, so this view treats the recorded set time as UTC directly — if that assumption is
 correct, the paper's pattern emerges with no further adjustment.
 
 ```js
