@@ -22,7 +22,8 @@ interpretable model whose splits read directly as `vessel_flag (× EEZ) → offs
   those activities whose measured offset equals the predicted one.
 
 The model is built by the `decision-tree-rules.csv.py` data loader; this page only renders and
-exports its output. There are no tunable parameters.
+exports its output. Fixed constants in the loader: `MIN_SAMPLES = 30` (support floor) and
+`CONFIDENCE_TOLERANCE_H = 1.0` (tolerance window for confidence calculation).
 
 ## How the classifier works
 
@@ -37,21 +38,27 @@ binary question like *"is vessel_flag_JP = 1?"* or *"is eez_code_FM = 1?"*. Beca
 flag column and one EEZ column equal 1 for every training example, the tree converges to one
 rule per observed `(flag, eez)` combination — which is exactly what we want.
 
-**How confidence is computed.** `confidence` is *not* an internal probability from the tree. It is
-computed empirically on the raw training data after the rules are produced:
+**How confidence is computed — with tolerance.** `confidence` is *not* an internal probability from
+the tree. It is computed empirically on the raw training data after the rules are produced.
 
-> **confidence** = (# observer activities where measured offset = predicted offset) ÷ (total activities for that flag × EEZ)
+`DecisionTreeClassifier` has **no built-in tolerance parameter**: it treats offset labels as
+unordered categories — it does not know that 10 and 12 are adjacent to 11. Tolerance is therefore
+applied as a **post-processing step**:
 
-A value of 100 % means every single observer set recorded the same clock — the rule is
-rock-solid. A lower value means the tree predicts the *majority* offset, but some sets used a
-different one. This is a property of the **data**, not the algorithm.
+> **confidence** = (# observer activities where |measured − predicted| ≤ 1 h) ÷ (total activities for that flag × EEZ)
 
-**Two concrete examples from the data:**
+Any activity whose recorded offset is within **±1 hour** of the prediction is counted as
+"agreeing". This absorbs near-identical timezone choices (a captain alternating between +11 and
++12 near a zone boundary) while still penalising clear data-entry errors far from the prediction
+(e.g., a −11 entry in waters where only +11/+12 are geographically plausible).
+
+**Three concrete examples from the data:**
 
 | Combination | Confidence | n | Interpretation |
 |-------------|-----------|---|----------------|
-| JP × FM | 100 % | 41 | All 41 Japanese observer sets in Federated States of Micronesia waters recorded the same UTC offset. The leaf is pure — the tree is certain. |
-| JP × PG | 72 % | 57 | 57 sets, but ~28 % used a different clock. The tree predicts the most common offset, but one in four sets disagreed. The mixing reflects genuine operational variation (e.g., different captains keeping departure-port time vs. local time), not a model artefact. |
+| JP × FM | 100 % | 41 | All 41 sets at exactly the same offset — pure agreement with or without tolerance. |
+| JP × PG | ~72 % | 57 | Genuine operational variation: ~28 % of sets used a noticeably different clock. The 1h tolerance does not fully absorb this because the disagreeing offsets are more than 1 h away from the majority. |
+| CN × VU | ~95 % with tolerance | — | Without tolerance: ~67 % (some sets recorded +10 or +12 instead of +11). With 1h tolerance those are counted as the same timezone choice. Only outliers like −11 or −12, which cannot correspond to any valid VU timezone, remain excluded. |
 
 **Minimum-support floor.** Any `(flag, eez)` combination with fewer than 30 observer activities
 (the `MIN_SAMPLES` constant in the Python loader) is considered too sparse to trust. These cells
