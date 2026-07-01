@@ -69,5 +69,5 @@ of logsheets, and we must generalise to the rest. Two approaches:
 | [Purseseine set time](./ps-set-time-distribution) | Step 1 — proves PS times are UTC → offset 0 |
 | [Longline set time distribution](./ll-set-time-distribution) | Step 1 — proves LL times are vessel time |
 | [Observer coverage](./observer-coverage) | Step 2 — how much observer data we have to learn from |
-| [Observer offsets](./observer-offsets) | Step 2 — the measured offsets (the training data) |
+| [Observer & nautical offsets](./observer-offsets) | Step 2 — measured observer offsets (training data) vs the longitude/15 estimate |
 | [Decision tree](./decision-tree) | Step 2 — the trained `flag × eez → offset` model |

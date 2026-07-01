@@ -61,7 +61,7 @@ timezone), **beyond ±1 h** (red — likely data-entry error or genuinely differ
 fall back to the **flag-level dominant offset** — the most common offset across all EEZs for that
 flag. They are labelled `flag_fallback` in the `rule_level` column and shown with a dashed
 border below. Flags with no observer data at all are not represented in this table; for those,
-use the [nautical (longitude/15) baseline](./nautical-offsets) as a fallback.
+use the [nautical (longitude/15) baseline](./observer-offsets) as a fallback.
 
 ```js
 import * as d3 from "npm:d3";

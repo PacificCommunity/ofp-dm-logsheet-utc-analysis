@@ -8,8 +8,7 @@ export default {
     {name: "Purseseine set time", path: "/ps-set-time-distribution"},
     {name: "Longline set time distribution", path: "/ll-set-time-distribution"},
     {name: "Observer coverage", path: "/observer-coverage"},
-    {name: "Observer offsets", path: "/observer-offsets"},
-    {name: "Nautical offsets", path: "/nautical-offsets"},
+    {name: "Observer & nautical offsets", path: "/observer-offsets"},
     {name: "Decision tree", path: "/decision-tree"},
   ],
 
