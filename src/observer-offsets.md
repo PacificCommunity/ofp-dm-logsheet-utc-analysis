@@ -129,9 +129,10 @@ display(offsetGrid(eezs, eez => offsetCard(
 
 ## Combined: flag × EEZ
 
-The dominant offset per flag × EEZ combination, shown as **observer / nautical**. Where the two
-disagree, the captain's clock differs from the geographic time zone (those cells are shown in
-bold). A dash (`—`) means no data for that source. Only the most-sampled EEZ columns are shown.
+The dominant offset per flag × EEZ combination. Each cell is split in two — **observer** on the
+left, **nautical** on the right. Where the two disagree, the cell is shown in bold. A dash (`—`)
+means no data for that source. **Hover any cell** to highlight its flag (row) and EEZ (column)
+headers. Only the most-sampled EEZ columns are shown.
 
 ```js
 {
@@ -151,29 +152,74 @@ bold). A dash (`—`) means no data for that source. Only the most-sampled EEZ c
   const topEez = eezs.slice(0, 20);
   const fmt = v => v === undefined ? "—" : (v >= 0 ? `+${v}` : `${v}`);
 
-  display(html`<div style="overflow-x:auto">
-    <table style="border-collapse:collapse;font-size:0.78rem;font-family:monospace">
-      <thead>
-        <tr>
-          <th style="position:sticky;left:0;background:#fff;text-align:left;padding:4px 8px;border-bottom:2px solid #e5e7eb">Flag</th>
-          ${topEez.map(eez => html`<th style="padding:4px 6px;border-bottom:2px solid #e5e7eb;text-align:center">${eez}</th>`)}
-        </tr>
-      </thead>
-      <tbody>
-        ${flags.map(flag => html`<tr style="border-bottom:1px solid #f3f4f6">
-          <td style="position:sticky;left:0;background:#fff;font-weight:700;padding:3px 8px">${flag}</td>
-          ${topEez.map(eez => {
-            const o = obsDom.get(`${flag}|${eez}`);
-            const n = nautDom.get(`${flag}|${eez}`);
-            if (o === undefined && n === undefined)
-              return html`<td style="padding:3px 6px;text-align:center;color:#e5e7eb">·</td>`;
-            const diverge = o !== undefined && n !== undefined && o !== n;
-            return html`<td style="padding:3px 6px;text-align:center;${diverge ? "font-weight:700" : ""}">${fmt(o)}&thinsp;/&thinsp;${fmt(n)}</td>`;
-          })}
-        </tr>`)}
-      </tbody>
-    </table>
-  </div>`);
+  const style = html`<style>
+    table.cmb { border-collapse:collapse; font-size:0.78rem; font-family:monospace; }
+    table.cmb th, table.cmb td { border:1px solid #cbd5e1; }
+    table.cmb th { background:#f8fafc; }
+    table.cmb .cmb-corner, table.cmb .cmb-rowhead {
+      position:sticky; left:0; z-index:1; text-align:left; padding:4px 8px; background:#f8fafc; font-weight:700;
+    }
+    table.cmb .cmb-colhead { padding:4px 0; text-align:center; }
+    table.cmb .cmb-cell { padding:0; }
+    table.cmb .half { display:flex; align-items:stretch; }
+    table.cmb .half > span { flex:1; text-align:center; padding:2px 6px; }
+    table.cmb .half > span + span { border-left:1px solid #e2e8f0; }
+    table.cmb .diverge { font-weight:700; }
+    table.cmb .hl-head { background:#bfdbfe !important; }
+    table.cmb .hl-cell { background:#dbeafe; }
+  </style>`;
+
+  const cellInner = (o, n) => html`<div class="half">
+    <span>${fmt(o)}</span><span>${fmt(n)}</span>
+  </div>`;
+
+  const table = html`<table class="cmb">
+    <thead>
+      <tr>
+        <th class="cmb-corner">Flag</th>
+        ${topEez.map((eez, ci) => html`<th class="cmb-colhead" data-col=${ci}>
+          <div>${eez}</div>
+          <div class="half" style="font-size:0.7em;color:#9ca3af;font-weight:400">
+            <span>obs</span><span>naut</span>
+          </div>
+        </th>`)}
+      </tr>
+    </thead>
+    <tbody>
+      ${flags.map(flag => html`<tr>
+        <th class="cmb-rowhead">${flag}</th>
+        ${topEez.map((eez, ci) => {
+          const o = obsDom.get(`${flag}|${eez}`);
+          const n = nautDom.get(`${flag}|${eez}`);
+          if (o === undefined && n === undefined)
+            return html`<td class="cmb-cell" data-col=${ci}><div style="text-align:center;color:#cbd5e1;padding:2px 6px">·</div></td>`;
+          const diverge = o !== undefined && n !== undefined && o !== n;
+          return html`<td class="cmb-cell ${diverge ? "diverge" : ""}" data-col=${ci}>${cellInner(o, n)}</td>`;
+        })}
+      </tr>`)}
+    </tbody>
+  </table>`;
+
+  // Hover: highlight the cell plus its row (flag) and column (EEZ) headers.
+  table.querySelectorAll("tbody tr").forEach(tr => {
+    const rowhead = tr.querySelector(".cmb-rowhead");
+    tr.querySelectorAll(".cmb-cell").forEach(td => {
+      const colhead = table.querySelector(`.cmb-colhead[data-col="${td.dataset.col}"]`);
+      td.addEventListener("mouseenter", () => {
+        td.classList.add("hl-cell");
+        rowhead.classList.add("hl-head");
+        colhead?.classList.add("hl-head");
+      });
+      td.addEventListener("mouseleave", () => {
+        td.classList.remove("hl-cell");
+        rowhead.classList.remove("hl-head");
+        colhead?.classList.remove("hl-head");
+      });
+    });
+  });
+
+  display(style);
+  display(html`<div style="overflow-x:auto">${table}</div>`);
   if (eezs.length > topEez.length) {
     display(html`<p style="color:#9ca3af;font-size:0.85rem">Showing the ${topEez.length} most-sampled EEZ columns of ${eezs.length}. Each cell is <strong>observer / nautical</strong>; bold cells are where the two disagree.</p>`);
   }
