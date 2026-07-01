@@ -12,29 +12,22 @@ categorical features (vessel_flag, eez_code), each leaf effectively represents a
 specific (flag, eez) combination, so the final artefact reads as an auditable
 `flag × eez → offset` lookup table.
 
-== What confidence means (with tolerance) ==
-`confidence` is NOT a tree-internal probability. It is computed empirically on the
-raw observer activities AFTER the tree makes its predictions.
+== What confidence means ==
+`confidence` is NOT a tree-internal probability. It is the share of the raw
+observer activities at that (flag, eez) pair whose measured offset equals the
+tree's prediction EXACTLY:
 
-`DecisionTreeClassifier` has no built-in tolerance parameter: it treats offset
-labels as unordered categories and doesn't know that 10, 11, 12 are adjacent. The
-tolerance is therefore applied as a post-processing step:
+    confidence = (# activities with predicted offset) / (total activities)
 
-    confidence = (# activities where |measured_offset − predicted_offset| ≤ TOLERANCE)
-                 / (total activities for that flag × eez)
-
-With CONFIDENCE_TOLERANCE_H = 1.0, any activity within ±1 h of the predicted offset
-is counted as "agreeing". This correctly absorbs near-identical timezone choices
-(e.g., a skipper switching between +11 and +12 when fishing near a zone boundary)
-while still penalising clear data-entry errors far from the prediction.
+The full offset distribution per flag×eez (visible on the decision-tree page as
+inline mini-bars) comes from ll-observer-activity-offsets.csv, which is a separate
+loader providing multiple rows per combo. Use that to see outliers and near-misses.
 
 Example from the data:
-  CN × VU — predicted +11, n≈200.  Without tolerance: ~67% (because some sets were
-             recorded as +10 or +12).  With 1h tolerance: ~95% (those ±1h offsets
-             count as the same timezone choice; only outliers like -11/-12 remain
-             excluded).
-  JP × FM — 100% (all 41 sets at the same offset, within or without tolerance).
-  JP × PG —  72% strict; slightly higher with tolerance depending on the split.
+  JP × FM  — 100% confidence, n=41  → every JP-flagged set in FM waters used
+              the same clock. The tree is certain.
+  JP × PG  —  72% confidence, n=57  → 57 sets, majority use one offset, but
+              ~28% used a different one. The tree predicts the majority.
 
 == Minimum-support floor and fallback ==
 Setting min_samples_leaf on the tree prevents creating overfit leaves for tiny
@@ -48,7 +41,7 @@ Output columns:
   eez_code     -- EEZ code
   offset       -- predicted UTC offset (whole/half hours)
   support      -- number of observer activities behind this flag x eez
-  confidence   -- share within ±CONFIDENCE_TOLERANCE_H of the predicted offset
+  confidence   -- exact-match share (measured offset == prediction)
   rule_level   -- "activity" (direct) | "flag_fallback" (sparse, coarsened)
 """
 
@@ -63,12 +56,6 @@ from db import ANALYSIS_START_DATE, CONNECTION_STRING
 # Flag×eez cells with fewer than this many activities fall back to the
 # flag-level dominant offset. This prevents noisy rules from sparse data.
 MIN_SAMPLES = 30
-
-# Offsets within this many hours of the prediction count as "agreeing" when
-# computing confidence. This absorbs near-identical timezone choices (e.g., a
-# skipper alternating between +11 and +12 near a zone boundary) while still
-# penalising clear data-entry errors far from the prediction.
-CONFIDENCE_TOLERANCE_H = 1.0
 
 SQL = f"""
 WITH
@@ -189,24 +176,11 @@ def main() -> None:
         file=sys.stderr,
     )
 
-    # ── Confidence (tolerance-based empirical match rate) ────────────────────
-    # Join every raw activity with the predicted offset for its flag×eez combo,
-    # then count those within CONFIDENCE_TOLERANCE_H as "agreeing".
-    tol_df = df.merge(
-        combos[["vessel_flag", "eez_code", "offset"]].rename(columns={"offset": "predicted"}),
-        on=["vessel_flag", "eez_code"],
-        how="left",
-    )
-    tol_df["within_tol"] = tol_df["offset"].sub(tol_df["predicted"]).abs() <= CONFIDENCE_TOLERANCE_H
-    n_within = (
-        tol_df.groupby(["vessel_flag", "eez_code"])["within_tol"]
-        .sum()
-        .rename("n_within")
-        .reset_index()
-    )
-    merged = combos.merge(n_within, on=["vessel_flag", "eez_code"], how="left")
-    merged["n_within"] = merged["n_within"].fillna(0)
-    merged["confidence"] = merged["n_within"] / merged["support"]
+    # ── Confidence (exact-match rate on raw training data) ───────────────────
+    actual = df.groupby(["vessel_flag", "eez_code", "offset"]).size().rename("n").reset_index()
+    merged = combos.merge(actual, on=["vessel_flag", "eez_code", "offset"], how="left")
+    merged["n"] = merged["n"].fillna(0)
+    merged["confidence"] = merged["n"] / merged["support"]
 
     out = merged[["vessel_flag", "eez_code", "offset", "support", "confidence", "rule_level"]].copy()
     out["offset"] = out["offset"].astype(float)

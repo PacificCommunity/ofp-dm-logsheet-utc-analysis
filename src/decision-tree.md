@@ -22,8 +22,7 @@ interpretable model whose splits read directly as `vessel_flag (× EEZ) → offs
   those activities whose measured offset equals the predicted one.
 
 The model is built by the `decision-tree-rules.csv.py` data loader; this page only renders and
-exports its output. Fixed constants in the loader: `MIN_SAMPLES = 30` (support floor) and
-`CONFIDENCE_TOLERANCE_H = 1.0` (tolerance window for confidence calculation).
+exports its output. Fixed constant in the loader: `MIN_SAMPLES = 30` (support floor).
 
 ## How the classifier works
 
@@ -38,27 +37,24 @@ binary question like *"is vessel_flag_JP = 1?"* or *"is eez_code_FM = 1?"*. Beca
 flag column and one EEZ column equal 1 for every training example, the tree converges to one
 rule per observed `(flag, eez)` combination — which is exactly what we want.
 
-**How confidence is computed — with tolerance.** `confidence` is *not* an internal probability from
-the tree. It is computed empirically on the raw training data after the rules are produced.
+**How confidence is computed.** `confidence` is *not* an internal probability from the tree. It is
+the share of the raw observer activities at that `(flag, eez)` pair whose measured offset equals
+the tree's prediction **exactly**:
 
-`DecisionTreeClassifier` has **no built-in tolerance parameter**: it treats offset labels as
-unordered categories — it does not know that 10 and 12 are adjacent to 11. Tolerance is therefore
-applied as a **post-processing step**:
+> **confidence** = (# activities with predicted offset) ÷ (total activities for that flag × EEZ)
 
-> **confidence** = (# observer activities where |measured − predicted| ≤ 1 h) ÷ (total activities for that flag × EEZ)
+The rules CSV always has **one row per flag × EEZ**. To understand *why* confidence is below 100%
+— and distinguish genuine operational variation from data-entry errors — the distribution bars in
+the tree view below show every observed offset for each combination. Bars are coloured by how far
+they sit from the prediction: **exact match** (green), **within ±1 h** (amber — likely same
+timezone), **beyond ±1 h** (red — likely data-entry error or genuinely different clock choice).
 
-Any activity whose recorded offset is within **±1 hour** of the prediction is counted as
-"agreeing". This absorbs near-identical timezone choices (a captain alternating between +11 and
-+12 near a zone boundary) while still penalising clear data-entry errors far from the prediction
-(e.g., a −11 entry in waters where only +11/+12 are geographically plausible).
-
-**Three concrete examples from the data:**
+**Two concrete examples from the data:**
 
 | Combination | Confidence | n | Interpretation |
 |-------------|-----------|---|----------------|
-| JP × FM | 100 % | 41 | All 41 sets at exactly the same offset — pure agreement with or without tolerance. |
-| JP × PG | ~72 % | 57 | Genuine operational variation: ~28 % of sets used a noticeably different clock. The 1h tolerance does not fully absorb this because the disagreeing offsets are more than 1 h away from the majority. |
-| CN × VU | ~95 % with tolerance | — | Without tolerance: ~67 % (some sets recorded +10 or +12 instead of +11). With 1h tolerance those are counted as the same timezone choice. Only outliers like −11 or −12, which cannot correspond to any valid VU timezone, remain excluded. |
+| JP × FM | 100 % | 41 | All 41 sets at exactly the same offset — pure leaf, no ambiguity. |
+| JP × PG | ~72 % | 57 | ~28 % used a different clock. The distribution bars reveal whether those are near-miss (±1 h) or far outliers. |
 
 **Minimum-support floor.** Any `(flag, eez)` combination with fewer than 30 observer activities
 (the `MIN_SAMPLES` constant in the Python loader) is considered too sparse to trust. These cells
@@ -71,6 +67,11 @@ use the [nautical (longitude/15) baseline](./nautical-offsets) as a fallback.
 import * as d3 from "npm:d3";
 
 const rules = await FileAttachment("data/decision-tree-rules.csv").csv({ typed: true });
+// Full offset distribution per flag×eez (multiple rows per combo)
+const distRaw = await FileAttachment("data/ll-observer-activity-offsets.csv").csv({ typed: true });
+
+// Index distribution by "flag|eez" for fast lookup
+const distIndex = d3.group(distRaw, d => `${d.vessel_flag}|${d.eez_code}`);
 
 const totalSupport = d3.sum(rules, d => d.support);
 const weightedConf = d3.sum(rules, d => d.confidence * d.support) / totalSupport;
@@ -91,14 +92,40 @@ const card = (label, value, sub) => html`<div style="flex:1;min-width:150px;bord
 display(html`<div style="display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0">
   ${card("flag × EEZ rules", d3.format(",")(rules.length))}
   ${card("Training activities", d3.format(",")(totalSupport))}
-  ${card("Weighted confidence", d3.format(".1%")(weightedConf), "share of activities matching prediction")}
+  ${card("Weighted confidence", d3.format(".1%")(weightedConf), "exact-match share")}
   ${card("Flag-fallback rules", nFallback, "sparse cells coarsened to flag level")}
 </div>`);
 ```
 
 ## Tree (flag → EEZ → offset)
 
+Each rule shows the **predicted offset** and its exact-match confidence, followed by the full
+**offset distribution** for that flag × EEZ: 🟢 exact match · 🟡 within ±1 h (same timezone) · 🔴 beyond ±1 h (likely error).
+
 ```js
+const TOLERANCE_H = 1.0;
+
+function distBar(flag, eez, predicted) {
+  const key = `${flag}|${eez}`;
+  const rows = distIndex.get(key);
+  if (!rows || rows.length <= 1) return html``; // nothing to show beyond the dominant
+  const total = d3.sum(rows, d => d.count);
+  const sorted = [...rows].sort((a, b) => b.count - a.count);
+  return html`<span style="display:inline-flex;gap:3px;align-items:center;flex-wrap:wrap;margin-left:4px">
+    ${sorted.map(r => {
+      const pct = (r.count / total * 100).toFixed(0);
+      const diff = Math.abs(r.offset - predicted);
+      const isExact = diff < 0.01;
+      const isNear  = !isExact && diff <= TOLERANCE_H;
+      const bg = isExact ? "#dcfce7" : isNear ? "#fef9c3" : "#fee2e2";
+      const dot = isExact ? "🟢" : isNear ? "🟡" : "🔴";
+      return html`<span title="${fmtOffset(r.offset)}: ${r.count} activities (${pct}%)" style="
+        font-family:monospace;font-size:0.75em;background:${bg};
+        padding:0 5px;border-radius:3px;white-space:nowrap">${dot}${fmtOffset(r.offset)} ${pct}%</span>`;
+    })}
+  </span>`;
+}
+
 const offsetBadge = (v, conf, level) => html`<span style="
   display:inline-block;font-family:monospace;font-weight:700;
   background:${conf >= 0.9 ? "#dcfce7" : conf >= 0.7 ? "#fef9c3" : "#fee2e2"};color:#166534;
@@ -113,23 +140,25 @@ display(html`<div style="font-size:0.9rem">
         <strong style="font-size:1rem">${flag}</strong>
         <span style="color:#9ca3af;font-size:0.8em">${d3.format(",")(flagTotals.get(flag))} activities · ${eezRules.length} EEZ</span>
       </div>
-      <div style="margin-top:0.35rem;padding-left:1rem;border-left:2px solid #f3f4f6;display:flex;flex-wrap:wrap;gap:0.35rem 1rem">
-        ${eezRules.map(r => html`<span style="white-space:nowrap">
-          <span style="font-family:monospace;color:#374151">${r.eez_code}</span>
+      <div style="margin-top:0.35rem;padding-left:1rem;border-left:2px solid #f3f4f6">
+        ${eezRules.map(r => html`<div style="margin:0.25rem 0;display:flex;align-items:center;flex-wrap:wrap;gap:0.25rem">
+          <span style="font-family:monospace;color:#374151;min-width:3em">${r.eez_code}</span>
           → ${offsetBadge(r.offset, r.confidence, r.rule_level)}
           <span style="color:#9ca3af;font-size:0.8em">${(r.confidence * 100).toFixed(0)}% · n=${d3.format(",")(r.support)}</span>
-        </span>`)}
+          ${distBar(r.vessel_flag, r.eez_code, r.offset)}
+        </div>`)}
       </div>
     </div>`;
   })}
 </div>`);
 ```
 
-<div style="margin:0.5rem 0">
+<div style="margin:0.5rem 0;font-size:0.85rem">
   <span style="background:#dcfce7;padding:1px 7px;border-radius:4px;font-family:monospace">+11</span> ≥90% confidence &nbsp;
   <span style="background:#fef9c3;padding:1px 7px;border-radius:4px;font-family:monospace">+11</span> 70–90% &nbsp;
   <span style="background:#fee2e2;padding:1px 7px;border-radius:4px;font-family:monospace">+11</span> &lt;70% &nbsp;
   <span style="background:#fef9c3;border:1px dashed #9ca3af;padding:1px 7px;border-radius:4px;font-family:monospace">+11</span> flag-level fallback (sparse, n&lt;30)
+  &nbsp;·&nbsp; distribution: 🟢 exact · 🟡 within ±1 h · 🔴 outlier (&gt;±1 h)
 </div>
 
 ## Rules table
