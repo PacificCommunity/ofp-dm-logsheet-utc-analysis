@@ -127,6 +127,57 @@ display(offsetGrid(eezs, eez => offsetCard(
 )));
 ```
 
+## By departure port
+
+A trip may keep the **departure-port clock** rather than adjusting to local vessel time. Here the
+observer-measured offset distribution for trips leaving each port (**left**) is shown against that
+port's **civil UTC offset** (**right**, from [Ports](./ports)). Where the dominant observer offset
+matches the port's civil offset, the captain was likely keeping port time.
+
+```js
+const portRaw  = await FileAttachment("data/ll-observer-port-offsets.csv").csv({ typed: true });
+const portsRef = await FileAttachment("data/ports.csv").csv({ typed: true });
+
+const portCivil = new Map(portsRef.map(p => [p.port_id, p]));
+const obsByPort = d3.group(portRaw, d => d.depart_port_id);
+const portName  = new Map(portRaw.map(d => [d.depart_port_id, d.depart_port_name]));
+const portTot   = new Map([...obsByPort].map(([k, v]) => [k, d3.sum(v, d => d.count)]));
+const ports     = [...obsByPort.keys()].sort((a, b) => portTot.get(b) - portTot.get(a));
+
+// Reference panel: the port's civil UTC offset, and whether it matches the
+// dominant observer offset for that port.
+function civilPanel(pid) {
+  const civil = portCivil.get(pid);
+  const dom = offsetRows(obsByPort.get(pid) ?? [], "offset")[0]?.offset;
+  if (!civil || civil.utc_offset === "" || civil.utc_offset == null) {
+    return html`<div style="font-size:0.82rem;color:#9ca3af;padding:0.5rem 0">No civil offset (port has no coordinates)</div>`;
+  }
+  const off = Number(civil.utc_offset);
+  const match = dom !== undefined && Math.abs(dom - off) < 0.01;
+  return html`<div style="font-size:0.82rem;color:#475569;padding:0.25rem 0">
+    <div style="font-weight:600;font-size:0.8rem;color:#6b7280;margin-bottom:0.3rem">Civil UTC offset</div>
+    <div style="font-family:monospace;font-size:1.4rem;font-weight:700;color:${match ? "#166534" : "#b45309"}">
+      ${fmtOffset(off)}
+    </div>
+    <div style="margin-top:0.25rem">${civil.iana_zone}${civil.has_dst === 1 ? html` <span style="color:#9ca3af">(+DST)</span>` : ""}</div>
+    <div style="margin-top:0.35rem;color:${match ? "#166534" : "#b45309"}">
+      ${dom === undefined ? "" : match ? "✓ matches dominant observer offset" : `✗ dominant observer offset is ${fmtOffset(dom)}`}
+    </div>
+  </div>`;
+}
+
+display(offsetGrid(ports, pid => offsetCard(
+  `${portName.get(pid) || pid} — ${d3.format(",")(portTot.get(pid) ?? 0)} activities`,
+  rankedList(offsetRows(obsByPort.get(pid) ?? [], "offset"), {
+    labelKey: "offset", countKey: "count", title: "Observer",
+    subtitle: `${d3.format(",")(portTot.get(pid) ?? 0)} activities`,
+    total: portTot.get(pid), labelFormat: fmtOffset,
+    noDataText: "No observer data",
+  }),
+  civilPanel(pid),
+)));
+```
+
 ## Combined: flag × EEZ
 
 The dominant offset per flag × EEZ combination. Each cell is split in two — **observer** on the
