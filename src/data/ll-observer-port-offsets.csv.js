@@ -10,8 +10,8 @@
  * dateline-folded (>+12 h → −24) and clipped to |offset| ≤ 14. The departure
  * port comes from log.trips_ll.depart_port_id → ref.ports.
  *
- * Used by the "By departure port" section of observer-offsets.md to compare the
- * observer-measured offset against the port's civil UTC offset (see ports.csv).
+ * Used by the "By departure port" section of observer-offsets.md to show the
+ * observer-measured offset distribution for trips leaving each port.
  *
  * Output columns: depart_port_id, depart_port_name, country_code, offset, count
  */

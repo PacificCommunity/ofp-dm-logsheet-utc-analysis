@@ -17,16 +17,19 @@ The departure port is added as a refinement on top of the flag × eez tree,
 because a captain may keep the departure-port clock rather than local vessel
 time. Each rule is resolved at the finest level that has enough observer data:
 
-  1. port  -- (flag, eez, depart_port) with >= MIN_SAMPLES activities. A port
-              override row is emitted with rule_level="port".
+  1. port  -- (flag, eez, depart_port) with >= 1 activity. A port breakdown row
+              is emitted with rule_level="port" for EVERY observed departure port
+              (no support floor), so the full flag -> eez -> port breakdown is
+              visible. Confidence reflects how consistent that port's clock is.
   2. eez   -- (flag, eez) with >= MIN_SAMPLES activities (the tree prediction).
               rule_level="eez"; depart_port is blank (applies to any port with no
               specific override).
   3. flag  -- sparse (flag, eez) cells fall back to the flag-level dominant
               offset. rule_level="flag_fallback"; depart_port blank.
 
-Downstream resolution: match a (flag, eez, port) exact port override first; else
-use the (flag, eez) rule; else the flag fallback.
+Downstream resolution: match a (flag, eez, port) exact port row first; else
+use the (flag, eez) rule; else the flag fallback. Note that low-support port
+rows carry low confidence and should be read with their support in mind.
 
 == What confidence means ==
 `confidence` is NOT a tree-internal probability. It is the share of the raw
@@ -196,15 +199,16 @@ def main() -> None:
         ["vessel_flag", "eez_code", "depart_port", "offset", "support", "confidence", "rule_level"]
     ]
 
-    # ── Level 1: departure-port overrides where a (flag, eez, port) cell has ──
-    #    enough observer data. These take priority over the (flag, eez) rule.
+    # ── Level 1: departure-port breakdown for EVERY observed (flag, eez, port). ──
+    #    No support floor: one row per observed departure port so the full
+    #    flag -> eez -> port breakdown is visible. Low-support rows carry low
+    #    confidence and are read alongside their support.
     port_groups = (
         df[df["depart_port"] != ""]
         .groupby(["vessel_flag", "eez_code", "depart_port"])
         .agg(support=("offset", "size"), offset=("offset", majority_offset))
         .reset_index()
     )
-    port_groups = port_groups[port_groups["support"] >= MIN_SAMPLES].copy()
 
     # Confidence at the (flag, eez, port) level.
     port_actual = (
@@ -220,7 +224,7 @@ def main() -> None:
         ["vessel_flag", "eez_code", "depart_port", "offset", "support", "confidence", "rule_level"]
     ]
 
-    print(f"Added {len(port_groups):,} port-override rules (support >= {MIN_SAMPLES})",
+    print(f"Added {len(port_groups):,} port breakdown rules (all observed ports)",
           file=sys.stderr)
 
     # ── Combine, order (port overrides first within a flag×eez), emit ─────────

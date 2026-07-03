@@ -18,8 +18,8 @@ trip's **departure port**.
 - **Features:** `vessel_flag` and `eez_code` (one-hot encoded) for the base tree; `depart_port` adds
   a third, finer level. Logsheet instance was dropped — it did not improve the prediction.
 - **Label:** the measured observer offset (`vessel-time − UTC`), the assumed ground truth.
-- The trained tree is evaluated for every observed `flag × EEZ` combination; departure-port
-  overrides are then layered on top. `support` is the number of observer activities behind a rule;
+- The trained tree is evaluated for every observed `flag × EEZ` combination; a departure-port
+  breakdown is then layered on top. `support` is the number of observer activities behind a rule;
   `confidence` is the share of those activities whose measured offset equals the assigned one.
 
 The model is built by the `decision-tree-rules.csv.py` data loader; this page only renders and
@@ -32,16 +32,17 @@ vessel time, so two trips in the same `flag × EEZ` can carry different offsets 
 they departed. To capture this, each rule is resolved at the **finest level that has enough observer
 data**:
 
-1. **`port`** — a `flag × EEZ × depart_port` cell with ≥ 30 activities. The most specific rule; it
-   overrides the EEZ-level rule for that exact port.
+1. **`port`** — every observed `flag × EEZ × depart_port` cell (**no support floor**), so the full
+   flag → EEZ → departure-port breakdown is visible. The most specific rule; it refines the
+   EEZ-level rule for that exact port. Low-support port rows carry low confidence — read them
+   alongside their activity count.
 2. **`eez`** — the `flag × EEZ` tree prediction (≥ 30 activities). Applies to any port without its
-   own override.
+   own row.
 3. **`flag_fallback`** — sparse `flag × EEZ` cells fall back to the flag-level dominant offset.
 
-To resolve a logsheet: look for a matching **port** override first, then the **eez** rule, then the
-**flag** fallback. Port rules are shown indented under their EEZ below, and flag-fallbacks carry a
-dashed border. See [Ports](./ports) for each port's civil UTC offset and
-[Observer & nautical offsets](./observer-offsets) for the by-port distributions.
+To resolve a logsheet: look for a matching **port** row first, then the **eez** rule, then the
+**flag** fallback. Port rows are shown indented under their EEZ below, and flag-fallbacks carry a
+dashed border. See [Observer & nautical offsets](./observer-offsets) for the by-port distributions.
 
 ## How the classifier works
 
@@ -70,12 +71,13 @@ not a model artefact.
 
 **A concrete example of the port refinement.** For `FM × FM`, trips departing **POHNPEI** and
 **KOSRAE** use different clocks (+11 vs +10) — the EEZ-level rule alone would blur them, but the
-port override separates them.
+port breakdown separates them.
 
-**Minimum-support floor.** Any `flag × EEZ (× port)` cell with fewer than 30 observer activities
-(`MIN_SAMPLES`) is considered too sparse to trust: port cells below the floor are dropped (the EEZ
-rule applies), and sparse EEZ cells fall back to the **flag-level dominant offset**, labelled
-`flag_fallback` and shown with a dashed border below.
+**Minimum-support floor.** The floor applies to the **flag × EEZ** tree only: any `flag × EEZ` cell
+with fewer than 30 observer activities (`MIN_SAMPLES`) falls back to the **flag-level dominant
+offset**, labelled `flag_fallback` and shown with a dashed border below. **Departure-port rows have
+no floor** — every observed port is listed so the full breakdown is visible, with confidence
+reflecting how consistent that port's clock is.
 
 ```js
 import * as d3 from "npm:d3";
@@ -86,7 +88,7 @@ const allRules = rules;
 const eezRules  = rules.filter(r => r.rule_level !== "port");
 const portRules = rules.filter(r => r.rule_level === "port");
 
-// Port overrides grouped under their flag×eez baseline.
+// Port breakdown rows grouped under their flag×eez baseline.
 const portByFlagEez = d3.group(portRules, d => `${d.vessel_flag}|${d.eez_code}`);
 
 // Base coverage = eez + flag_fallback rows (each activity counted once).
@@ -111,7 +113,7 @@ const card = (label, value, sub) => html`<div style="flex:1;min-width:150px;bord
 </div>`;
 display(html`<div style="display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0">
   ${card("flag × EEZ rules", d3.format(",")(eezRules.length))}
-  ${card("Port overrides", d3.format(",")(nPort), "flag × EEZ × port")}
+  ${card("Port rows", d3.format(",")(nPort), "flag × EEZ × port")}
   ${card("Training activities", d3.format(",")(totalSupport))}
   ${card("Weighted confidence", d3.format(".1%")(weightedConf), "flag × EEZ level")}
   ${card("Flag-fallback rules", nFallback, "sparse → flag-level offset")}
@@ -169,7 +171,7 @@ display(html`<div style="font-size:0.9rem">
   <span style="background:#fef9c3;padding:1px 7px;border-radius:4px;font-family:monospace">+11</span> 70–90% &nbsp;
   <span style="background:#fee2e2;padding:1px 7px;border-radius:4px;font-family:monospace">+11</span> &lt;70% &nbsp;
   <span style="background:#fef9c3;border:1px dashed #9ca3af;padding:1px 7px;border-radius:4px;font-family:monospace">+11</span> flag-level fallback &nbsp;
-  <span style="color:#2563eb">⤷</span> departure-port override
+  <span style="color:#2563eb">⤷</span> departure-port breakdown
 </div>
 
 ## Rules table
@@ -178,7 +180,7 @@ display(html`<div style="font-size:0.9rem">
 {
   const sorted = [...allRules].sort((a, b) => b.support - a.support);
   const levelMeta = {
-    port: { label: "port override", color: "#2563eb" },
+    port: { label: "port", color: "#2563eb" },
     eez: { label: "activity", color: "#9ca3af" },
     flag_fallback: { label: "⚠ flag fallback", color: "#b45309" },
   };

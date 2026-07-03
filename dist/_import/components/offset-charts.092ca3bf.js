@@ -11,8 +11,8 @@
  *   offsetGrid     — card grid HTML element
  */
 
-import * as d3 from "../../_npm/d3@7.9.0/66d82917.js";
-import { html } from "../../_npm/htl@1.0.0/87d6f6ef.js";
+import * as d3 from "../../_npm/d3@7.9.0/080cf928.js";
+import { html } from "../../_npm/htl@1.0.0/11521f02.js";
 
 export const TYPES = ["LonglineLogsheet", "PurseseineLogsheet"];
 export const TYPE_LABEL = { LonglineLogsheet: "Longline", PurseseineLogsheet: "Purseseine" };

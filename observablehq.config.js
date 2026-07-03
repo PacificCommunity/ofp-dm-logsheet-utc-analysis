@@ -9,7 +9,6 @@ export default {
     {name: "Longline set time distribution", path: "/ll-set-time-distribution"},
     {name: "Observer coverage", path: "/observer-coverage"},
     {name: "Observer & nautical offsets", path: "/observer-offsets"},
-    {name: "Ports", path: "/ports"},
     {name: "Decision tree", path: "/decision-tree"},
   ],
 

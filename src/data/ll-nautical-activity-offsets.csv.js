@@ -12,7 +12,13 @@
  * Unlike observer-activity-offsets, this loader covers ALL logsheet sets (not
  * only those with a matched observer trip), so the counts are much larger.
  *
- * Output columns: vessel_flag, eez_code, nautical_offset, count
+ * The trip's departure port (log.trips_ll.depart_port_id → ref.ports) is carried
+ * through so the output can be filtered by vessel_flag, eez_code and
+ * departure_port. Sets whose trip has no departure port are kept with a blank
+ * port so the flag/eez aggregations stay complete.
+ *
+ * Output columns: vessel_flag, eez_code, depart_port_id, depart_port,
+ *                 nautical_offset, count
  */
 
 import odbc from "odbc";
@@ -39,10 +45,13 @@ nautical AS (
     SELECT
         vf.flag_id AS vessel_flag,
         sl.eez_code,
+        tl.depart_port_id,
+        p.port_name AS depart_port,
         ROUND(CAST(sl.lond AS FLOAT) / 15.0, 0) AS nautical_offset
     FROM log.sets_ll sl
     INNER JOIN log.trips_ll tl ON tl.log_trip_id = sl.log_trip_id
     INNER JOIN vessel_flag vf  ON vf.vessel_id   = tl.vessel_id
+    LEFT  JOIN ref.ports p     ON p.port_id      = tl.depart_port_id
     WHERE sl.l_activity_id = 1
       AND sl.eez_code       IS NOT NULL
       AND sl.lond            IS NOT NULL
@@ -53,12 +62,14 @@ nautical AS (
 SELECT
     vessel_flag,
     eez_code,
+    depart_port_id,
+    depart_port,
     nautical_offset,
     COUNT(*) AS [count]
 FROM nautical
 WHERE ABS(nautical_offset) <= 14
-GROUP BY vessel_flag, eez_code, nautical_offset
-ORDER BY vessel_flag, eez_code, nautical_offset
+GROUP BY vessel_flag, eez_code, depart_port_id, depart_port, nautical_offset
+ORDER BY vessel_flag, eez_code, depart_port, nautical_offset
 `;
 
 const conn = await odbc.connect(CONNECTION_STRING);
@@ -68,6 +79,8 @@ await conn.close();
 process.stdout.write(csvFormat(rows.map(r => ({
   vessel_flag:     String(r.vessel_flag).trim(),
   eez_code:        String(r.eez_code).trim(),
+  depart_port_id:  r.depart_port_id == null ? "" : String(r.depart_port_id).trim(),
+  depart_port:     r.depart_port == null ? "" : String(r.depart_port).trim(),
   nautical_offset: Number(r.nautical_offset),
   count:           Number(r.count),
 }))));
