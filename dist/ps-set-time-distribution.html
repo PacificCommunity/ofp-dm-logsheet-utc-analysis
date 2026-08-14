@@ -10,9 +10,9 @@
 <link rel="preload" as="style" href="./_observablehq/theme-air.d5b7fcbe.css">
 <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
 <link rel="stylesheet" type="text/css" href="./_observablehq/theme-air.d5b7fcbe.css">
-<link rel="modulepreload" href="./_observablehq/client.1df15afb.js">
+<link rel="modulepreload" href="./_observablehq/client.c8b692f8.js">
 <link rel="modulepreload" href="./_observablehq/runtime.607a8173.js">
-<link rel="modulepreload" href="./_observablehq/stdlib.23790ac1.js">
+<link rel="modulepreload" href="./_observablehq/stdlib.50d89e50.js">
 <link rel="modulepreload" href="./_npm/d3@7.9.0/080cf928.js">
 <link rel="modulepreload" href="./_npm/@observablehq/plot@0.6.17/93ce672e.js">
 <link rel="modulepreload" href="./_npm/htl@1.0.0/11521f02.js">
@@ -55,11 +55,11 @@
 <link rel="icon" href="./_file/observable.1af93621.png" type="image/png" sizes="32x32">
 <script type="module">
 
-import {define} from "./_observablehq/client.1df15afb.js";
-import {registerFile} from "./_observablehq/stdlib.23790ac1.js";
+import {define} from "./_observablehq/client.c8b692f8.js";
+import {registerFile} from "./_observablehq/stdlib.50d89e50.js";
 
-registerFile("./data/ps-fad-set-hour-classification.csv", {"name":"./data/ps-fad-set-hour-classification.csv","mimeType":"text/csv","path":"./_file/data/ps-fad-set-hour-classification.3461078e.csv","lastModified":1783047004424,"size":13498811});
-registerFile("./data/ps-set-time-sunrise-relative.csv", {"name":"./data/ps-set-time-sunrise-relative.csv","mimeType":"text/csv","path":"./_file/data/ps-set-time-sunrise-relative.d26aa86a.csv","lastModified":1783047014373,"size":30521748});
+registerFile("./data/ps-fad-set-hour-classification.csv", {"name":"./data/ps-fad-set-hour-classification.csv","mimeType":"text/csv","path":"./_file/data/ps-fad-set-hour-classification.3461078e.csv","lastModified":1783056352043,"size":13498811});
+registerFile("./data/ps-set-time-sunrise-relative.csv", {"name":"./data/ps-set-time-sunrise-relative.csv","mimeType":"text/csv","path":"./_file/data/ps-set-time-sunrise-relative.e90ac68f.csv","lastModified":1783056367841,"size":30521748});
 
 define({id: "ff2b5b1d", inputs: ["FileAttachment"], outputs: ["d3","Plot","raw","SUNRISE","SUNSET","data","assoc","unassoc"], body: async (FileAttachment) => {
 const [d3, Plot] = await Promise.all([import("./_npm/d3@7.9.0/080cf928.js"), import("./_npm/@observablehq/plot@0.6.17/93ce672e.js")]);
@@ -238,6 +238,7 @@ display(html`<div style="display:flex;gap:1.5rem;flex-wrap:wrap">
     <li class="observablehq-link"><a href="./observer-coverage">Observer coverage</a></li>
     <li class="observablehq-link"><a href="./observer-offsets">Observer &amp; nautical offsets</a></li>
     <li class="observablehq-link"><a href="./decision-tree">Decision tree</a></li>
+    <li class="observablehq-link"><a href="./utc-migration-database-changelog">Changelog</a></li>
   </ol>
 </nav>
 <script>{const e=document.querySelector("#observablehq-sidebar"),o=document.querySelector("#observablehq-sidebar-toggle"),r=sessionStorage.getItem("observablehq-sidebar");r?o.checked=r==="true":o.indeterminate=!0;for(const t of document.querySelectorAll("#observablehq-sidebar summary")){const s=t.parentElement;switch(sessionStorage.getItem(`observablehq-sidebar:${t.textContent}`)){case"true":s.open=!0;break;case"false":s.classList.contains("observablehq-section-active")||(s.open=!1);break}}addEventListener("beforeunload",()=>sessionStorage.setItem("observablehq-sidebar-scrolly",`${e.scrollTop}`));const a=sessionStorage.getItem("observablehq-sidebar-scrolly");a!=null&&(e.style.cssText="overflow: hidden;",e.scrollTop=+a,e.style.cssText="");}</script>
@@ -298,7 +299,7 @@ correct, the paper's pattern emerges with no further adjustment.</p>
 </main>
 <footer id="observablehq-footer">
 <nav><a rel="prev" href="./"><span>Logsheet UTC Analysis</span></a><a rel="next" href="./ll-set-time-distribution"><span>Longline set time distribution</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-07-03T13:49:04">Jul 3, 2026</a>.</div>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-08-14T14:05:58">Aug 14, 2026</a>.</div>
 </footer>
 </div>
 </body>

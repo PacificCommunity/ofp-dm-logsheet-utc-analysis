@@ -10,9 +10,9 @@
 <link rel="preload" as="style" href="./_observablehq/theme-air.d5b7fcbe.css">
 <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
 <link rel="stylesheet" type="text/css" href="./_observablehq/theme-air.d5b7fcbe.css">
-<link rel="modulepreload" href="./_observablehq/client.1df15afb.js">
+<link rel="modulepreload" href="./_observablehq/client.c8b692f8.js">
 <link rel="modulepreload" href="./_observablehq/runtime.607a8173.js">
-<link rel="modulepreload" href="./_observablehq/stdlib.23790ac1.js">
+<link rel="modulepreload" href="./_observablehq/stdlib.50d89e50.js">
 <link rel="modulepreload" href="./_npm/d3@7.9.0/080cf928.js">
 <link rel="modulepreload" href="./_import/components/offset-charts.092ca3bf.js">
 <link rel="modulepreload" href="./_npm/htl@1.0.0/11521f02.js">
@@ -52,12 +52,12 @@
 <link rel="icon" href="./_file/observable.1af93621.png" type="image/png" sizes="32x32">
 <script type="module">
 
-import {define} from "./_observablehq/client.1df15afb.js";
-import {registerFile} from "./_observablehq/stdlib.23790ac1.js";
+import {define} from "./_observablehq/client.c8b692f8.js";
+import {registerFile} from "./_observablehq/stdlib.50d89e50.js";
 
-registerFile("./data/ll-nautical-activity-offsets.csv", {"name":"./data/ll-nautical-activity-offsets.csv","mimeType":"text/csv","path":"./_file/data/ll-nautical-activity-offsets.31485f61.csv","lastModified":1783046992369,"size":118926});
-registerFile("./data/ll-observer-activity-offsets.csv", {"name":"./data/ll-observer-activity-offsets.csv","mimeType":"text/csv","path":"./_file/data/ll-observer-activity-offsets.c7491fb6.csv","lastModified":1783046989233,"size":3430});
-registerFile("./data/ll-observer-port-offsets.csv", {"name":"./data/ll-observer-port-offsets.csv","mimeType":"text/csv","path":"./_file/data/ll-observer-port-offsets.432769ca.csv","lastModified":1783046998344,"size":6820});
+registerFile("./data/ll-nautical-activity-offsets.csv", {"name":"./data/ll-nautical-activity-offsets.csv","mimeType":"text/csv","path":"./_file/data/ll-nautical-activity-offsets.31485f61.csv","lastModified":1783056450391,"size":118926});
+registerFile("./data/ll-observer-activity-offsets.csv", {"name":"./data/ll-observer-activity-offsets.csv","mimeType":"text/csv","path":"./_file/data/ll-observer-activity-offsets.c7491fb6.csv","lastModified":1783056443148,"size":3430});
+registerFile("./data/ll-observer-port-offsets.csv", {"name":"./data/ll-observer-port-offsets.csv","mimeType":"text/csv","path":"./_file/data/ll-observer-port-offsets.432769ca.csv","lastModified":1783056457828,"size":6820});
 
 define({id: "0b1c8f97", inputs: ["FileAttachment"], outputs: ["d3","rankedList","offsetGrid","offsetCard","obsRaw","nautRaw","fmtOffset","offsetRows","obsByFlag","obsByEez","nautByFlag","nautByEez","total","obsFlagTot","obsEezTot","nautFlagTot","nautEezTot","unionKeys","flags","eezs"], body: async (FileAttachment) => {
 const [d3, {rankedList, offsetGrid, offsetCard}] = await Promise.all([import("./_npm/d3@7.9.0/080cf928.js"), import("./_import/components/offset-charts.092ca3bf.js")]);
@@ -273,6 +273,7 @@ define({id: "55f4ecbb", inputs: ["d3","offsetRows","obsByFlag","nautByFlag","eez
     <li class="observablehq-link"><a href="./observer-coverage">Observer coverage</a></li>
     <li class="observablehq-link observablehq-link-active"><a href="./observer-offsets">Observer &amp; nautical offsets</a></li>
     <li class="observablehq-link"><a href="./decision-tree">Decision tree</a></li>
+    <li class="observablehq-link"><a href="./utc-migration-database-changelog">Changelog</a></li>
   </ol>
 </nav>
 <script>{const e=document.querySelector("#observablehq-sidebar"),o=document.querySelector("#observablehq-sidebar-toggle"),r=sessionStorage.getItem("observablehq-sidebar");r?o.checked=r==="true":o.indeterminate=!0;for(const t of document.querySelectorAll("#observablehq-sidebar summary")){const s=t.parentElement;switch(sessionStorage.getItem(`observablehq-sidebar:${t.textContent}`)){case"true":s.open=!0;break;case"false":s.classList.contains("observablehq-section-active")||(s.open=!1);break}}addEventListener("beforeunload",()=>sessionStorage.setItem("observablehq-sidebar-scrolly",`${e.scrollTop}`));const a=sessionStorage.getItem("observablehq-sidebar-scrolly");a!=null&&(e.style.cssText="overflow: hidden;",e.scrollTop=+a,e.style.cssText="");}</script>
@@ -329,7 +330,7 @@ headers. Only the most-sampled EEZ columns are shown.</p>
 </main>
 <footer id="observablehq-footer">
 <nav><a rel="prev" href="./observer-coverage"><span>Observer coverage</span></a><a rel="next" href="./decision-tree"><span>Decision tree</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-07-03T13:49:04">Jul 3, 2026</a>.</div>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-08-14T14:05:58">Aug 14, 2026</a>.</div>
 </footer>
 </div>
 </body>

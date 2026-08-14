@@ -10,9 +10,9 @@
 <link rel="preload" as="style" href="./_observablehq/theme-air.d5b7fcbe.css">
 <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
 <link rel="stylesheet" type="text/css" href="./_observablehq/theme-air.d5b7fcbe.css">
-<link rel="modulepreload" href="./_observablehq/client.1df15afb.js">
+<link rel="modulepreload" href="./_observablehq/client.c8b692f8.js">
 <link rel="modulepreload" href="./_observablehq/runtime.607a8173.js">
-<link rel="modulepreload" href="./_observablehq/stdlib.23790ac1.js">
+<link rel="modulepreload" href="./_observablehq/stdlib.50d89e50.js">
 <link rel="modulepreload" href="./_npm/@observablehq/plot@0.6.17/93ce672e.js">
 <link rel="modulepreload" href="./_npm/d3@7.9.0/080cf928.js">
 <link rel="modulepreload" href="./_npm/d3-dsv@3.0.1/097745a2.js">
@@ -54,10 +54,10 @@
 <link rel="icon" href="./_file/observable.1af93621.png" type="image/png" sizes="32x32">
 <script type="module">
 
-import {define} from "./_observablehq/client.1df15afb.js";
-import {registerFile} from "./_observablehq/stdlib.23790ac1.js";
+import {define} from "./_observablehq/client.c8b692f8.js";
+import {registerFile} from "./_observablehq/stdlib.50d89e50.js";
 
-registerFile("./data/set-time-distribution.csv", {"name":"./data/set-time-distribution.csv","mimeType":"text/csv","path":"./_file/data/set-time-distribution.48b06f19.csv","lastModified":1783046979554,"size":778});
+registerFile("./data/set-time-distribution.csv", {"name":"./data/set-time-distribution.csv","mimeType":"text/csv","path":"./_file/data/set-time-distribution.48b06f19.csv","lastModified":1783056375416,"size":778});
 
 define({id: "7eadcd53", inputs: ["FileAttachment"], outputs: ["Plot","d3","sets","ll","totalLL"], body: async (FileAttachment) => {
 const [Plot, d3] = await Promise.all([import("./_npm/@observablehq/plot@0.6.17/93ce672e.js"), import("./_npm/d3@7.9.0/080cf928.js")]);
@@ -169,6 +169,7 @@ hourChart(ll, {
     <li class="observablehq-link"><a href="./observer-coverage">Observer coverage</a></li>
     <li class="observablehq-link"><a href="./observer-offsets">Observer &amp; nautical offsets</a></li>
     <li class="observablehq-link"><a href="./decision-tree">Decision tree</a></li>
+    <li class="observablehq-link"><a href="./utc-migration-database-changelog">Changelog</a></li>
   </ol>
 </nav>
 <script>{const e=document.querySelector("#observablehq-sidebar"),o=document.querySelector("#observablehq-sidebar-toggle"),r=sessionStorage.getItem("observablehq-sidebar");r?o.checked=r==="true":o.indeterminate=!0;for(const t of document.querySelectorAll("#observablehq-sidebar summary")){const s=t.parentElement;switch(sessionStorage.getItem(`observablehq-sidebar:${t.textContent}`)){case"true":s.open=!0;break;case"false":s.classList.contains("observablehq-section-active")||(s.open=!1);break}}addEventListener("beforeunload",()=>sessionStorage.setItem("observablehq-sidebar-scrolly",`${e.scrollTop}`));const a=sessionStorage.getItem("observablehq-sidebar-scrolly");a!=null&&(e.style.cssText="overflow: hidden;",e.scrollTop=+a,e.style.cssText="");}</script>
@@ -198,7 +199,7 @@ per-trip offset evidence and the resulting decision tree used to estimate that o
 </main>
 <footer id="observablehq-footer">
 <nav><a rel="prev" href="./ps-set-time-distribution"><span>Purseseine set time</span></a><a rel="next" href="./observer-coverage"><span>Observer coverage</span></a></nav>
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-07-03T13:49:04">Jul 3, 2026</a>.</div>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-08-14T14:05:58">Aug 14, 2026</a>.</div>
 </footer>
 </div>
 </body>
