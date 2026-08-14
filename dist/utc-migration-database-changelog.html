@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="generator" content="Observable Framework v1.13.4">
+<title>Tufman2 database changelog — UTC offset migration v1 | Logsheet UTC Analysis</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
+<link rel="preload" as="style" href="./_observablehq/theme-air,near-midnight.b050d634.css">
+<link rel="preload" as="style" href="./_observablehq/stdlib/inputs.f7bf0e12.css">
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
+<link rel="stylesheet" type="text/css" href="./_observablehq/theme-air,near-midnight.b050d634.css">
+<link rel="stylesheet" type="text/css" href="./_observablehq/stdlib/inputs.f7bf0e12.css">
+<link rel="modulepreload" href="./_observablehq/client.c8b692f8.js">
+<link rel="modulepreload" href="./_observablehq/runtime.607a8173.js">
+<link rel="modulepreload" href="./_observablehq/stdlib.50d89e50.js">
+<link rel="modulepreload" href="./_observablehq/stdlib/duckdb.d8b43ff3.js">
+<link rel="modulepreload" href="./_observablehq/stdlib/inputs.0a307ce6.js">
+<link rel="modulepreload" href="./_npm/@duckdb/duckdb-wasm@1.29.0/d167315f.js">
+<link rel="modulepreload" href="./_npm/htl@1.0.0/11521f02.js">
+<link rel="modulepreload" href="./_npm/isoformat@0.2.1/604cb63b.js">
+<link rel="modulepreload" href="./_npm/apache-arrow@21.2.0/b9fc0486.js">
+<link rel="modulepreload" href="./_npm/tslib@2.8.1/396b382b.js">
+<link rel="modulepreload" href="./_npm/flatbuffers@25.9.23/c8db6147.js">
+<link rel="icon" href="./_file/observable.1af93621.png" type="image/png" sizes="32x32">
+<script type="module">
+
+import {define} from "./_observablehq/client.c8b692f8.js";
+
+define({id: "5e474986", inputs: ["display","Inputs","sql"], body: async (display,Inputs,sql) => {
+display(Inputs.table(await sql`select top 1 sll.logdate,
+             convert(date, sll.logdate)     date,
+             convert(datetime, sll.logdate) datetime,
+             format(sll.logdate, 'HH:mm')   time,
+             switchoffset(sll.logdate, 0)   UTC
+from log.trips_ll ll
+         left join log.sets_ll sll on ll.log_trip_id = sll.log_trip_id
+where ll.utc_origin > 0;`, {select: false}));
+}});
+
+define({id: "aaee28cc", inputs: ["display","Inputs","sql"], body: async (display,Inputs,sql) => {
+display(Inputs.table(await sql`-- these do not return the same rows once offsets are populated
+SELECT COUNT(*)
+FROM log.sets_ll
+WHERE logdate >= '2024-01-01';
+SELECT COUNT(*)
+FROM log.sets_ll
+WHERE CONVERT(date, logdate) >= '2024-01-01';`, {select: false}));
+}});
+
+</script>
+</head>
+<body>
+<input id="observablehq-sidebar-toggle" type="checkbox" title="Toggle sidebar">
+<label id="observablehq-sidebar-backdrop" for="observablehq-sidebar-toggle"></label>
+<nav id="observablehq-sidebar">
+  <ol>
+    <label id="observablehq-sidebar-close" for="observablehq-sidebar-toggle"></label>
+    <li class="observablehq-link"><a href="./">Logsheet UTC Analysis</a></li>
+  </ol>
+  <ol>
+    <li class="observablehq-link"><a href="./">Problem &amp; method</a></li>
+    <li class="observablehq-link"><a href="./ps-set-time-distribution">Purseseine set time</a></li>
+    <li class="observablehq-link"><a href="./ll-set-time-distribution">Longline set time distribution</a></li>
+    <li class="observablehq-link"><a href="./observer-coverage">Observer coverage</a></li>
+    <li class="observablehq-link"><a href="./observer-offsets">Observer &amp; nautical offsets</a></li>
+    <li class="observablehq-link"><a href="./decision-tree">Decision tree</a></li>
+    <li class="observablehq-link observablehq-link-active"><a href="./utc-migration-database-changelog">Changelog</a></li>
+  </ol>
+</nav>
+<script>{const e=document.querySelector("#observablehq-sidebar"),o=document.querySelector("#observablehq-sidebar-toggle"),r=sessionStorage.getItem("observablehq-sidebar");r?o.checked=r==="true":o.indeterminate=!0;for(const t of document.querySelectorAll("#observablehq-sidebar summary")){const s=t.parentElement;switch(sessionStorage.getItem(`observablehq-sidebar:${t.textContent}`)){case"true":s.open=!0;break;case"false":s.classList.contains("observablehq-section-active")||(s.open=!1);break}}addEventListener("beforeunload",()=>sessionStorage.setItem("observablehq-sidebar-scrolly",`${e.scrollTop}`));const a=sessionStorage.getItem("observablehq-sidebar-scrolly");a!=null&&(e.style.cssText="overflow: hidden;",e.scrollTop=+a,e.style.cssText="");}</script>
+<div id="observablehq-center">
+<aside id="observablehq-toc" data-selector="h1:not(:first-of-type)[id], h2:first-child[id], :not(h1) + h2[id]">
+<nav>
+<div>Contents</div>
+<ol>
+<li class="observablehq-secondary-link"><a href="#1-read-this-first">1. Read this first</a></li>
+<li class="observablehq-secondary-link"><a href="#2-what-changed">2. What changed</a></li>
+<li class="observablehq-secondary-link"><a href="#3-the-new-utc-origin-column">3. The new utc_origin column</a></li>
+<li class="observablehq-secondary-link"><a href="#4-rewrite-recipes">4. Rewrite recipes</a></li>
+</ol>
+</nav>
+</aside>
+<main id="observablehq-main" class="observablehq">
+<h1 id="tufman2-database-changelog-utc-offset-migration-v1" tabindex="-1"><a class="observablehq-header-anchor" href="#tufman2-database-changelog-utc-offset-migration-v1">Tufman2 database changelog — UTC offset migration v1</a></h1>
+<p><strong>Audience:</strong> anyone using the Tufman2 Database</p>
+<p><strong>Applies to:</strong> Only the <code>log</code> schema</p>
+<hr>
+<h2 id="1-read-this-first" tabindex="-1"><a class="observablehq-header-anchor" href="#1-read-this-first">1. Read this first</a></h2>
+<p>Dates and times used to be stored as two columns: a <code>datetime</code> holding the date, with the time of day always midnight,
+and a separate <code>char(4)</code> column holding the time as <code>HHmm</code>.</p>
+<p>They are now stored as one <code>datetimeoffset(0)</code> column carrying the date, the time of day and the UTC offset together.</p>
+<hr>
+<h2 id="2-what-changed" tabindex="-1"><a class="observablehq-header-anchor" href="#2-what-changed">2. What changed</a></h2>
+<h3 id="2-1-trip-tables" tabindex="-1"><a class="observablehq-header-anchor" href="#2-1-trip-tables">2.1 Trip tables</a></h3>
+<p>Applies to <strong><code>trips_ll</code>, <code>trips_pl</code>, <code>trips_ps</code>, <code>trips_hl</code>, <code>trips_ds</code>, <code>trips_vn</code></strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Was</th>
+<th>Now</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>depart_date</code></td>
+<td><code>datetime</code></td>
+<td><code>datetimeoffset(0)</code></td>
+<td>now carries time of day + offset</td>
+</tr>
+<tr>
+<td><code>return_date</code></td>
+<td><code>datetime</code></td>
+<td><code>datetimeoffset(0)</code></td>
+<td>now carries time of day + offset</td>
+</tr>
+<tr>
+<td><code>depart_time</code></td>
+<td><code>char(4)</code></td>
+<td><strong>dropped</strong></td>
+<td>folded into <code>depart_date</code></td>
+</tr>
+<tr>
+<td><code>return_time</code></td>
+<td><code>char(4)</code></td>
+<td><strong>dropped</strong></td>
+<td>folded into <code>return_date</code></td>
+</tr>
+<tr>
+<td><code>utc_origin</code></td>
+<td>–</td>
+<td><code>smallint</code> <strong>added</strong></td>
+<td>see <a href="#3-the-new-utc_origin-column">§3</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-2-activity-tables" tabindex="-1"><a class="observablehq-header-anchor" href="#2-2-activity-tables">2.2 Activity tables</a></h3>
+<p>Applies to <strong><code>sets_ll</code>, <code>sets_pl</code>, <code>sets_ps</code>, <code>sets_hl</code>, <code>sets_ds</code>, <code>sets_vn</code></strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Was</th>
+<th>Now</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>logdate</code></td>
+<td><code>datetime</code></td>
+<td><code>datetimeoffset(0)</code></td>
+<td>now carries time of day + offset</td>
+</tr>
+<tr>
+<td><code>set_time</code></td>
+<td><code>char(4)</code></td>
+<td><strong>dropped</strong></td>
+<td>folded into <code>logdate</code>. <code>sets_pl</code> never had this column.</td>
+</tr>
+</tbody>
+</table>
+<p><code>sets_ll</code> also drops <code>log_datetime_utc</code> (<code>datetime</code>) — replace with <code>SWITCHOFFSET(logdate, 0)</code>.</p>
+<h3 id="2-3-purse-seine-child-tables" tabindex="-1"><a class="observablehq-header-anchor" href="#2-3-purse-seine-child-tables">2.3 Purse-seine child tables</a></h3>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Column</th>
+<th>Was</th>
+<th>Now</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>transshipments</code></td>
+<td><code>start_date</code></td>
+<td><code>datetime</code></td>
+<td><code>datetimeoffset(0)</code></td>
+</tr>
+<tr>
+<td><code>transshipments</code></td>
+<td><code>end_date</code></td>
+<td><code>datetime</code></td>
+<td><code>datetimeoffset(0)</code></td>
+</tr>
+<tr>
+<td><code>transshipments</code></td>
+<td><code>start_time</code></td>
+<td><code>char(4)</code></td>
+<td><strong>dropped</strong></td>
+</tr>
+<tr>
+<td><code>transshipments</code></td>
+<td><code>end_time</code></td>
+<td><code>char(4)</code></td>
+<td><strong>dropped</strong></td>
+</tr>
+<tr>
+<td><code>net_share_receives</code></td>
+<td><code>receive_date</code></td>
+<td><code>datetime</code></td>
+<td><code>datetimeoffset(0)</code></td>
+</tr>
+<tr>
+<td><code>net_share_receives</code></td>
+<td><code>receive_time</code></td>
+<td><code>char(4)</code></td>
+<td><strong>dropped</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="3-the-new-utc-origin-column" tabindex="-1"><a class="observablehq-header-anchor" href="#3-the-new-utc-origin-column">3. The new <code>utc_origin</code> column</a></h2>
+<p><code>utc_origin</code> records where the stored offset came from.</p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Name</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td>None</td>
+<td>Offset not calculated yet. Stored as <code>+00:00</code>. Do not convert to UTC.</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td>EReporting</td>
+<td>Offset supplied by the e-reporting source.</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td>LinkedObserverTrip</td>
+<td>Offset queried from a linked observer trip.</td>
+</tr>
+<tr>
+<td><code>3</code></td>
+<td>Coordinates</td>
+<td>Offset calculated from the activity's latitude/longitude.</td>
+</tr>
+<tr>
+<td><code>4</code></td>
+<td>OriginalValueInUtc</td>
+<td>The original data was already recorded in UTC.</td>
+</tr>
+<tr>
+<td><code>5</code></td>
+<td>DecisionTreeV1</td>
+<td>Offset queried from a decision tree, trained from observer data.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The migration alone leaves almost everything at <code>0</code>.</strong> Offsets will be populated afterward by separate backfill jobs,
+or when the trip is saved trough Tufman2. Until those have run, rows sit at <code>utc_origin = 0</code>
+with a <code>+00:00</code> placeholder.</p>
+<hr>
+<h2 id="4-rewrite-recipes" tabindex="-1"><a class="observablehq-header-anchor" href="#4-rewrite-recipes">4. Rewrite recipes</a></h2>
+<table>
+<thead>
+<tr>
+<th>What you want</th>
+<th>Old</th>
+<th>New</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Time of day as <code>HH:mm</code></td>
+<td><code>a.set_time</code></td>
+<td><code>format(a.logdate, 'HH:mm')</code></td>
+</tr>
+<tr>
+<td>Local calendar date</td>
+<td><code>CONVERT(date, logdate)</code></td>
+<td><code>convert(date,sll.logdate)</code></td>
+</tr>
+<tr>
+<td>Full local timestamp</td>
+<td><code>logdate</code> + <code>set_time</code></td>
+<td><code>CONVERT(datetime, logdate)</code></td>
+</tr>
+<tr>
+<td>The UTC instant</td>
+<td><code>log_datetime_utc</code></td>
+<td><code>SWITCHOFFSET(logdate, 0)</code></td>
+</tr>
+<tr>
+<td>Filter by local date</td>
+<td><code>logdate &gt;= '2024-01-01'</code></td>
+<td><code>CONVERT(date, logdate) &gt;= '2024-01-01'</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="query-example" tabindex="-1"><a class="observablehq-header-anchor" href="#query-example">Query example</a></h3>
+<div class="observablehq observablehq--block"><!--:5e474986:--></div>
+<table>
+<thead>
+<tr>
+<th>logdate</th>
+<th>date</th>
+<th>datetime</th>
+<th>time</th>
+<th>UTC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2025-11-04 07:24:00 -10:00</td>
+<td>2025-11-04</td>
+<td>2025-11-04 07:24:00.000</td>
+<td>07:24</td>
+<td>2025-11-04 17:24:00 +00:00</td>
+</tr>
+</tbody>
+</table>
+<h3 id="4-1-the-string-literal-trap" tabindex="-1"><a class="observablehq-header-anchor" href="#4-1-the-string-literal-trap">4.1 The string-literal trap</a></h3>
+<p>Comparing a <code>datetimeoffset</code> column against a bare string literal makes SQL Server interpret the literal at **
+<code>+00:00</code>**. Your filter is then evaluated against the UTC instant, not the local date that was actually written down:</p>
+<div class="observablehq observablehq--block"><!--:aaee28cc:--></div>
+<p>Use <code>CONVERT(date, logdate)</code> when you mean the local calendar date.</p>
+</main>
+<footer id="observablehq-footer">
+<nav><a rel="prev" href="./decision-tree"><span>Decision tree</span></a></nav>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2026-08-14T14:05:58">Aug 14, 2026</a>.</div>
+</footer>
+</div>
+</body>
+</html>
