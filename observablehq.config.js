@@ -10,6 +10,8 @@ export default {
     {name: "Observer coverage", path: "/observer-coverage"},
     {name: "Observer & nautical offsets", path: "/observer-offsets"},
     {name: "Decision tree", path: "/decision-tree"},
+    {name: "Changelog", path: "/utc-migration-database-changelog"},
+      
   ],
 
   // Content to add to the head of the page, e.g. for a favicon:
