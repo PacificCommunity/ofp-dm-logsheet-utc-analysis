@@ -1,8 +1,8 @@
-﻿# Tufman2 database changelog — UTC offset migration v1
+﻿# Tufman2 database changelog — UTC offset migration
 
 **Audience:** anyone using the Tufman2 Database
 
-**Applies to:** Only the `log` schema
+**Applies to:** The `log` and `vms` schemas
 
 ---
 
@@ -50,6 +50,28 @@ Applies to **`sets_ll`, `sets_pl`, `sets_ps`, `sets_hl`, `sets_ds`, `sets_vn`**:
 | `transshipments`     | `end_time`     | `char(4)`  | **dropped**         |
 | `net_share_receives` | `receive_date` | `datetime` | `datetimeoffset(0)` |
 | `net_share_receives` | `receive_time` | `char(4)`  | **dropped**         |
+
+### 2.4 VMS tables
+
+Applies to **`vms_trips`, `vms_non_fishing_period`, `vms_trips_import`** (all in the `vms` schema):
+
+| Table                    | Column            | Was        | Now                 |
+|--------------------------|-------------------|------------|---------------------|
+| `vms_trips`              | `departure_date`  | `datetime` | `datetimeoffset(0)` |
+| `vms_trips`              | `return_date`     | `datetime` | `datetimeoffset(0)` |
+| `vms_non_fishing_period` | `start_date_time` | `datetime` | `datetimeoffset(0)` |
+| `vms_non_fishing_period` | `end_date_time`   | `datetime` | `datetimeoffset(0)` |
+| `vms_trips_import`       | `departure_date`  | `datetime` | `datetimeoffset(0)` |
+| `vms_trips_import`       | `return_date`     | `datetime` | `datetimeoffset(0)` |
+
+The `vms` migration is simpler than the `log` one:
+
+- VMS data is inherently UTC, so every value carries a **`+00:00` offset that is already correct** — there is no
+  placeholder phase and no backfill job.
+- There is **no `utc_origin` column** on these tables: the offset is always `+00:00` by definition, so the column would
+  carry no information.
+- No time columns were dropped — these columns were single `datetime` values already carrying the time of day.
+- `entered_date` / `changed_date` audit columns are untouched (as in the `log` schema).
 
 ---
 
