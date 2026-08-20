@@ -64,14 +64,7 @@ Applies to **`vms_trips`, `vms_non_fishing_period`, `vms_trips_import`** (all in
 | `vms_trips_import`       | `departure_date`  | `datetime` | `datetimeoffset(0)` |
 | `vms_trips_import`       | `return_date`     | `datetime` | `datetimeoffset(0)` |
 
-The `vms` migration is simpler than the `log` one:
-
-- VMS data is inherently UTC, so every value carries a **`+00:00` offset that is already correct** — there is no
-  placeholder phase and no backfill job.
-- There is **no `utc_origin` column** on these tables: the offset is always `+00:00` by definition, so the column would
-  carry no information.
-- No time columns were dropped — these columns were single `datetime` values already carrying the time of day.
-- `entered_date` / `changed_date` audit columns are untouched (as in the `log` schema).
+VMS data is inherently UTC, so every value carries a `+00:00` offset that is already correct.
 
 ---
 
@@ -113,7 +106,7 @@ select top 1 sll.logdate,
              format(sll.logdate, 'HH:mm')   time,
              switchoffset(sll.logdate, 0)   UTC
 from log.trips_ll ll
-         left join log.sets_ll sll on ll.log_trip_id = sll.log_trip_id
+       left join log.sets_ll sll on ll.log_trip_id = sll.log_trip_id
 where ll.utc_origin > 0;
 ```
 
