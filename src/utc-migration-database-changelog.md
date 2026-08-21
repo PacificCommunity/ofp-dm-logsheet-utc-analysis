@@ -142,3 +142,8 @@ select set_id from @sets where convert(date, logdate) >= '2024-01-01';
 ```
 
 Use `convert(date, logdate)` whenever you mean the local calendar date.
+
+
+## 7. Tufman2 reports
+
+Please note that all impacted Tufman2 reports will be manually updated before the migration.
