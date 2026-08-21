@@ -1,4 +1,4 @@
-﻿# Tufman2 database changelog — UTC offset migration
+# Tufman2 database changelog — UTC offset migration
 
 **Audience:** anyone using the Tufman2 Database
 
@@ -33,10 +33,10 @@ Applies to **`trips_ll`, `trips_pl`, `trips_ps`, `trips_hl`, `trips_ds`, `trips_
 
 Applies to **`sets_ll`, `sets_pl`, `sets_ps`, `sets_hl`, `sets_ds`, `sets_vn`**:
 
-| Column     | Was        | Now                 | Note                                                    |
-|------------|------------|---------------------|---------------------------------------------------------|
-| `logdate`  | `datetime` | `datetimeoffset(0)` | now carries time of day + offset                        |
-| `set_time` | `char(4)`  | **dropped**         | folded into `logdate`. `sets_pl` never had this column. |
+| Column     | Was        | Now                 | Note                             |
+|------------|------------|---------------------|----------------------------------|
+| `logdate`  | `datetime` | `datetimeoffset(0)` | now carries time of day + offset |
+| `set_time` | `char(4)`  | **dropped**         | folded into `logdate`.           |
 
 `sets_ll` also drops `log_datetime_utc` (`datetime`) — replace with `SWITCHOFFSET(logdate, 0)`.
 
@@ -81,52 +81,64 @@ VMS data is inherently UTC, so every value carries a `+00:00` offset that is alr
 | `4`   | OriginalValueInUtc | The original data was already recorded in UTC.                        |
 | `5`   | DecisionTreeV1     | Offset queried from a decision tree, trained from observer data.      |
 
-**The migration alone leaves almost everything at `0`.** Offsets will be populated afterward by separate backfill jobs,
-or when the trip is saved trough Tufman2. Until those have run, rows sit at `utc_origin = 0`
-with a `+00:00` placeholder.
+## 4. Database migration and logsheet backfilling
+
+- A database migration will be executed first, it will update the existing tables with the new columns and delete the
+  old ones. A default UTC offset of 0 will be attributed.
+- The logsheet backfilling will be done through a Tufman2 scheduled task ran overnight. Each existing logsheet will have
+  utc offsets calculated from different strategies, described in the utc_origin section.
+- Any logsheet saved through the Tufman2 API will have its UTC offset calculated, if not already done via the
+  backfilling job.
 
 ---
 
-## 4. Rewrite recipes
+## 5. Conversions
 
-| What you want          | Old                       | New                                      |
-|------------------------|---------------------------|------------------------------------------|
-| Time of day as `HH:mm` | `a.set_time`              | `format(a.logdate, 'HH:mm')`             |
-| Local calendar date    | `CONVERT(date, logdate)`  | `convert(date,sll.logdate)`              |
-| Full local timestamp   | `logdate` + `set_time`    | `CONVERT(datetime, logdate)`             |
-| The UTC instant        | `log_datetime_utc`        | `SWITCHOFFSET(logdate, 0)`               |
-| Filter by local date   | `logdate >= '2024-01-01'` | `CONVERT(date, logdate) >= '2024-01-01'` |
+How to rewrite existing queries, using `log.sets_ll` as the example. All the snippets below use the same sample row —
+before the migration it was stored as `logdate = 2025-11-04 00:00:00` plus `set_time = '0724'`, and it is now stored as:
 
-### Query example
-
-```sql
-select top 1 sll.logdate,
-             convert(date, sll.logdate)     date,
-             convert(datetime, sll.logdate) datetime,
-             format(sll.logdate, 'HH:mm')   time,
-             switchoffset(sll.logdate, 0)   UTC
-from log.trips_ll ll
-       left join log.sets_ll sll on ll.log_trip_id = sll.log_trip_id
-where ll.utc_origin > 0;
+```
+logdate = 2025-11-04 07:24:00 -10:00
 ```
 
-| logdate                    | date       | datetime                | time  | UTC                        |
-|----------------------------|------------|-------------------------|-------|----------------------------|
-| 2025-11-04 07:24:00 -10:00 | 2025-11-04 | 2025-11-04 07:24:00.000 | 07:24 | 2025-11-04 17:24:00 +00:00 |
+### Quick reference
 
-### 4.1 The string-literal trap
+| You need             | Before the migration   | Now                          | Result for the sample row    |
+|----------------------|------------------------|------------------------------|------------------------------|
+| Time of day (`HHmm`) | `set_time`             | `format(logdate, 'HHmm')`    | `0724`                       |
+| Local calendar date  | `logdate`              | `convert(date, logdate)`     | `2025-11-04`                 |
+| Local date and time  | `logdate` + `set_time` | `convert(datetime, logdate)` | `2025-11-04 07:24:00`        |
+| UTC instant          | `log_datetime_utc`     | `switchoffset(logdate, 0)`   | `2025-11-04 17:24:00 +00:00` |
 
-Comparing a `datetimeoffset` column against a bare string literal makes SQL Server interpret the literal at **
-`+00:00`**. Your filter is then evaluated against the UTC instant, not the local date that was actually written down:
+---
+
+## 6. The string-literal trap
+
+Comparing a `datetimeoffset` column against a bare string literal makes SQL Server interpret the literal at **`+00:00`**,
+and `datetimeoffset` values compare as **UTC instants**. Your filter is then evaluated against the UTC instant, not the
+local date that was actually written down.
+
+Take two logsheets on either side of new year 2024:
 
 ```sql
--- these do not return the same rows once offsets are populated
-SELECT COUNT(*)
-FROM log.sets_ll
-WHERE logdate >= '2024-01-01';
-SELECT COUNT(*)
-FROM log.sets_ll
-WHERE CONVERT(date, logdate) >= '2024-01-01';
+declare @sets table (set_id int, logdate datetimeoffset(0));
+insert @sets values
+    (1, '2023-12-31 21:00:00 -11:00'),  -- a 2023 logsheet
+    (2, '2024-01-01 06:30:00 +13:00');  -- a 2024 logsheet
 ```
 
-Use `CONVERT(date, logdate)` when you mean the local calendar date.
+Filtering with a bare literal returns the **2023** logsheet (its UTC instant is `2024-01-01 08:00`):
+
+```sql
+  select set_id from @sets where logdate >= '2024-01-01';
+-- returns: 1
+```
+
+Filtering on the local calendar date returns the **2024** logsheet:
+
+```sql
+select set_id from @sets where convert(date, logdate) >= '2024-01-01';
+-- returns: 2
+```
+
+Use `convert(date, logdate)` whenever you mean the local calendar date.
